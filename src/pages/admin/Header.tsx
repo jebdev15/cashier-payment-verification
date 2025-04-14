@@ -22,10 +22,10 @@ const Header = () => {
           </IconButton>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <Typography variant="h6" component="div">
-              CHMSU
+                CHMSU
             </Typography>
             <Typography variant="h6" component="div" >
-              {import.meta.env.VITE_APP_NAME}
+                {import.meta.env.VITE_APP_NAME}
             </Typography>
           </Box>
         </Toolbar>

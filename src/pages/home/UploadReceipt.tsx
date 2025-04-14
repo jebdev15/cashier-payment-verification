@@ -1,53 +1,78 @@
 import React from 'react'
-import { Box, Button, Paper, Typography } from '@mui/material'
+import { Box, Button, Paper, TextField, Typography } from '@mui/material'
 import { UploadFile as UploadFileIcon } from '@mui/icons-material'
 import SpanningTable from './SpanningTableForUR'
+import { LazyImage } from '../../components/LazyImage'
 
 const UploadReceipt = () => {
-    const [referenceId, setReferenceId] = React.useState<string>("")
-    const [loading, setLoading] = React.useState<boolean>(false)
-    const handleTimeOut = () => {
-        return new Promise<void>((resolve) => {
-            setTimeout(() => {
-                const randomString = Math.random().toString(36).substring(2, 12); // temporary reference id
-                setReferenceId(randomString)
-                resolve()
-            }, 2000)
-        })
-    }
-    const handleGenerateReferenceId = async () => {
-        setLoading(true)
-        try {
-            await handleTimeOut()
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false)
+    const [file, setFile] = React.useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+    const handleChangeFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files?.[0];
+        if (selectedFile) {
+        setFile(selectedFile);
+
+        // If it's an image, generate preview
+        if (selectedFile.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+            setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(selectedFile);
+        } else {
+            setPreviewUrl(null);
+        }
         }
     }
     return (
-        <Box sx={{ flexGrow: 1, paddingLeft: 5 }}>
-            <Typography variant="h4" color="initial">Upload Receipt</Typography>
+        <Box sx={{ flexGrow: 1, paddingX: 4, paddingY: 2 }}>
+            <Typography 
+                variant="h4" 
+                color="initial" 
+                sx={{ marginBottom: 2 }}
+            >
+                Upload Receipt
+            </Typography>
             <Paper 
                 sx={{ 
                     display: "flex", 
-                    flexDirection: "column", 
+                    flexDirection: "row", 
                     justifyContent: "center", 
                     alignItems: "center", 
-                    gap: 2, 
                     height: "100%", 
                     width: "100%" 
-                }}>
-                <Button
-                    variant="contained"
-                    onClick={handleGenerateReferenceId}
-                    disabled={loading}
-                    startIcon={<UploadFileIcon />}
-                    >
-                    {loading ? "Uploading..." : "Upload File"}
-                </Button>
-                {referenceId && <Typography variant="h6" color="initial">Reference Id: {!loading && referenceId}</Typography>}
-                <SpanningTable />
+                }}
+            >
+                <Box
+                    sx={{ 
+                        display: "flex", 
+                        flexDirection: "column", 
+                        justifyContent: "center", 
+                        alignItems: "center", 
+                        gap: 2, 
+                        height: {xs: "100%", md: 600}, 
+                        width: {xs: "100%", md: 600} 
+                    }}
+                >
+                    <TextField type='file' onChange={handleChangeFile} />
+                    <Paper sx={{ minHeight: 400, minWidth: 400 }}>
+                        {previewUrl && <LazyImage src={previewUrl} alt="Preview" height={400} width={400} />}
+                    </Paper>
+                    {file && <Button variant="contained" startIcon={<UploadFileIcon />}>Upload File</Button>}
+                </Box>
+                <Box 
+                    sx={{ 
+                        display: "flex", 
+                        flexDirection: "column", 
+                        justifyContent: "center", 
+                        alignItems: "center", 
+                        gap: 2, 
+                        height:  {xs: "100%", md: 500}, 
+                        width:  {xs: "100%", md: 400},
+                    }}
+                >
+                    <SpanningTable />
+                </Box>
             </Paper>
         </Box>
     )

@@ -29,11 +29,26 @@ const rows = [
 
 const SpanningTable = () => {
   return (
-    <TableContainer component={Paper} sx={{ maxWidth: 400 }}>
+    <TableContainer 
+      component={Paper} 
+      sx={{ 
+        maxWidth: 400,
+        overflow: "auto"
+      }}
+    >
       <Table stickyHeader sx={{ maxWidth: 400 }} aria-label="spanning table">
         <TableHead>
           <TableRow>
-            <TableCell align="center" colSpan={4}>
+            <TableCell 
+              align="center" 
+              colSpan={4} 
+              sx={{ 
+                position: 'sticky', 
+                top: 0, 
+                backgroundColor: 'background.paper', 
+                zIndex: 1 
+              }}
+            >
               Upload Receipt Log
             </TableCell>
           </TableRow>

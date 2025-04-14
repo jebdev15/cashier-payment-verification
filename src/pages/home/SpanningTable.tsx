@@ -50,7 +50,7 @@ const invoiceTotal = invoiceTaxes + invoiceSubtotal;
 const SpanningTable = () => {
   return (
     <TableContainer component={Paper} sx={{ maxWidth: 400 }}>
-      <Table sx={{ maxWidth: 400 }} aria-label="spanning table">
+      <Table sx={{ maxWidth: 400, overflow: "scroll" }} aria-label="spanning table">
         <TableHead>
           <TableRow>
             <TableCell align="center" colSpan={4}>
