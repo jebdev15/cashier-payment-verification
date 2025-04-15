@@ -1,40 +1,14 @@
 import React from 'react'
-import {
-    AccountBalance as AccountBalanceIcon,
-    FileUpload as FileUploadIcon,
-    History as HistoryIcon,
-    ExitToApp as ExitToAppIcon
-} from '@mui/icons-material'
+import { ExitToApp as ExitToAppIcon } from '@mui/icons-material'
 import { Avatar, Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import { useNavigate } from 'react-router'
-
-const sideNav = [
-    {
-        path: "/",
-        label: "Statement of Account",
-        abbreviation: "sao",
-        icon: AccountBalanceIcon,
-    },
-    {
-        path: "/upload-receipt",
-        label: "Upload Receipt",
-        abbreviation: "ur",
-        icon: FileUploadIcon
-    },
-    {
-        path: "/transaction-history",
-        label: "Transaction History",
-        abbreviation: "th",
-        icon: HistoryIcon
-    }
-]
-
+import { sideNav } from './sideNav'
 
 const Sidebar = () => {
     const navigate = useNavigate()
     const [currentTab, setCurrentTab] = React.useState<string>("")
     const handleChange = (path: string, selectedTab: string) => {
-        navigate(path)
+        navigate(`/home${path}`)
         setCurrentTab(selectedTab)
     }
     return (
@@ -66,15 +40,6 @@ const Sidebar = () => {
                             <ListItemButton 
                                 selected={currentTab === item.abbreviation} 
                                 onClick={() => handleChange(item.path, item.abbreviation)} 
-                                // sx={{
-                                //     '&.Mui-selected': {
-                                //       color: 'primary',
-                                //       backgroundColor: 'primary.main',
-                                //       '& .MuiListItemIcon-root': {
-                                //         color: 'primary.main',
-                                //       },
-                                //     },
-                                // }}
                             >
                                 <ListItemIcon>
                                     <item.icon />

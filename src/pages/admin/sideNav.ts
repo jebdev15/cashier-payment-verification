@@ -6,19 +6,19 @@ import {
 
 export const sideNav = [
     {
-        path: "/admin",
+        path: "",
         label: "Dashboard",
         abbreviation: "dash",
         icon: DashboardIcon
     },
     {
-        path: "/admin/account-management",
+        path: "/account-management",
         label: "Account Management",
         abbreviation: "am",
         icon: PeopleIcon
     },
     {
-        path: "/admin/transaction-history",
+        path: "/transaction-history",
         label: "Transaction History",
         abbreviation: "th",
         icon: HistoryIcon

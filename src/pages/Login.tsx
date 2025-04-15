@@ -2,6 +2,7 @@ import React from 'react'
 import { Password, Person, Send } from '@mui/icons-material';
 import { Box, Paper, FormControl, TextField, IconButton, Button, Typography, Tooltip } from '@mui/material'
 import ReCAPTCHA from "react-google-recaptcha";
+import { useNavigate } from 'react-router';
 type LoginData = {
     email: string;
     code: string;
@@ -11,6 +12,8 @@ const initialLoginData: LoginData = {
     code: "",
 };
 const Login = () => {
+    const navigate = useNavigate()
+    const handleRedirectToRegister = () => { navigate("/register") }
     const [loginData, setLoginData] = React.useState<LoginData>(initialLoginData);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
@@ -30,7 +33,7 @@ const Login = () => {
                 sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center',
+                    alignContent: 'center',
                     gap: 2,
                     padding: 2,
                     minWidth: 500,
@@ -39,7 +42,7 @@ const Login = () => {
                 component={"form"}
             >
                 <Typography variant="h4" color="initial" align="center">LOGIN</Typography>
-                <Typography variant="caption" color="initial" align="center">Not registered? Register <a href="/register">here</a></Typography>
+                <Typography variant="caption" color="initial" align="center">Not registered? Register <a style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={handleRedirectToRegister}>here</a></Typography>
                 <FormControl fullWidth>
                     <TextField
                         id="outlined-basic"
@@ -50,7 +53,12 @@ const Login = () => {
                         slotProps={{
                             input: {
                                 startAdornment: <Person />,
-                                endAdornment: <Tooltip title="Send Code" arrow><IconButton onClick={handleSendEmail}><Send /></IconButton></Tooltip>
+                                endAdornment: 
+                                    <Tooltip title="Send Code" arrow>
+                                        <IconButton onClick={handleSendEmail}>
+                                            <Send />
+                                        </IconButton>
+                                    </Tooltip>
                             }
                         }}
                         required
@@ -71,7 +79,9 @@ const Login = () => {
                         required
                     />
                 </FormControl>
-                <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha}/>
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha}/>
+                </Box>
                 <Button type="submit" variant="contained">Login</Button>
             </Box>
         </Paper>

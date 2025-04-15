@@ -1,8 +1,8 @@
 import { createBrowserRouter } from "react-router";
 
-import LandingPage from "../pages/home/LandingPage";
-import Login from "../pages/home/Login";
-import Register from "../pages/home/Register";
+import LandingPage from "../pages/LandingPage";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
 
 import HomeLayout from "../pages/home/Layout";
 import StatementOfAccount from "../pages/home/StatementOfAccount";

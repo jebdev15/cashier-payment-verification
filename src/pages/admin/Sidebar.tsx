@@ -10,7 +10,7 @@ const Sidebar = () => {
     const navigate = useNavigate()
     const [currentTab, setCurrentTab] = React.useState<string>("")
     const handleChange = (path: string, selectedTab: string) => {
-        navigate(path)
+        navigate(`/admin${path}`)
         setCurrentTab(selectedTab)
     }
     return (
