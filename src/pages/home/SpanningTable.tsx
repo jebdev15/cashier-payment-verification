@@ -1,3 +1,4 @@
+import React from 'react';
 import {
     Paper,
     Table, 
@@ -8,70 +9,50 @@ import {
     TableRow
 } from '@mui/material';
 
-const TAX_RATE = 0.07;
-
 function ccyFormat(num: number) {
   return `${num.toFixed(2)}`;
 }
 
-function priceRow(qty: number, unit: number) {
-  return qty * unit;
-}
-
-function createRow(desc: string, qty: number, unit: number) {
-  const price = priceRow(qty, unit);
-  return { desc, qty, unit, price };
-}
-
 interface Row {
-  desc: string;
-  qty: number;
-  unit: number;
-  price: number;
+  item_title: string;
+  amount: string;
 }
 
-function subtotal(items: readonly Row[]) {
-  return items.map(({ price }) => price).reduce((sum, i) => sum + i, 0);
-}
-
-const rows = [
-  createRow('Tuition', 100, 1.15),
-  createRow('Miscellaneous', 10, 45.99),
-  createRow('Academic Fee', 2, 17.99),
-  createRow('Athletic Fee', 2, 17.99),
-  createRow('Dental Fee', 2, 17.99),
-  createRow('ICT Development Fee', 2, 17.99),
-];
-
-const invoiceSubtotal = subtotal(rows);
-const invoiceTaxes = TAX_RATE * invoiceSubtotal;
-const invoiceTotal = invoiceTaxes + invoiceSubtotal;
-
-const SpanningTable = () => {
+const SpanningTable = ({ rows, loading }: { rows: Row[], loading: boolean }) => {
+  const [data, setData] = React.useState<Row[]>(rows);
+  const calculateTotalAmount = React.useMemo(() => {
+     return rows.reduce((acc, { amount }) => acc + Number(amount), 0);
+  },[rows])
+  React.useEffect(() => {
+    console.log({rows})
+    setData(rows)    
+  },[rows])
+  if(loading) return <div>Loading...</div>
+  if(rows.length === 0) return <div>No data</div>
   return (
-    <TableContainer component={Paper} sx={{ maxWidth: 400 }}>
+    <TableContainer component={Paper} sx={{ maxWidth: 400, maxHeight: 400 }}>
       <Table sx={{ maxWidth: 400, overflow: "scroll" }} aria-label="spanning table">
         <TableHead>
           <TableRow>
-            <TableCell align="center" colSpan={4}>
+            <TableCell align="center" colSpan={4} sx={{ position: 'sticky', top: 0, backgroundColor: 'background.paper', zIndex: 1 }}>
               Assessment
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Description</TableCell>
-            <TableCell align="right">Amount</TableCell>
+            <TableCell sx={{ position: 'sticky', top: 1, backgroundColor: 'background.paper', zIndex: 1 }}>Description</TableCell>
+            <TableCell align="right" sx={{ position: 'sticky', top: 1, backgroundColor: 'background.paper', zIndex: 1 }}>Amount</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.desc}>
-              <TableCell>{row.desc}</TableCell>
-              <TableCell align="right">{ccyFormat(row.price)}</TableCell>
+          {data.map((item, index) => (
+            <TableRow key={index}>
+              <TableCell>{item.item_title}</TableCell>
+              <TableCell align="right">{ccyFormat(Number(item.amount))}</TableCell>
             </TableRow>
           ))}
           <TableRow>
-            <TableCell align="right">Total</TableCell>
-            <TableCell align="right">{ccyFormat(invoiceTotal)}</TableCell>
+            <TableCell align="right" sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', zIndex: 1 }}>Total</TableCell>
+            <TableCell align="right" sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', zIndex: 1 }}>{ccyFormat(calculateTotalAmount)}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
@@ -79,4 +60,4 @@ const SpanningTable = () => {
   );
 }
 
-export default SpanningTable
+export default React.memo(SpanningTable)

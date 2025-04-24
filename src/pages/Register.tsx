@@ -3,6 +3,8 @@ import { Password, Person, Send } from '@mui/icons-material';
 import { Box, Paper, FormControl, TextField, IconButton, Button, Typography, Tooltip, Select, SelectChangeEvent, MenuItem, FormControlLabel, FormLabel } from '@mui/material'
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from 'react-router';
+import { axiosInstance } from '../api/app';
+import { isAxiosError } from 'axios';
 type registerData = {
     userType: string;
     studentIdNumber: string;
@@ -35,6 +37,7 @@ const Register = () => {
             [name]: value,
         }));
     }
+    const [loading, setLoading] = React.useState<boolean>(false);
     const recaptcha = React.useRef<ReCAPTCHA>(null);
     const handleSendEmail = (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,6 +48,24 @@ const Register = () => {
             ...prevData,
             userType: event.target.value,
         }));
+    }
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
+        try {
+            const { data } = await axiosInstance.post("/api/auth/register", formData);
+            alert(data.message);
+        } catch (error) {
+            console.error(error);
+            if(isAxiosError(error)) {
+                if(error.request) return alert(error.request.response["message"])
+                if(error.response) return alert(error.response.data.message)
+            }
+            alert("Something went wrong")
+        } finally {
+            setLoading(false);
+        }
     }
     return (
         <Paper component={Paper}>
@@ -59,6 +80,7 @@ const Register = () => {
                     minHeight: 500
                 }}
                 component={"form"}
+                onSubmit={handleSubmit}
             >
                 <Typography variant="h4" color="initial" align="center">REGISTRATION FORM</Typography>
                 <Typography variant="caption" color="initial" align="center">Already registered? Login <a style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={handleRedirectToLogin}>here</a></Typography>
@@ -166,7 +188,7 @@ const Register = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha}/>
                 </Box>
-                <Button type="submit" variant="contained">Register</Button>
+                <Button type="submit" variant="contained" disabled={loading}>{loading ? "Registering..." : "Register"}</Button>
             </Box>
         </Paper>
     )
