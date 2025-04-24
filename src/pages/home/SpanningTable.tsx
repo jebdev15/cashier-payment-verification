@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-    Paper,
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableContainer, 
-    TableHead, 
-    TableRow
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from '@mui/material';
 
 function ccyFormat(num: number) {
@@ -20,15 +20,17 @@ interface Row {
 
 const SpanningTable = ({ rows, loading }: { rows: Row[], loading: boolean }) => {
   const [data, setData] = React.useState<Row[]>(rows);
-  const calculateTotalAmount = React.useMemo(() => {
-     return rows.reduce((acc, { amount }) => acc + Number(amount), 0);
-  },[rows])
+  const [totalAmount, setTotalAmount] = React.useState<number>(0);
   React.useEffect(() => {
-    console.log({rows})
-    setData(rows)    
-  },[rows])
-  if(loading) return <div>Loading...</div>
-  if(rows.length === 0) return <div>No data</div>
+    const calculateTotalAmount = () => {
+      return rows.reduce((acc, { amount }) => acc + Number(amount), 0);
+    }
+    const total = calculateTotalAmount();
+    setTotalAmount(total);
+    setData(rows)
+  }, [rows])
+  if (loading) return <div>Loading...</div>
+  if (rows.length === 0) return <div>No data</div>
   return (
     <TableContainer component={Paper} sx={{ maxWidth: 400, maxHeight: 400 }}>
       <Table sx={{ maxWidth: 400, overflow: "scroll" }} aria-label="spanning table">
@@ -52,7 +54,7 @@ const SpanningTable = ({ rows, loading }: { rows: Row[], loading: boolean }) => 
           ))}
           <TableRow>
             <TableCell align="right" sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', zIndex: 1 }}>Total</TableCell>
-            <TableCell align="right" sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', zIndex: 1 }}>{ccyFormat(calculateTotalAmount)}</TableCell>
+            <TableCell align="right" sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', zIndex: 1 }}>{ccyFormat(totalAmount)}</TableCell>
           </TableRow>
         </TableBody>
       </Table>

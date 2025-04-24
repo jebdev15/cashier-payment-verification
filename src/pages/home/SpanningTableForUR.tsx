@@ -7,28 +7,16 @@ import {
     TableHead, 
     TableRow
 } from '@mui/material';
+import React from 'react';
+import { FileUploadLogType } from '../../types/fileUpload';
 
-function createRow(fileName: string, fileUploadedAt: Date) {
-  return { fileName, fileUploadedAt };
-}
-
-const rows = [
-  createRow('Tuition_Fee.jpg', new Date()),
-  createRow('Miscellaneous.jpeg', new Date()),
-  createRow('Academic Fee.jpeg', new Date()),
-  createRow('Athletic Fee.jpeg', new Date()),
-  createRow('Dental Fee.jpeg', new Date()),
-  createRow('ICT Development Fee.jpeg', new Date()),
-  createRow('Tuition_Fee.jpg', new Date()),
-  createRow('Miscellaneous.jpeg', new Date()),
-  createRow('Academic Fee.jpeg', new Date()),
-  createRow('Athletic Fee.jpeg', new Date()),
-  createRow('Dental Fee.jpeg', new Date()),
-  createRow('ICT Development Fee.jpeg', new Date()),
-];
-
-const SpanningTable = () => {
-  return (
+const SpanningTable = ({ data, loading }: { data: FileUploadLogType[], loading: boolean}) => {
+  const [rows, setRows] = React.useState<FileUploadLogType[]>([]);
+  React.useEffect(() => {
+    setRows(data);
+  },[data])
+  if(loading) return <div>Loading...</div>
+  return ( 
     <TableContainer component={Paper} sx={{ maxWidth: 400 }}>
       <Table stickyHeader sx={{ maxWidth: 400 }} aria-label="spanning table">
         <TableHead>
@@ -43,10 +31,11 @@ const SpanningTable = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, index) => (
+          {rows.length === 0 && <TableRow><TableCell colSpan={2}>No data</TableCell></TableRow>}
+          {rows.length > 0 && rows.map((row, index) => (
             <TableRow key={index}>
               <TableCell>{row.fileName}</TableCell>
-              <TableCell align="right">{new Date(row.fileUploadedAt).toLocaleString()}</TableCell>
+              <TableCell align="right">{new Date(row.uploadedAt).toLocaleString()}</TableCell>
             </TableRow>
           ))}
         </TableBody>

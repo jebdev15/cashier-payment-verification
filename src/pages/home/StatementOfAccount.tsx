@@ -44,13 +44,11 @@ const StatementOfAccount = () => {
     try {
       const randomString = await handleTimeOut()
       const formData = new FormData()
-      formData.append("reference_id", randomString)
+      formData.append("reference_code", randomString)
       const { data } = await axiosInstanceWithAuthorization(accessToken).post(`/api/statement-of-account/save-reference-id`, formData)
-      console.log(data)
-      setReferenceId(randomString)
-      console.log({ randomString })
+      setReferenceId(data.reference_code)
     } catch (error) {
-      console.log(error)
+      console.error(error)
     } finally {
       setLoading((prevState) => ({ ...prevState, grid: false }))
     }
@@ -64,7 +62,6 @@ const StatementOfAccount = () => {
       setLoading((prevState) => ({ ...prevState, soaTable: true }))
       const data = statementOfAccountData.filter(({ school_year, semester }: { school_year: number, semester: string }) => school_year === dataToFilter.school_year && semester === dataToFilter.semester)
       setFilteredData(data)
-      console.log({ filteredData })
       setTimeout(() => {
         setLoading((prevState) => ({ ...prevState, soaTable: false }))
         resolve()
@@ -85,7 +82,7 @@ const StatementOfAccount = () => {
         const uniqueSemesters: string[] = Array.from(new Set(data.filter(({ semester }: { semester: string }) => semester).map(({ semester }: { semester: string }) => semester)))
         setSemesters(uniqueSemesters)
       } catch (error) {
-        console.log({ error })
+        console.error({ error })
         if (signal.aborted) return;
         if (isAxiosError(error)) {
           if (error.request) return alert(error.request.response)

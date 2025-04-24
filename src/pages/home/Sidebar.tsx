@@ -3,13 +3,19 @@ import { ExitToApp as ExitToAppIcon } from '@mui/icons-material'
 import { Avatar, Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import { useNavigate } from 'react-router'
 import { sideNav } from './sideNav'
+import { useCookies } from 'react-cookie'
 
 const Sidebar = () => {
     const navigate = useNavigate()
+    const [,,removeCookie] = useCookies(['accessToken'])
     const [currentTab, setCurrentTab] = React.useState<string>("")
     const handleChange = (path: string, selectedTab: string) => {
         navigate(`/home${path}`)
         setCurrentTab(selectedTab)
+    }
+    const handleLogout = () => {
+        removeCookie("accessToken", { path: "/" })
+        navigate("/", { replace: true })
     }
     return (
         <Box sx={{ width: '100%', maxWidth: 250, bgcolor: 'background.paper' }}>
@@ -49,7 +55,7 @@ const Sidebar = () => {
                         </ListItem>
                     ))}
                     <ListItem disablePadding>
-                        <ListItemButton>
+                        <ListItemButton onClick={handleLogout}>
                             <ListItemIcon>
                                 <ExitToAppIcon />
                             </ListItemIcon>

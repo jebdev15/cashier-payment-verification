@@ -72,7 +72,7 @@ const Login = () => {
         } catch (error) {
             console.error(error);
             if(isAxiosError(error)) {
-                if(error.request) return alert(error.request.response["message"])
+                if(error.request) return alert(error.request.response)
                 if(error.response) return alert(error.response.data.message)
             }
             alert("Something went wrong")
