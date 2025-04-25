@@ -33,6 +33,8 @@ const Login = () => {
         setLoading((prevState) => ({ ...prevState, sendCode: true }));
         const formData = new FormData();
         formData.append("email", loginData.email);
+        formData.append("code", loginData.code);
+        formData.append("purpose", "login");
         try {
             const { data } = await axiosInstance.post("/api/auth/generate-code", formData);
             alert(data.message);
@@ -80,7 +82,7 @@ const Login = () => {
             setLoading((prevState) => ({ ...prevState, loginForm: false, sendCode: false }));
         }
     }
-    const disableLoginButton = !loginData.email || !loginData.code || !recaptchaValue
+    const disableLoginButton = !loginData.email || !loginData.code || !recaptchaValue || loading.loginForm
     return (
         <Paper component={Paper}>
             <Box

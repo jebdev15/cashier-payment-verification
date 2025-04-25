@@ -37,11 +37,25 @@ const Register = () => {
             [name]: value,
         }));
     }
-    const [loading, setLoading] = React.useState<boolean>(false);
+    const [loading, setLoading] = React.useState<{ registrationForm: boolean, sendCode: boolean }>({ registrationForm: false, sendCode: false });
     const recaptcha = React.useRef<ReCAPTCHA>(null);
-    const handleSendEmail = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log("email",registerData.email)
+    const handleSendEmail = async () => {
+        setLoading((prevState) => ({ ...prevState, sendCode: true }));
+        const formData = new FormData();
+        formData.append("email", registerData.email);
+        formData.append("purpose", "registration");
+        try {
+            const { data } = await axiosInstance.post("/api/auth/generate-code", formData);
+            alert(data.message);
+        } catch (error) {
+            if (isAxiosError(error)) {
+                if (error.request) return alert(error.request.response)
+                if (error.response) return alert(error.response.data)
+            }
+            alert("Something went wrong")
+        } finally {
+            setLoading((prevState) => ({ ...prevState, sendCode: false }));
+        }
     }
     const handleChangeSelect = (event: SelectChangeEvent<string>) => {
         setRegisterData((prevData) => ({
@@ -58,9 +72,9 @@ const Register = () => {
             alert(data.message);
         } catch (error) {
             console.error(error);
-            if(isAxiosError(error)) {
-                if(error.request) return alert(error.request.response["message"])
-                if(error.response) return alert(error.response.data.message)
+            if (isAxiosError(error)) {
+                if (error.request) return alert(error.request.response["message"])
+                if (error.response) return alert(error.response.data.message)
             }
             alert("Something went wrong")
         } finally {
@@ -158,7 +172,7 @@ const Register = () => {
                         slotProps={{
                             input: {
                                 startAdornment: <Person />,
-                                endAdornment: 
+                                endAdornment:
                                     <Tooltip title="Send Code" arrow>
                                         <IconButton onClick={handleSendEmail}>
                                             <Send />
@@ -186,7 +200,7 @@ const Register = () => {
                     />
                 </FormControl>
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-                    <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha}/>
+                    <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha} />
                 </Box>
                 <Button type="submit" variant="contained" disabled={loading}>{loading ? "Registering..." : "Register"}</Button>
             </Box>
