@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Button, FormControl, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { Box, Button, Divider, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material'
 import SpanningTable from './SpanningTable'
 import { useCookies } from 'react-cookie'
 import { axiosInstanceWithAuthorization } from '../../api/app'
@@ -19,7 +19,7 @@ const StatementOfAccount = () => {
   const [statementOfAccountData, setStatementOfAccountData] = React.useState<StatementOfAccountDataType[]>([])
   const [filteredData, setFilteredData] = React.useState<StatementOfAccountDataType[]>([])
   const [dataToFilter, setDataToFilter] = React.useState<{ school_year: number, semester: string }>({ school_year: new Date().getFullYear(), semester: "" })
-  const [schoolYear, setSchoolYear] = React.useState<number[]>([])
+  const [schoolYears, setSchoolYears] = React.useState<number[]>([])
   const [semesters, setSemesters] = React.useState<string[]>([])
   const [referenceId, setReferenceId] = React.useState<string>("")
   const [loading, setLoading] = React.useState<{
@@ -78,7 +78,7 @@ const StatementOfAccount = () => {
         const filteredData = data.filter((item: StatementOfAccountDataType) => parseFloat(item.amount))
         setStatementOfAccountData(filteredData)
         const uniqueSchoolYear: number[] = Array.from(new Set(data.filter(({ school_year }: { school_year: number }) => Number(school_year)).map(({ school_year }: { school_year: number }) => Number(school_year))))
-        setSchoolYear(uniqueSchoolYear)
+        setSchoolYears(uniqueSchoolYear)
         const uniqueSemesters: string[] = Array.from(new Set(data.filter(({ semester }: { semester: string }) => semester).map(({ semester }: { semester: string }) => semester)))
         setSemesters(uniqueSemesters)
       } catch (error) {
@@ -101,8 +101,20 @@ const StatementOfAccount = () => {
   return (
     <Box sx={{ flexGrow: 1, paddingLeft: 5 }}>
       <Typography variant="h4" color="initial">Statement of Account</Typography>
-      <Paper sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 2, height: "100%", width: "100%" }}>
-        <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", gap: 2, minWidth: 300 }} component={"form"} onSubmit={handleSubmit}>
+      <Paper sx={{ display: "flex", flexDirection: { xs: "column", md: "row"}, gap: 2, height: "100%", width: "100%" }}>
+        <Box 
+          sx={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            justifyContent: "center", 
+            alignItems: "center", 
+            gap: 2, 
+            padding: 5,
+            width: { xs: "100%", lg: "50%" }
+          }} 
+          component={"form"} 
+          onSubmit={handleSubmit}
+        >
           <FormControl fullWidth>
             <Select
               labelId="select-school-year-label"
@@ -111,7 +123,7 @@ const StatementOfAccount = () => {
               name="school_year"
               onChange={handleChange}
             >
-              {schoolYear.length > 0 && schoolYear.map((item, index) => (
+              {schoolYears.length > 0 && schoolYears.map((item, index) => (
                 <MenuItem key={index} value={item}>{`${item} - ${item + 1}`}</MenuItem>
               ))}
             </Select>
@@ -131,14 +143,16 @@ const StatementOfAccount = () => {
           </FormControl>
           <Button type="submit" variant="contained">FILTER</Button>
         </Box>
-        <SpanningTable rows={filteredData} loading={loading.soaTable} />
-        <Button
-          variant="contained"
-          onClick={handleGenerateReferenceId}
-          disabled={loading.grid}>
-          {loading.grid ? "Generating..." : "Generate Reference Id"}
-        </Button>
-        {(referenceId && (!loading.grid)) && <Typography variant="h6" color="initial">Reference Id: {referenceId}</Typography>}
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+          <SpanningTable rows={filteredData} loading={loading.soaTable} />
+          {/* <Button
+            variant="contained"
+            onClick={handleGenerateReferenceId}
+            disabled={loading.grid}>
+            {loading.grid ? "Generating..." : "Generate Reference Id"}
+          </Button> */}
+          {(referenceId && (!loading.grid)) && <Typography variant="h6" color="initial">Reference Id: {referenceId}</Typography>}
+        </Box>
       </Paper>
     </Box>
   )
