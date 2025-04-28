@@ -1,5 +1,8 @@
 import React from 'react'
-import { Password, Person, Send } from '@mui/icons-material';
+import { 
+    Abc as AbcIcon, 
+    Person as PersonIcon, 
+} from '@mui/icons-material';
 import { Box, Paper, FormControl, TextField, IconButton, Button, Typography, Tooltip } from '@mui/material'
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from 'react-router';
@@ -40,8 +43,8 @@ const Login = () => {
             alert(data.message);
         } catch (error) {
             if(isAxiosError(error)) {
-                if(error.request) return alert(error.request.response)
-                if(error.response) return alert(error.response.data)
+                if (error.request) return alert(JSON.parse(error.request.response.toString()).message)
+                if (error.response) return alert(JSON.parse(error.response.data.toString()).message)
             }
             alert("Something went wrong")
         } finally {
@@ -102,20 +105,13 @@ const Login = () => {
                 <Typography variant="caption" color="initial" align="center">Not registered? Register <a style={{ textDecoration: 'underline', cursor: 'pointer' }} onClick={handleRedirectToRegister}>here</a></Typography>
                 <FormControl fullWidth>
                     <TextField
-                        id="outlined-basic"
                         label="Email Address"
                         name="email"
                         value={loginData.email}
                         onChange={handleChange}
                         slotProps={{
                             input: {
-                                startAdornment: <Person />,
-                                endAdornment: 
-                                    <Tooltip title="Send Code" arrow>
-                                        <IconButton onClick={handleSendEmail}>
-                                            <Send />
-                                        </IconButton>
-                                    </Tooltip>
+                                startAdornment: <PersonIcon />
                             }
                         }}
                         required
@@ -123,14 +119,19 @@ const Login = () => {
                 </FormControl>
                 <FormControl fullWidth>
                     <TextField
-                        id="outlined-basic"
-                        label="Code"
+                        label="Authentication Code"
                         name="code"
                         value={loginData.code}
                         onChange={handleChange}
                         slotProps={{
                             input: {
-                                startAdornment: <Password />,
+                                startAdornment: <AbcIcon />,
+                                endAdornment: 
+                                    <Tooltip title="Send Code" arrow>
+                                        <IconButton onClick={handleSendEmail} disabled={loginData.email === ""}>
+                                            <Typography variant="body1" color="initial">Send code</Typography>
+                                        </IconButton>
+                                    </Tooltip>
                             }
                         }}
                         required

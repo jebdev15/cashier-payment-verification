@@ -1,22 +1,21 @@
 import React from 'react'
-import { Password, Person, Send } from '@mui/icons-material';
-import { Box, Paper, FormControl, TextField, IconButton, Button, Typography, Tooltip, Select, SelectChangeEvent, MenuItem, FormControlLabel, FormLabel } from '@mui/material'
+import { Box, Paper, FormControl, TextField, IconButton, Button, Typography, Tooltip, Select, SelectChangeEvent, MenuItem } from '@mui/material'
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from 'react-router';
 import { axiosInstance } from '../api/app';
 import { isAxiosError } from 'axios';
-type registerData = {
+type RegisterDataType = {
     userType: string;
-    studentIdNumber: string;
+    studentId: string;
     firstName: string;
     middleName: string;
     lastName: string;
     email: string;
     code: string;
 }
-const initialregisterData: registerData = {
+const initialregisterData: RegisterDataType = {
     userType: "Student",
-    studentIdNumber: "",
+    studentId: "",
     firstName: "",
     middleName: "",
     lastName: "",
@@ -29,7 +28,7 @@ const userTypeOptions = ["Student"];
 const Register = () => {
     const navigate = useNavigate()
     const handleRedirectToLogin = () => { navigate("/") }
-    const [registerData, setRegisterData] = React.useState<registerData>(initialregisterData);
+    const [registerData, setRegisterData] = React.useState<RegisterDataType>(initialregisterData);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = event.target;
         setRegisterData((prevData) => ({
@@ -40,6 +39,7 @@ const Register = () => {
     const [loading, setLoading] = React.useState<{ registrationForm: boolean, sendCode: boolean }>({ registrationForm: false, sendCode: false });
     const recaptcha = React.useRef<ReCAPTCHA>(null);
     const handleSendEmail = async () => {
+        if(registerData.email === "") return alert("Email is required");
         setLoading((prevState) => ({ ...prevState, sendCode: true }));
         const formData = new FormData();
         formData.append("email", registerData.email);
@@ -65,7 +65,7 @@ const Register = () => {
     }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        setLoading((prevState) => ({ ...prevState, registrationForm: true }));
         const formData = new FormData(e.currentTarget as HTMLFormElement);
         try {
             const { data } = await axiosInstance.post("/api/auth/register", formData);
@@ -73,14 +73,16 @@ const Register = () => {
         } catch (error) {
             console.error(error);
             if (isAxiosError(error)) {
-                if (error.request) return alert(error.request.response["message"])
-                if (error.response) return alert(error.response.data.message)
+                if (error.request) return alert(JSON.parse(error.request.response.toString()).message)
+                if (error.response) return alert(JSON.parse(error.response.data.toString()).message)
             }
-            alert("Something went wrong")
+            alert("Server is busy, please try again later")
         } finally {
-            setLoading(false);
+            setLoading((prevState) => ({ ...prevState, registrationForm: false }));
         }
     }
+
+    const disableButton = registerData.code === "" || registerData.email === "" || registerData.firstName === "" || registerData.lastName === "" || registerData.studentId === "" || registerData.middleName === "" || loading.registrationForm;
     return (
         <Paper component={Paper}>
             <Box
@@ -120,10 +122,9 @@ const Register = () => {
                 {registerData.userType === "Student" && (
                     <FormControl fullWidth>
                         <TextField
-                            id="outlined-basic"
-                            label="Student ID Number"
-                            name="studentIdNumber"
-                            value={registerData.studentIdNumber}
+                            label="Student ID"
+                            name="studentId"
+                            value={registerData.studentId}
                             onChange={handleChange}
                             required={registerData.userType === "Student"}
                         />
@@ -132,7 +133,7 @@ const Register = () => {
                 {/* First Name */}
                 <FormControl fullWidth>
                     <TextField
-                        id="outlined-basic"
+                        
                         label="First Name"
                         name="firstName"
                         value={registerData.firstName}
@@ -143,7 +144,7 @@ const Register = () => {
                 {/* Middle Name */}
                 <FormControl fullWidth>
                     <TextField
-                        id="outlined-basic"
+                        
                         label="Middle Name"
                         name="middleName"
                         value={registerData.middleName}
@@ -153,7 +154,7 @@ const Register = () => {
                 {/* Last Name */}
                 <FormControl fullWidth>
                     <TextField
-                        id="outlined-basic"
+                        
                         label="Last Name"
                         name="lastName"
                         value={registerData.lastName}
@@ -164,36 +165,29 @@ const Register = () => {
                 {/* Email Address */}
                 <FormControl fullWidth>
                     <TextField
-                        id="outlined-basic"
                         label="Email Address"
                         name="email"
                         value={registerData.email}
                         onChange={handleChange}
-                        slotProps={{
-                            input: {
-                                startAdornment: <Person />,
-                                endAdornment:
-                                    <Tooltip title="Send Code" arrow>
-                                        <IconButton onClick={handleSendEmail}>
-                                            <Send />
-                                        </IconButton>
-                                    </Tooltip>
-                            }
-                        }}
                         required
                     />
                 </FormControl>
                 {/* Code */}
                 <FormControl fullWidth>
                     <TextField
-                        id="outlined-basic"
-                        label="Code"
+                        label="Verification Code"
                         name="code"
                         value={registerData.code}
                         onChange={handleChange}
                         slotProps={{
                             input: {
-                                startAdornment: <Password />,
+                                endAdornment:
+                                    <Tooltip title="Send Code" arrow>
+                                        <IconButton onClick={handleSendEmail} disabled={registerData.email === ""}>
+                                            {/* */}
+                                            <Typography variant="body1" color="initial">Send verification code</Typography>
+                                        </IconButton>
+                                    </Tooltip>
                             }
                         }}
                         required
@@ -202,7 +196,7 @@ const Register = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                     <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha} />
                 </Box>
-                <Button type="submit" variant="contained" disabled={loading}>{loading ? "Registering..." : "Register"}</Button>
+                <Button type="submit" variant="contained" disabled={disableButton}>{loading.registrationForm ? "Registering..." : "Register"}</Button>
             </Box>
         </Paper>
     )
