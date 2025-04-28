@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Box, Button, Paper, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, FormControl, Paper, TextField, Typography } from '@mui/material'
 import { UploadFile as UploadFileIcon } from '@mui/icons-material'
 import SpanningTable from './SpanningTableForUR'
 import { LazyImage } from '../../components/LazyImage'
@@ -16,6 +16,7 @@ const UploadReceipt = () => {
     const [error, setError] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean}>({ upload: false, log: false });
     const [data, setData] = React.useState<FileUploadLogType[]>([]);
+    const [remarks, setRemarks] = React.useState<string>("");
     const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -51,9 +52,6 @@ const UploadReceipt = () => {
     }
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const confirmation = window.confirm('Are you sure to proceed to the next form? You can\'t edit your image after proceeding.');
-        if (!confirmation) return;
-
         setLoading((prevState) => ({ ...prevState, upload: true, log: true }));
 
         const formData = new FormData();
@@ -64,7 +62,7 @@ const UploadReceipt = () => {
             const blob = base64ToBlob(image);
             // Append the Blob or File directly (no need to convert if it's already a File)
             formData.append('receipt', blob || image, imageName);  // Use the file object directly if available
-            formData.append('remarks', "asd");  // Use the file object directly if available
+            formData.append('remarks', remarks);  // Use the file object directly if available
         } else {
             alert("No image to upload. Please select a file before proceeding.");
             setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
@@ -74,6 +72,11 @@ const UploadReceipt = () => {
         try {
             const { data, status } = await axiosInstanceWithAuthorization(accessToken).post('/api/upload/receipts', formData, { headers: { 'Content-Type': 'multipart/form-data' }, });
             alert(data.message);
+            if(status === 200) {
+                setRemarks("")
+                setImage("")
+                setImageName("")
+            }
             console.log(data, status);
         } catch (error) {
             console.error("Error uploading file:", error);
@@ -130,7 +133,7 @@ const UploadReceipt = () => {
                     component="form"
                     onSubmit={handleSubmit}
                 >
-                    <TextField type='file' onChange={handleChangeFile} />
+                    <TextField type='file' onChange={handleChangeFile} value={image} />
                     <Paper sx={{ minHeight: 400, minWidth: 400 }}>
                         {image && <LazyImage src={image} alt="Preview" height={400} width={400} />}
                     </Paper>
@@ -140,6 +143,9 @@ const UploadReceipt = () => {
                         {error}
                         </Alert>
                     )}
+                    <FormControl sx={{ minWidth: 400 }}>
+                        <TextField label="Remarks(optional)" value={remarks} multiline rows={4} onChange={(e) => setRemarks(e.target.value)} />
+                    </FormControl>
                 </Box>
                 <Box
                     sx={{
