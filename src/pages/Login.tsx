@@ -57,7 +57,10 @@ const Login = () => {
     const handleRedirectToHome = (accessToken: string) => {
         return new Promise<void>((resolve) => {
             setTimeout(() => {
-                setCookie("accessToken", accessToken, { path: "/" })
+                setCookie("accessToken", accessToken, { 
+                    path: "/", 
+                    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1) // 1 day 
+                })
                 navigate("/home", { replace: true })
                 resolve()
             }, 1000)
@@ -128,8 +131,8 @@ const Login = () => {
                                 startAdornment: <AbcIcon />,
                                 endAdornment: 
                                     <Tooltip title="Send Code" arrow>
-                                        <IconButton onClick={handleSendEmail} disabled={loginData.email === ""}>
-                                            <Typography variant="body1" color="initial">Send code</Typography>
+                                        <IconButton onClick={handleSendEmail} disabled={loginData.email === "" || loading.sendCode}>
+                                            <Typography variant="body1" color="initial">{ loading.sendCode ? "Please wait..." : "Send code"}</Typography>
                                         </IconButton>
                                     </Tooltip>
                             }
