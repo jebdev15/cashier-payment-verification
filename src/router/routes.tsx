@@ -13,6 +13,7 @@ import AdminLayout from "../pages/admin/Layout";
 import Dashboard from "../pages/admin/Dashboard";
 import AccountManagement from "../pages/admin/AccountManagement";
 import AdminTransactionHistory from "../pages/admin/TransactionHistory";
+import HomeLayoutContextProvider from "../context/HomeLayoutContext";
 
 export const routes = createBrowserRouter([
     {
@@ -32,7 +33,9 @@ export const routes = createBrowserRouter([
     },
     {
         path: "/home",
-        element: <HomeLayout />,
+        element: <HomeLayoutContextProvider>
+                    <HomeLayout />
+                </HomeLayoutContextProvider>,
         children: [
             {
                 index: true,

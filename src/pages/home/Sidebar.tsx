@@ -4,8 +4,10 @@ import { Avatar, Box, Divider, List, ListItem, ListItemButton, ListItemIcon, Lis
 import { useNavigate } from 'react-router'
 import { sideNav } from './sideNav'
 import { useCookies } from 'react-cookie'
+import { HomeLayoutContext } from '../../context/HomeLayoutContext'
 
 const Sidebar = () => {
+    const { sidebarOpen } = React.useContext(HomeLayoutContext)
     const navigate = useNavigate()
     const [,,removeCookie] = useCookies(['accessToken'])
     const [currentTab, setCurrentTab] = React.useState<string>("")
@@ -14,11 +16,14 @@ const Sidebar = () => {
         setCurrentTab(selectedTab)
     }
     const handleLogout = () => {
-        removeCookie("accessToken", { path: "/" })
+        removeCookie("accessToken", { 
+            path: "/", 
+            expires: new Date("Thu, 01 Jan 1970 00:00:00 GMT")
+        })
         navigate("/", { replace: true })
     }
     return (
-        <Box sx={{ width: '100%', maxWidth: 250, bgcolor: 'background.paper' }}>
+        <Box sx={{ width: '100%', maxWidth: 250, bgcolor: 'background.paper', display: sidebarOpen ? "block" : "none" }}>
             <nav aria-label="main mailbox folders">
                 <List>
                     <ListItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} disablePadding>
