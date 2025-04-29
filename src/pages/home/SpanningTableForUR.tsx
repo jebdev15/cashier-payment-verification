@@ -17,8 +17,8 @@ const SpanningTable = ({ data, loading }: { data: FileUploadLogType[], loading: 
   },[data])
   if(loading) return <div>Loading...</div>
   return ( 
-    <TableContainer component={Paper} sx={{ maxWidth: 400 }}>
-      <Table stickyHeader sx={{ maxWidth: 400 }} aria-label="spanning table">
+    <TableContainer component={Paper} sx={{ width: "100%" }}>
+      <Table stickyHeader sx={{ width: "100%" }} aria-label="spanning table">
         <TableHead>
           <TableRow>
             <TableCell align="center" colSpan={4}>
@@ -37,7 +37,7 @@ const SpanningTable = ({ data, loading }: { data: FileUploadLogType[], loading: 
             <TableRow key={index}>
               <TableCell>{row.fileName}</TableCell>
               <TableCell>{row.remarks}</TableCell>
-              <TableCell align="right">{new Date(row.uploadedAt).toLocaleString()}</TableCell>
+              <TableCell>{new Date(row.uploadedAt).toLocaleString()}</TableCell>
             </TableRow>
           ))}
         </TableBody>

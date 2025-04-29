@@ -17,6 +17,7 @@ const UploadReceipt = () => {
     const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean}>({ upload: false, log: false });
     const [data, setData] = React.useState<FileUploadLogType[]>([]);
     const [remarks, setRemarks] = React.useState<string>("");
+    const fileInputRef = React.useRef<HTMLInputElement>(null)
     const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -76,6 +77,10 @@ const UploadReceipt = () => {
                 setRemarks("")
                 setImage("")
                 setImageName("")
+                // after successful upload:
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = ""; // clears file
+                }
             }
             console.log(data, status);
         } catch (error) {
@@ -113,7 +118,7 @@ const UploadReceipt = () => {
             <Paper
                 sx={{
                     display: "flex",
-                    flexDirection: "row",
+                    flexDirection: {xs: "column", md: "row"},
                     justifyContent: "center",
                     alignItems: "center",
                     height: "100%",
@@ -128,23 +133,23 @@ const UploadReceipt = () => {
                         alignItems: "center",
                         gap: 2,
                         height: { xs: "100%", md: 600 },
-                        width: { xs: "100%", md: 600 }
+                        width: { xs: "100%", md: "50%" }
                     }}
                     component="form"
                     onSubmit={handleSubmit}
                 >
-                    <TextField type='file' onChange={handleChangeFile} value={image} />
+                    <TextField type='file' onChange={handleChangeFile} inputRef={fileInputRef} inputProps={{ accept: 'image/*' }} />
                     <Paper sx={{ minHeight: 400, minWidth: 400 }}>
                         {image && <LazyImage src={image} alt="Preview" height={400} width={400} />}
                     </Paper>
                     <Button variant="contained" startIcon={<UploadFileIcon />} disabled={!image || loading.upload} type="submit" sx={{ mt: 2 }}>{loading.upload ? "Uploading..." : "Upload File"}</Button>
                     {error && (
-                        <Alert severity="warning" sx={{ mb: 2, maxWidth: 400 }}>
+                        <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
                         {error}
                         </Alert>
                     )}
                     <FormControl sx={{ minWidth: 400 }}>
-                        <TextField label="Remarks(optional)" value={remarks} multiline rows={4} onChange={(e) => setRemarks(e.target.value)} />
+                        <TextField label="Remarks" value={remarks} multiline rows={4} onChange={(e) => setRemarks(e.target.value)} />
                     </FormControl>
                 </Box>
                 <Box
@@ -155,7 +160,7 @@ const UploadReceipt = () => {
                         alignItems: "center",
                         gap: 2,
                         height: { xs: "100%", md: 500 },
-                        width: { xs: "100%", md: 400 },
+                        width: { xs: "100%", md: "50%" },
                     }}
                 >
                     <SpanningTable data={data} loading={loading.log} />
