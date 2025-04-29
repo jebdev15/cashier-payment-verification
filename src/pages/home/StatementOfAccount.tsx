@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Button, Divider, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { Alert, Box, Button, Divider, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material'
 import SpanningTable from './SpanningTable'
 import { useCookies } from 'react-cookie'
 import { axiosInstanceWithAuthorization } from '../../api/app'
@@ -34,8 +34,8 @@ const StatementOfAccount = () => {
   const handleTimeOut = () => {
     return new Promise<string>((resolve) => {
       setTimeout(() => {
-        const randomString = Math.random().toString(36).substring(2, 12); // temporary reference id
-        resolve(randomString)
+        const randomString = Math.random().toString(36).substring(9, 12); // temporary reference id
+        resolve(`PVERIS-S-${randomString}`)
       }, 1000)
     })
   }
@@ -45,7 +45,7 @@ const StatementOfAccount = () => {
       const randomString = await handleTimeOut()
       const formData = new FormData()
       formData.append("reference_code", randomString)
-      const { data } = await axiosInstanceWithAuthorization(accessToken).post(`/api/statement-of-account/save-reference-id`, formData)
+      const { data } = await axiosInstanceWithAuthorization(accessToken).post(`/api/soa/save-reference-id`, formData)
       setReferenceId(data.reference_code)
     } catch (error) {
       console.error(error)
@@ -74,7 +74,7 @@ const StatementOfAccount = () => {
     const fetchStatementOfAccount = async () => {
       try {
         setLoading((prevState) => ({ ...prevState, soa: true }))
-        const { data } = await axiosInstanceWithAuthorization(accessToken).get("/api/statement-of-account/student-id", { signal });
+        const { data } = await axiosInstanceWithAuthorization(accessToken).get("/api/soa/student-id", { signal });
         const filteredData = data.filter((item: StatementOfAccountDataType) => parseFloat(item.amount))
         setStatementOfAccountData(filteredData)
         const uniqueSchoolYear: number[] = Array.from(new Set(data.filter(({ school_year }: { school_year: number }) => Number(school_year)).map(({ school_year }: { school_year: number }) => Number(school_year))))
@@ -99,7 +99,7 @@ const StatementOfAccount = () => {
   if (loading.soa) return <Typography variant="h4" color="initial">Loading...</Typography>
   if (statementOfAccountData.length === 0) return <Typography variant="h4" color="initial">No data found</Typography>
   return (
-    <Box sx={{ flexGrow: 1, paddingLeft: 5 }}>
+    <Box sx={{ flexGrow: 1, paddingLeft: 5, height: "100%", overflow: "auto" }}>
       <Typography variant="h4" color="initial">Statement of Account</Typography>
       <Paper sx={{ display: "flex", flexDirection: { xs: "column", md: "row"}, gap: 2, height: "100%", width: "100%" }}>
         <Box 
@@ -110,7 +110,7 @@ const StatementOfAccount = () => {
             alignItems: "center", 
             gap: 2, 
             padding: 5,
-            width: { xs: "100%", lg: "50%" }
+            width: { xs: "100%", md: "50%" }
           }} 
           component={"form"} 
           onSubmit={handleSubmit}
@@ -145,13 +145,22 @@ const StatementOfAccount = () => {
         </Box>
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
           <SpanningTable rows={filteredData} loading={loading.soaTable} />
-          {/* <Button
-            variant="contained"
-            onClick={handleGenerateReferenceId}
-            disabled={loading.grid}>
-            {loading.grid ? "Generating..." : "Generate Reference Id"}
-          </Button> */}
-          {(referenceId && (!loading.grid)) && <Typography variant="h6" color="initial">Reference Id: {referenceId}</Typography>}
+          {filteredData.length > 0 && (
+            <Button
+              variant="contained"
+              onClick={handleGenerateReferenceId}
+              disabled={loading.grid}
+              sx={{ marginTop: 2 }}
+            >
+              {loading.grid ? "Generating..." : "Generate Reference Id"}
+            </Button>
+          )}
+          {(referenceId && (!loading.grid)) && (
+            <>
+              <Typography variant="h6" color="initial">Reference Id: {referenceId}</Typography>
+              <Alert severity="info">Please be informed that your reference ID will expire in 1 hour, after which you can generate a new one.</Alert>
+            </>
+          )}
         </Box>
       </Paper>
     </Box>

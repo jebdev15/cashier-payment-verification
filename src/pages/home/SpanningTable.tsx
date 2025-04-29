@@ -32,8 +32,8 @@ const SpanningTable = ({ rows, loading }: { rows: Row[], loading: boolean }) => 
   if (loading) return <div>Loading...</div>
   if (rows.length === 0) return <div>No data</div>
   return (
-    <TableContainer component={Paper} sx={{ maxWidth: 400, maxHeight: 400 }}>
-      <Table sx={{ maxWidth: 400, overflow: "scroll" }} aria-label="spanning table">
+    <TableContainer component={Paper} sx={{ width: "100%", maxHeight: 400 }}>
+      <Table sx={{ width: "100%", overflow: "scroll" }} aria-label="spanning table">
         <TableHead>
           <TableRow>
             <TableCell align="center" colSpan={4} sx={{ position: 'sticky', top: 0, backgroundColor: 'background.paper', zIndex: 1 }}>
@@ -42,19 +42,19 @@ const SpanningTable = ({ rows, loading }: { rows: Row[], loading: boolean }) => 
           </TableRow>
           <TableRow>
             <TableCell sx={{ position: 'sticky', top: 1, backgroundColor: 'background.paper', zIndex: 1 }}>Description</TableCell>
-            <TableCell align="right" sx={{ position: 'sticky', top: 1, backgroundColor: 'background.paper', zIndex: 1 }}>Amount</TableCell>
+            <TableCell sx={{ position: 'sticky', top: 1, backgroundColor: 'background.paper', zIndex: 1 }}>Amount</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data.map((item, index) => (
             <TableRow key={index}>
               <TableCell>{item.item_title}</TableCell>
-              <TableCell align="right">{ccyFormat(Number(item.amount))}</TableCell>
+              <TableCell>{ccyFormat(Number(item.amount))}</TableCell>
             </TableRow>
           ))}
           <TableRow>
             <TableCell align="right" sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', zIndex: 1 }}>Total</TableCell>
-            <TableCell align="right" sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', zIndex: 1 }}>{ccyFormat(totalAmount)}</TableCell>
+            <TableCell sx={{ position: 'sticky', bottom: 0, backgroundColor: 'background.paper', zIndex: 1 }}>{ccyFormat(totalAmount)}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
