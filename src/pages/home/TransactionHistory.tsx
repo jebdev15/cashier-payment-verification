@@ -13,21 +13,18 @@ const TransactionHistory = () => {
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'student_id', headerName: 'Student ID', width: 130, hide: true },
-    { field: 'fileName', headerName: 'File Name', width: 200 },
-    { field: 'filePath', headerName: 'Path', width: 400 },
-    { field: 'uploadedAt', headerName: 'Status', width: 90 },
-    {
-      field: 'action',
-      headerName: 'Action',
-      width: 160
-    }
+    { field: 'reference_code', headerName: 'Reference ID', width: 200 },
+    // { field: 'payment_id', headerName: 'Payment ID', width: 100 },
+    { field: 'purpose', headerName: 'Purpose', width: 100 },
+    { field: 'status', headerName: 'Status', width: 160 },
+    { field: 'created_at', headerName: 'Created At', width: 160 },
   ]
   React.useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
     const fetchUploadReceiptLog = async () => {
       try {
-        const { data, status } = await axiosInstanceWithAuthorization(accessToken).get('/api/upload/receipts', { signal });
+        const { data, status } = await axiosInstanceWithAuthorization(accessToken).get('/api/soa/transactions', { signal });
         setData(data);
         console.log(data, status);
       } catch (error) {
