@@ -13,13 +13,13 @@ export const sideNav = [
     },
     {
         path: "/account-management",
-        label: "Account Management",
+        label: "Accounts",
         abbreviation: "am",
         icon: PeopleIcon
     },
     {
         path: "/transaction-history",
-        label: "Transaction History",
+        label: "Transactions",
         abbreviation: "th",
         icon: HistoryIcon
     },

@@ -5,8 +5,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import { HomeLayoutContext } from '../../context/HomeLayoutContext';
 
 const Header = () => {
+  const { handleToggleSidebar } = React.useContext(HomeLayoutContext);
   return (
     <Box sx={{ width: '100%' }}>
       <AppBar position="static">
@@ -17,6 +19,7 @@ const Header = () => {
             color="inherit"
             aria-label="menu"
             sx={{ mr: 2 }}
+            onClick={handleToggleSidebar}
           >
             <MenuIcon />
           </IconButton>

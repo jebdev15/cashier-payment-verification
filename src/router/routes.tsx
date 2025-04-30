@@ -4,16 +4,17 @@ import LandingPage from "../pages/LandingPage";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 
+import HomeLayoutContextProvider from "../context/HomeLayoutContext";
 import HomeLayout from "../pages/home/Layout";
 import StatementOfAccount from "../pages/home/StatementOfAccount";
 import UploadReceipt from "../pages/home/UploadReceipt";
 import TransactionHistory from "../pages/home/TransactionHistory";
 
+import AdminLayoutContextProvider from "../context/AdminLayoutContext";
 import AdminLayout from "../pages/admin/Layout";
 import Dashboard from "../pages/admin/Dashboard";
 import AccountManagement from "../pages/admin/AccountManagement";
-import AdminTransactionHistory from "../pages/admin/TransactionHistory";
-import HomeLayoutContextProvider from "../context/HomeLayoutContext";
+import Transactions from "../pages/admin/Transactions";
 
 export const routes = createBrowserRouter([
     {
@@ -53,7 +54,9 @@ export const routes = createBrowserRouter([
     },
     {
         path: "/admin",
-        element: <AdminLayout />,
+        element: <AdminLayoutContextProvider>
+                    <AdminLayout />
+                </AdminLayoutContextProvider>,
         children: [
             {
                 index: true,
@@ -65,7 +68,7 @@ export const routes = createBrowserRouter([
             },
             {
                 path: "transaction-history",
-                element: <AdminTransactionHistory />,
+                element: <Transactions />,
             },
         ],
     },
