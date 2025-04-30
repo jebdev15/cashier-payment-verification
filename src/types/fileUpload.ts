@@ -1,4 +1,5 @@
 export type FileUploadLogType = {
+  id: number;
   fileName: string;
   filePath: string;
   fileType: string;
