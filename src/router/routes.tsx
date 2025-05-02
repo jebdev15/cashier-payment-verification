@@ -13,8 +13,11 @@ import TransactionHistory from "../pages/home/TransactionHistory";
 import AdminLayoutContextProvider from "../context/AdminLayoutContext";
 import AdminLayout from "../pages/admin/Layout";
 import Dashboard from "../pages/admin/Dashboard";
-import AccountManagement from "../pages/admin/AccountManagement";
-import Transactions from "../pages/admin/Transactions";
+import ShowAccounts from "../pages/admin/Accounts/ShowAccounts";
+import EditAccount from "../pages/admin/Accounts/EditAccount";
+import ShowTransactions from "../pages/admin/Transactions/ShowTransactions";
+import EditTransaction from "../pages/admin/Transactions/EditTransaction";
+import ReceiptViewer from "../pages/admin/Transactions/ReceiptViewer";
 
 export const routes = createBrowserRouter([
     {
@@ -63,12 +66,24 @@ export const routes = createBrowserRouter([
                 element: <Dashboard />,
             },
             {
-                path: "account-management",
-                element: <AccountManagement />,
+                path: "accounts",
+                element: <ShowAccounts />,
             },
             {
-                path: "transaction-history",
-                element: <Transactions />,
+                path: "accounts/:id",
+                element: <EditAccount />,
+            },
+            {
+                path: "transactions",
+                element: <ShowTransactions />,
+            },
+            // {
+            //     path: "transactions/:id",
+            //     element: <EditTransaction />,
+            // },
+            {
+                path: "transactions/:id",
+                element: <ReceiptViewer />,
             },
         ],
     },

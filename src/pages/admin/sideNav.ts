@@ -12,13 +12,13 @@ export const sideNav = [
         icon: DashboardIcon
     },
     {
-        path: "/account-management",
+        path: "/accounts",
         label: "Accounts",
         abbreviation: "am",
         icon: PeopleIcon
     },
     {
-        path: "/transaction-history",
+        path: "/transactions",
         label: "Transactions",
         abbreviation: "th",
         icon: HistoryIcon
