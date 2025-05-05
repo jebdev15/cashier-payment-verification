@@ -1,50 +1,151 @@
 import React from 'react'
-import { Box, Typography, Paper } from '@mui/material'
-import { useParams } from 'react-router-dom'
-import { axiosInstance } from '../../../api/app'
-import { isAxiosError } from 'axios'
+import { Box, Typography, Paper, Alert, FormControl, TextField, FormLabel, Select, MenuItem, Button } from '@mui/material'
+import { useParams } from 'react-router'
 import { LazyImage } from '../../../components/LazyImage'
+import { useAxios } from '../../../hooks/useAxios'
+type TransactionDataType = {
+  id: number
+  fullName: string
+  student_id: string
+  reference_code: string
+  payment_id: string
+  amount: number | string
+  purpose: string
+  status: string
+  expires_at: Date
+  created_at: Date
+}
 
+const initialTransactionData: TransactionDataType = { 
+  id: 0,
+  fullName: "",
+  student_id: "",
+  reference_code: "",
+  payment_id: "",
+  amount: 0,
+  purpose: "",
+  status: "pending",
+  expires_at: new Date(),
+  created_at: new Date(),
+}
 const ReceiptViewer = () => {
-  const { id } = useParams<{ id: string }>()
-  const [image, setImage] = React.useState<string | null>(null)
-  const [loading, setLoading] = React.useState<boolean>(true)
-
+  const { transactionId } = useParams()
+  const [dataToUpdate, setDataToUpdate] = React.useState<TransactionDataType>(initialTransactionData)
+  const { data, loading, error } = useAxios({
+    url: `/api/upload/receipts/${transactionId}`,
+    authorized: true,
+  })
+  const { data: data2 } = useAxios({
+    url: `/api/transactions/${transactionId}`,
+    authorized: true,
+  })
   React.useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const fetchImage = async () => {
-      setLoading(true)
-      try {
-        const { data } = await axiosInstance.get(`/api/upload/receipts/${id}`, { signal });
-        setImage(data.image) // assuming `data.image` is a base64 or URL
-      } catch (error) {
-        if (signal.aborted) return
-        if (isAxiosError(error)) {
-          if (error.request) return alert(error.request.response["message"])
-          if (error.response) return alert(error.response.data.message)
-        }
-        console.error("Error fetching receipt:", error)
-      } finally {
-        setLoading(false)
-      }
+    if (data2) {
+      setDataToUpdate(data2[0])
     }
-    fetchImage()
-    return () => controller.abort()
-  }, [id])
-
+  },[data2])
+  if (error) return <Alert severity="error">{error}</Alert>
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h5">Receipt for Transaction ID: {id}</Typography>
-      <Paper sx={{ mt: 2, p: 2, textAlign: 'center' }}>
-        {loading ? (
-          <Typography>Loading receipt...</Typography>
-        ) : image ? (
-          <LazyImage src={image} alt="Receipt" height={"100%"} width={"100%"} />
-        ) : (
-          <Typography>No receipt image found.</Typography>
-        )}
-      </Paper>
+    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', padding: 0, margin: 0 }}>
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h5">Receipt for Transaction ID: {transactionId}</Typography>
+        <Paper sx={{ mt: 2, p: 2, textAlign: 'center' }}>
+          {loading ? (
+            <Typography>Loading receipt...</Typography>
+          ) : data?.image ? (
+            <LazyImage src={data?.image} alt="Receipt" height={"100%"} width={"100%"} />
+          ) : (
+            <Typography>No receipt image found.</Typography>
+          )}
+        </Paper>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          // justifyContent: "center",
+          alignItems: "center",
+          alignContent: "center",
+          gap: 2,
+          height: "100%",
+          width: "100%",
+          paddingX: 5,
+        }}
+        component="form"
+      // onSubmit={handleSubmit}
+      >
+        <FormControl fullWidth>
+          <TextField
+            label="Student ID"
+            variant="outlined"
+            value={dataToUpdate?.student_id}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            label="First Name"
+            variant="outlined"
+            value={dataToUpdate?.fullName}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            label="Reference Code"
+            variant="outlined"
+            value={dataToUpdate?.reference_code}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            label="Payment ID"
+            variant="outlined"
+            value={dataToUpdate?.payment_id}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            label="Purpose"
+            variant="outlined"
+            value={data?.purpose}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            label="Amount"
+            variant="outlined"
+            value={dataToUpdate?.amount}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            label="Created At"
+            variant="outlined"
+            value={dataToUpdate?.created_at}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <TextField
+            label="Expires At"
+            variant="outlined"
+            value={dataToUpdate?.expires_at}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <FormLabel id="status">Status</FormLabel>
+          <Select
+            value={dataToUpdate?.status}
+            labelId="status"
+            label="Status"
+            name="status"
+          // onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
+          >
+            <MenuItem value={"pending"}></MenuItem>
+            <MenuItem value={"approved"}>Approve</MenuItem>
+            <MenuItem value={"rejected"}>Reject</MenuItem>
+          </Select>
+        </FormControl>
+        <Button type="submit" variant="contained" disabled={loading.form}>{loading.form ? "Updating..." : "Update"}</Button>
+      </Box>
     </Box>
   )
 }

@@ -24,7 +24,7 @@ const TransactionHistory = () => {
     const signal = controller.signal;
     const fetchUploadReceiptLog = async () => {
       try {
-        const { data, status } = await axiosInstanceWithAuthorization(accessToken).get('/api/soa/transactions', { signal });
+        const { data, status } = await axiosInstanceWithAuthorization(accessToken).get('/api/transactions', { signal });
         setData(data);
         console.log(data, status);
       } catch (error) {
