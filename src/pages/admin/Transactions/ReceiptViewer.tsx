@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Typography, Paper, Alert, FormControl, TextField, FormLabel, Select, MenuItem, Button } from '@mui/material'
+import { Box, Typography, Paper, Alert, FormControl, TextField, Select, MenuItem, Button, InputLabel } from '@mui/material'
 import { useParams } from 'react-router'
 import { LazyImage } from '../../../components/LazyImage'
 import { useAxios } from '../../../hooks/useAxios'
@@ -11,6 +11,8 @@ type TransactionDataType = {
   payment_id: string
   amount: number | string
   purpose: string
+  filePath: string
+  referenceId: string
   status: string
   expires_at: Date
   created_at: Date
@@ -24,6 +26,8 @@ const initialTransactionData: TransactionDataType = {
   payment_id: "",
   amount: 0,
   purpose: "",
+  filePath: "",
+  referenceId: "",
   status: "pending",
   expires_at: new Date(),
   created_at: new Date(),
@@ -31,39 +35,46 @@ const initialTransactionData: TransactionDataType = {
 const ReceiptViewer = () => {
   const { transactionId } = useParams()
   const [dataToUpdate, setDataToUpdate] = React.useState<TransactionDataType>(initialTransactionData)
+  const [loadingImage, setLoadingImage] = React.useState<boolean>(true)
   const { data, loading, error } = useAxios({
-    url: `/api/upload/receipts/${transactionId}`,
-    authorized: true,
-  })
-  const { data: data2 } = useAxios({
     url: `/api/transactions/${transactionId}`,
     authorized: true,
   })
   React.useEffect(() => {
-    if (data2) {
-      setDataToUpdate(data2[0])
+    if (data) {
+      setDataToUpdate(data[0])
+      setLoadingImage(false);
+      console.log(`${import.meta.env.VITE_API_URL}/${data[0]?.filePath}`)
     }
-  },[data2])
+  },[data])
   if (error) return <Alert severity="error">{error}</Alert>
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', padding: 0, margin: 0 }}>
       <Box sx={{ p: 4 }}>
         <Typography variant="h5">Receipt for Transaction ID: {transactionId}</Typography>
-        <Paper sx={{ mt: 2, p: 2, textAlign: 'center' }}>
-          {loading ? (
+        {/* <Paper sx={{ mt: 2, p: 2, textAlign: 'center' }}>
+          {loadingImage ? (
             <Typography>Loading receipt...</Typography>
-          ) : data?.image ? (
-            <LazyImage src={data?.image} alt="Receipt" height={"100%"} width={"100%"} />
+          ) : dataToUpdate?.filePath ? (
+            <img src={`${import.meta.env.VITE_API_URL}/${dataToUpdate?.filePath}`} alt="Receipt" style={{ minWidth: 300, maxHeight: 500 }} loading='lazy' />
           ) : (
             <Typography>No receipt image found.</Typography>
           )}
-        </Paper>
+        </Paper> */}
+        {
+          loadingImage ? (
+            <Typography>Loading receipt...</Typography>
+          ) : dataToUpdate?.filePath ? (
+            <Typography>View receipt here: <a href={`${import.meta.env.VITE_API_URL}/${dataToUpdate?.filePath}`} target="_blank">Receipt</a></Typography>
+          ) : (
+            <Typography>No receipt image found.</Typography>
+          )
+        }
       </Box>
       <Box
         sx={{
           display: "flex",
           flexDirection: "column",
-          // justifyContent: "center",
           alignItems: "center",
           alignContent: "center",
           gap: 2,
@@ -106,7 +117,7 @@ const ReceiptViewer = () => {
           <TextField
             label="Purpose"
             variant="outlined"
-            value={data?.purpose}
+            value={dataToUpdate?.purpose}
           />
         </FormControl>
         <FormControl fullWidth>
@@ -131,7 +142,7 @@ const ReceiptViewer = () => {
           />
         </FormControl>
         <FormControl fullWidth>
-          <FormLabel id="status">Status</FormLabel>
+          <InputLabel id="status">Status</InputLabel>
           <Select
             value={dataToUpdate?.status}
             labelId="status"
@@ -139,7 +150,7 @@ const ReceiptViewer = () => {
             name="status"
           // onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
           >
-            <MenuItem value={"pending"}></MenuItem>
+            <MenuItem value={"pending"}>Pending</MenuItem>
             <MenuItem value={"approved"}>Approve</MenuItem>
             <MenuItem value={"rejected"}>Reject</MenuItem>
           </Select>

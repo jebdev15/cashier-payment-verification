@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Box, Button, Divider, FormControl, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material'
+import { Alert, Box, Button, Divider, FormControl, InputLabel, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Select, SelectChangeEvent, Typography } from '@mui/material'
 import SpanningTable from './SpanningTable'
 import { useCookies } from 'react-cookie'
 import { axiosInstanceWithAuthorization } from '../../api/app'
@@ -21,7 +21,7 @@ const StatementOfAccount = () => {
   const [dataToFilter, setDataToFilter] = React.useState<{ school_year: number, semester: string }>({ school_year: new Date().getFullYear(), semester: "" })
   const [schoolYears, setSchoolYears] = React.useState<number[]>([])
   const [semesters, setSemesters] = React.useState<string[]>([])
-  const [referenceId, setReferenceId] = React.useState<string>("")
+  // const [referenceId, setReferenceId] = React.useState<string>("")
   const [loading, setLoading] = React.useState<{
     soa: boolean;
     soaTable: boolean;
@@ -31,28 +31,28 @@ const StatementOfAccount = () => {
     soaTable: false,
     grid: false
   })
-  const handleTimeOut = () => {
-    return new Promise<string>((resolve) => {
-      setTimeout(() => {
-        const randomString = Math.random().toString(36).substring(9, 12); // temporary reference id
-        resolve(`PVERIS-S-${randomString}`)
-      }, 1000)
-    })
-  }
-  const handleGenerateReferenceId = async () => {
-    setLoading((prevState) => ({ ...prevState, grid: true }))
-    try {
-      const randomString = await handleTimeOut()
-      const formData = new FormData()
-      formData.append("reference_code", randomString)
-      const { data } = await axiosInstanceWithAuthorization(accessToken).post(`/api/soa/save-reference-id`, formData)
-      setReferenceId(data.reference_code)
-    } catch (error) {
-      console.error(error)
-    } finally {
-      setLoading((prevState) => ({ ...prevState, grid: false }))
-    }
-  }
+  // const handleTimeOut = () => {
+  //   return new Promise<string>((resolve) => {
+  //     setTimeout(() => {
+  //       const randomString = Math.random().toString(36).substring(9, 12); // temporary reference id
+  //       resolve(`PVERIS-S-${randomString}`)
+  //     }, 1000)
+  //   })
+  // }
+  // const handleGenerateReferenceId = async () => {
+  //   setLoading((prevState) => ({ ...prevState, grid: true }))
+  //   try {
+  //     const randomString = await handleTimeOut()
+  //     const formData = new FormData()
+  //     formData.append("reference_code", randomString)
+  //     const { data } = await axiosInstanceWithAuthorization(accessToken).post(`/api/soa/save-reference-id`, formData)
+  //     setReferenceId(data.reference_code)
+  //   } catch (error) {
+  //     console.error(error)
+  //   } finally {
+  //     setLoading((prevState) => ({ ...prevState, grid: false }))
+  //   }
+  // }
   const handleChange = (event: SelectChangeEvent<number | string>) => {
     setDataToFilter((prevData) => ({ ...prevData, [event.target.name]: event.target.value }))
   }
@@ -116,6 +116,7 @@ const StatementOfAccount = () => {
           onSubmit={handleSubmit}
         >
           <FormControl fullWidth>
+            <InputLabel id="select-school-year-label">School Year</InputLabel>
             <Select
               labelId="select-school-year-label"
               id="select-school-year"
@@ -129,6 +130,7 @@ const StatementOfAccount = () => {
             </Select>
           </FormControl>
           <FormControl fullWidth>
+            <InputLabel id="select-school-semester-label">Semester</InputLabel>
             <Select
               labelId="select-school-semester-label"
               id="select-school-semester"
@@ -144,8 +146,8 @@ const StatementOfAccount = () => {
           <Button type="submit" variant="contained">FILTER</Button>
         </Box>
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-          <SpanningTable rows={filteredData} loading={loading.soaTable} />
-          {filteredData.length > 0 && (
+          <SpanningTable rows={filteredData} loadingSoaTable={loading.soaTable} loadingGrid={loading.grid} setLoading={setLoading} />
+          {/* {filteredData.length > 0 && (
             <Button
               variant="contained"
               onClick={handleGenerateReferenceId}
@@ -160,7 +162,7 @@ const StatementOfAccount = () => {
               <Typography variant="h6" color="initial">Reference Id: {referenceId}</Typography>
               <Alert severity="info">Please be informed that your reference ID will expire in 1 hour, after which you can generate a new one.</Alert>
             </>
-          )}
+          )} */}
         </Box>
       </Paper>
     </Box>

@@ -16,8 +16,9 @@ const UploadReceipt = () => {
     const [error, setError] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean}>({ upload: false, log: false });
     const [data, setData] = React.useState<FileUploadLogType[]>([]);
+    const [referenceId, setReferenceId] = React.useState<string>("");
     const [remarks, setRemarks] = React.useState<string>("");
-    const fileInputRef = React.useRef<HTMLInputElement>(null)
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
     const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -64,6 +65,7 @@ const UploadReceipt = () => {
             // Append the Blob or File directly (no need to convert if it's already a File)
             formData.append('receipt', blob || image, imageName);  // Use the file object directly if available
             formData.append('remarks', remarks);  // Use the file object directly if available
+            formData.append('referenceId', referenceId);
         } else {
             alert("No image to upload. Please select a file before proceeding.");
             setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
@@ -74,6 +76,7 @@ const UploadReceipt = () => {
             const { data, status } = await axiosInstanceWithAuthorization(accessToken).post('/api/upload/receipts', formData, { headers: { 'Content-Type': 'multipart/form-data' }, });
             alert(data.message);
             if(status === 200) {
+                setReferenceId("")
                 setRemarks("")
                 setImage("")
                 setImageName("")
@@ -142,15 +145,27 @@ const UploadReceipt = () => {
                     <Paper sx={{ minHeight: 400, minWidth: 400 }}>
                         {image && <LazyImage src={image} alt="Preview" height={400} width={400} />}
                     </Paper>
-                    <Button variant="contained" startIcon={<UploadFileIcon />} disabled={!image || loading.upload} type="submit" sx={{ mt: 2 }}>{loading.upload ? "Uploading..." : "Upload File"}</Button>
+
+                    <FormControl sx={{ minWidth: 400 }}>
+                        <TextField label="Reference ID" value={referenceId} onChange={(e) => setReferenceId(e.target.value)} />
+                    </FormControl>
+                    <FormControl sx={{ minWidth: 400 }}>
+                        <TextField label="Remarks" value={remarks} multiline rows={4} onChange={(e) => setRemarks(e.target.value)} />
+                    </FormControl>
+                    <Button 
+                        variant="contained" 
+                        startIcon={<UploadFileIcon />} 
+                        disabled={!image || loading.upload || !referenceId} 
+                        type="submit" 
+                        sx={{ mt: 2 }}
+                    >
+                        {loading.upload ? "Uploading..." : "Upload File"}
+                    </Button>
                     {error && (
                         <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
                         {error}
                         </Alert>
                     )}
-                    <FormControl sx={{ minWidth: 400 }}>
-                        <TextField label="Remarks" value={remarks} multiline rows={4} onChange={(e) => setRemarks(e.target.value)} />
-                    </FormControl>
                 </Box>
                 <Box
                     sx={{
