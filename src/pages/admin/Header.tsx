@@ -5,10 +5,10 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import { HomeLayoutContext } from '../../context/HomeLayoutContext';
+import { AdminLayoutContext } from '../../context/AdminLayoutContext';
 
 const Header = () => {
-  const { handleToggleSidebar } = React.useContext(HomeLayoutContext);
+  const { handleToggleSidebar } = React.useContext(AdminLayoutContext);
   return (
     <Box sx={{ width: '100%' }}>
       <AppBar position="static">

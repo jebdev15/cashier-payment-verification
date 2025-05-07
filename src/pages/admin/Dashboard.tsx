@@ -8,9 +8,7 @@ const Dashboard = () => {
     method: 'GET',
     authorized: true
   })
-  React.useEffect(() => {
-    console.log({ data, loading, error })
-  }, [data, loading, error])
+  if (loading) return <p>Loading...</p>;
   if (error) return <Alert severity="error">{error}</Alert>;
   return (
     <Box sx={{ flexGrow: 1, paddingX: 4, paddingY: 2 }}>

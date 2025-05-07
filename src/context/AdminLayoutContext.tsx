@@ -1,16 +1,13 @@
 import React from 'react'
 
 export const AdminLayoutContext = React.createContext({
-    sidebarOpen: false,
+    sidebarOpen: true,
     handleToggleSidebar: () => {},
 })
 
 const AdminLayoutContextProvider = ({ children }: { children: React.ReactNode }) => {
-    const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false)
-    const handleToggleSidebar = () => {
-        setSidebarOpen(!sidebarOpen)
-        console.log(!sidebarOpen)
-    }
+    const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(true)
+    const handleToggleSidebar = () => setSidebarOpen(!sidebarOpen)
     return (
         <AdminLayoutContext.Provider value={{ sidebarOpen, handleToggleSidebar }}>
             {children}

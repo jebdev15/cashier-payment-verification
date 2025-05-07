@@ -1,9 +1,23 @@
 import React from 'react'
-import { Box, Button, FormControl, FormLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
-import { axiosInstance } from '../../../api/app';
-import { isAxiosError } from 'axios';
-import { useNavigate, useParams } from 'react-router';
-import { TransactionDataType } from './type';
+import { Box, Typography, Alert, FormControl, TextField, Select, MenuItem, Button, InputLabel } from '@mui/material'
+import { useNavigate, useParams } from 'react-router'
+import { useAxios } from '../../../hooks/useAxios'
+import { isAxiosError } from 'axios'
+import { axiosInstance } from '../../../api/app'
+type TransactionDataType = {
+    id: number
+    fullName: string
+    student_id: string
+    reference_code: string
+    payment_id: string
+    amount: number | string
+    purpose: string
+    filePath: string
+    referenceId: string
+    status: string
+    expires_at: Date
+    created_at: Date
+}
 
 const initialTransactionData: TransactionDataType = {
     id: 0,
@@ -11,24 +25,47 @@ const initialTransactionData: TransactionDataType = {
     student_id: "",
     reference_code: "",
     payment_id: "",
+    amount: 0,
     purpose: "",
-    status: "",
+    filePath: "",
+    referenceId: "",
+    status: "pending",
     expires_at: new Date(),
     created_at: new Date(),
 }
-const TransactionAccount = () => {
-    const navigate = useNavigate();
-    const { id } = useParams();
-    const [loading, setLoading] = React.useState<{ form: boolean; fetch: boolean }>({ form: false, fetch: false });
-    const [dataToUpdate, setDataToUpdate] = React.useState<TransactionDataType>(initialTransactionData);
+const EditTransaction = () => {
+    const navigate = useNavigate()
+    const { transactionId } = useParams()
+    const [dataToUpdate, setDataToUpdate] = React.useState<TransactionDataType>(initialTransactionData)
+    const [loadingImage, setLoadingImage] = React.useState<boolean>(true)
+    const [loadingForm, setLoadingForm] = React.useState<boolean>(false)
+    const { data, loading, error } = useAxios({
+        url: `/api/transactions/${transactionId}`,
+        authorized: true,
+    })
+    React.useEffect(() => {
+        if (data) {
+            setDataToUpdate(data[0])
+            setLoadingImage(false);
+            console.log(`${import.meta.env.VITE_API_URL}/${data[0]?.filePath}`)
+        }
+    }, [data])
+    const handleOpenReceipt = () => {
+        try {
+            window.open(`${import.meta.env.VITE_API_URL}/${dataToUpdate?.filePath}`, '_blank')
+        } catch (error) {
+            console.error('Failed to open receipt:', error)
+        }
+    }
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setLoading((prevState) => ({ ...prevState, form: true }));
-        const formData = new FormData(event.currentTarget);
+        setLoadingForm(true);
+        const formData = new FormData();
+        formData.append('status', dataToUpdate.status);
         try {
             const { data } = await axiosInstance.put(`/api/transactions/${dataToUpdate.id}`, formData);
-            if (!data) return;
             alert(data.message);
+            if (!data) return;
             navigate("/admin/transactions", { replace: true });
         } catch (error) {
             if (isAxiosError(error)) {
@@ -36,112 +73,122 @@ const TransactionAccount = () => {
                 if (error.response) return alert(JSON.parse(error.response.toString()).message);
             }
         } finally {
-            setLoading((prevState) => ({ ...prevState, form: false }));
+            setLoadingForm(false);
         }
     }
-    React.useEffect(() => {
-        const controller = new AbortController();
-        const signal = controller.signal;
-        const fetchUser = async () => {
-            setLoading((prevState) => ({ ...prevState, fetch: true }));
-            try {
-                const { data } = await axiosInstance.get(`/api/transactions/${id}`, { signal });
-                setDataToUpdate(data[0]);
-            } catch (error) {
-                if (signal.aborted) return;
-                if (isAxiosError(error)) {
-                    if (error.request) return alert(error.request.response["message"]);
-                    if (error.response) return alert(error.response.data.message);
-                }
-            } finally {
-                setLoading((prevState) => ({ ...prevState, fetch: false }));
-            }
-        }
-        fetchUser();
-        return () => controller.abort();
-    }, [id])
-    if (loading.fetch) return <div>Loading...</div>
+    if (loading) return <Typography>Loading...</Typography>
+    if (error) return <Alert severity="error">{error}</Alert>
     return (
-        <Box sx={{ flexGrow: 1, paddingLeft: 5, width: "100%", bgcolor: "#f5f5f5" }}>
-            <Typography variant="h4" color="initial">Edit Transaction</Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', padding: 0, margin: 0 }}>
+            <Box sx={{ p: 4 }}>
+                <Typography variant="h5">Transaction ID: {transactionId}</Typography>
+                {/* <Paper sx={{ mt: 2, p: 2, textAlign: 'center' }}>
+          {loadingImage ? (
+            <Typography>Loading receipt...</Typography>
+          ) : dataToUpdate?.filePath ? (
+            <img src={`${import.meta.env.VITE_API_URL}/${dataToUpdate?.filePath}`} alt="Receipt" style={{ minWidth: 300, maxHeight: 500 }} loading='lazy' />
+          ) : (
+            <Typography>No receipt image found.</Typography>
+          )}
+        </Paper> */}
+                {
+                    loadingImage ? (
+                        <Typography>Loading receipt...</Typography>
+                    ) : dataToUpdate?.filePath ? (
+                        <Typography>View receipt here: <Button onClick={handleOpenReceipt}>View Receipt</Button></Typography>
+                    ) : (
+                        <Typography>No receipt image found.</Typography>
+                    )
+                }
+            </Box>
             <Box
                 sx={{
                     display: "flex",
                     flexDirection: "column",
+                    alignItems: "center",
+                    alignContent: "center",
                     gap: 2,
                     height: "100%",
-                    maxWidth: 500,
+                    width: "100%",
+                    paddingX: 5,
                 }}
                 component="form"
-                onSubmit={handleSubmit}
+            onSubmit={handleSubmit}
             >
                 <FormControl fullWidth>
                     <TextField
                         label="Student ID"
                         variant="outlined"
-                        value={dataToUpdate.student_id}
+                        value={dataToUpdate?.student_id}
                     />
                 </FormControl>
                 <FormControl fullWidth>
                     <TextField
                         label="First Name"
                         variant="outlined"
-                        value={dataToUpdate.fullName}
+                        value={dataToUpdate?.fullName}
                     />
                 </FormControl>
                 <FormControl fullWidth>
                     <TextField
                         label="Reference Code"
                         variant="outlined"
-                        value={dataToUpdate.reference_code}
+                        value={dataToUpdate?.reference_code}
                     />
                 </FormControl>
                 <FormControl fullWidth>
                     <TextField
                         label="Payment ID"
                         variant="outlined"
-                        value={dataToUpdate.payment_id}
+                        value={dataToUpdate?.payment_id}
                     />
                 </FormControl>
                 <FormControl fullWidth>
                     <TextField
                         label="Purpose"
                         variant="outlined"
-                        value={dataToUpdate.purpose}
+                        value={dataToUpdate?.purpose}
+                    />
+                </FormControl>
+                <FormControl fullWidth>
+                    <TextField
+                        label="Amount"
+                        variant="outlined"
+                        value={dataToUpdate?.amount}
                     />
                 </FormControl>
                 <FormControl fullWidth>
                     <TextField
                         label="Created At"
                         variant="outlined"
-                        value={dataToUpdate.created_at}
+                        value={dataToUpdate?.created_at}
                     />
                 </FormControl>
                 <FormControl fullWidth>
                     <TextField
                         label="Expires At"
                         variant="outlined"
-                        value={dataToUpdate.expires_at}
+                        value={dataToUpdate?.expires_at}
                     />
                 </FormControl>
                 <FormControl fullWidth>
-                    <FormLabel id="status">Status</FormLabel>
+                    <InputLabel id="status">Status</InputLabel>
                     <Select
-                        value={dataToUpdate.status}
+                        value={dataToUpdate?.status}
                         labelId="status"
                         label="Status"
                         name="status"
                         onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
                     >
-                        <MenuItem value={"pending"}></MenuItem>
+                        <MenuItem value={"pending"}>Pending</MenuItem>
                         <MenuItem value={"approved"}>Approve</MenuItem>
                         <MenuItem value={"rejected"}>Reject</MenuItem>
                     </Select>
                 </FormControl>
-                <Button type="submit" variant="contained" disabled={loading.form}>{loading.form ? "Updating..." : "Update"}</Button>
+                <Button type="submit" variant="contained" disabled={loadingForm}>{loadingForm ? "Updating..." : "Update"}</Button>
             </Box>
         </Box>
     )
 }
 
-export default React.memo(TransactionAccount)
+export default React.memo(EditTransaction)

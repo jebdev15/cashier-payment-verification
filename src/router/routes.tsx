@@ -17,8 +17,7 @@ import Dashboard from "../pages/admin/Dashboard";
 import ShowAccounts from "../pages/admin/Accounts/ShowAccounts";
 import EditAccount from "../pages/admin/Accounts/EditAccount";
 import ShowTransactions from "../pages/admin/Transactions/ShowTransactions";
-// import EditTransaction from "../pages/admin/Transactions/EditTransaction";
-import ReceiptViewer from "../pages/admin/Transactions/ReceiptViewer";
+import EditTransaction from "../pages/admin/Transactions/EditTransaction";
 
 export const routes = createBrowserRouter([
     {
@@ -57,7 +56,7 @@ export const routes = createBrowserRouter([
         ],
     },
     {
-        path: "/admin",
+        path: "/sign-in",
         element: <AdminLogin />,
     },
     {
@@ -84,7 +83,7 @@ export const routes = createBrowserRouter([
             },
             {
                 path: "transactions/:transactionId",
-                element: <ReceiptViewer />,
+                element: <EditTransaction />,
             },
         ],
     },

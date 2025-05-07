@@ -131,9 +131,11 @@ const Login = () => {
                                 startAdornment: <AbcIcon />,
                                 endAdornment: 
                                     <Tooltip title="Send Code" arrow>
-                                        <IconButton onClick={handleSendEmail} disabled={loginData.email === "" || loading.sendCode}>
-                                            <Typography variant="body1" color="initial">{ loading.sendCode ? "Please wait..." : "Send code"}</Typography>
-                                        </IconButton>
+                                        <span>
+                                            <IconButton onClick={handleSendEmail} disabled={loginData.email === "" || loading.sendCode}>
+                                                <Typography variant="body1" color="initial">{ loading.sendCode ? "Please wait..." : "Send code"}</Typography>
+                                            </IconButton>
+                                        </span>
                                     </Tooltip>
                             }
                         }}

@@ -6,7 +6,7 @@ import {
 
 export const sideNav = [
     {
-        path: "dashboard",
+        path: "/dashboard",
         label: "Dashboard",
         abbreviation: "dash",
         icon: DashboardIcon

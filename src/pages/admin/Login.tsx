@@ -7,7 +7,12 @@ import { axiosInstance } from "../../api/app";
 import { useNavigate } from "react-router";
 import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
-
+import { jwtDecode } from "jwt-decode";
+type GoogleTokenPayload = {
+    name?: string;
+    email?: string;
+    sub: string;
+  };
 const Login: React.FC = () => {
     const [, setCookie] = useCookies();
     const navigate = useNavigate()
@@ -18,7 +23,11 @@ const Login: React.FC = () => {
             const { data } = await axiosInstance.post('/api/auth/admin-login', { token: credentialResponse.credential });
             alert(data.message)
             if(data.isAuthenticated) {
-                setCookie('accessToken', data.accessToken, { path: '/' });
+                const decodedToken = jwtDecode<GoogleTokenPayload>(credentialResponse.credential);
+                const fullName = decodedToken.name || "User";
+
+                setCookie("accessToken", data.accessToken, { path: "/" });
+                setCookie("fullName", fullName, { path: "/" });
                 setTimeout(() => navigate('/admin/dashboard'), 1000);
             } 
         } catch (error) {

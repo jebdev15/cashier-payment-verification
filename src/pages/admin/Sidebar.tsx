@@ -5,33 +5,30 @@ import {
 import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import { useNavigate } from 'react-router'
 import { sideNav } from './sideNav'
-import { HomeLayoutContext } from '../../context/HomeLayoutContext'
+import { AdminLayoutContext } from '../../context/AdminLayoutContext'
+import { useCookies } from 'react-cookie'
 
 const Sidebar = () => {
-    const { sidebarOpen } = React.useContext(HomeLayoutContext)
     const navigate = useNavigate()
+    const [cookie, setCookie] = useCookies()
+    const { sidebarOpen } = React.useContext(AdminLayoutContext)
     const [currentTab, setCurrentTab] = React.useState<string>("")
     const handleChange = (path: string, selectedTab: string) => {
         navigate(`/admin${path}`)
         setCurrentTab(selectedTab)
     }
+    const handleLogout = () => {
+        setCookie("accessToken", "", { path: "/", expires: new Date("Thu, 01 Jan 1970 00:00:00 GMT") })
+        setCookie("fullName", "", { path: "/", expires: new Date("Thu, 01 Jan 1970 00:00:00 GMT") })
+        navigate("/sign-in", { replace: true })
+    }
     return (
-        <Box sx={{ width: '100%', maxWidth: 250, bgcolor: 'background.paper' }}>
+        <Box sx={{ width: '100%', maxWidth: 250, bgcolor: 'background.paper', display: sidebarOpen ? "block" : "none" }}>
             <nav aria-label="main mailbox folders">
                 <List>
                     <ListItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} disablePadding>
-                        {/* Avatar nalang kuno hambal ni sir, indi na image. */}
-                        {/* <Box 
-                            sx={{ 
-                                height: "100px", 
-                                width: "100px",
-                                backgroundColor: "#333"
-                                }}
-                            >
-                            <Avatar alt="Christian Anthony Gemelo" src="/static/images/avatar/1.jpg" />
-                        </Box> */}
                         <Typography gutterBottom variant="body1" component="div">
-                            Administrator
+                            {cookie.fullName}
                         </Typography>
                         <Typography gutterBottom variant="caption" component="div" color="text.secondary">
                             Administrator
@@ -50,7 +47,7 @@ const Sidebar = () => {
                         </ListItem>
                     ))}
                     <ListItem disablePadding>
-                        <ListItemButton>
+                        <ListItemButton onClick={handleLogout}>
                             <ListItemIcon>
                                 <ExitToAppIcon />
                             </ListItemIcon>
