@@ -1,0 +1,64 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-primary: #047940;
+}
+
+.chmsulogo {
+  border: 2px solid #ffffff !important;
+  border-radius: 50%;
+}
+
+.chmsutxt {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  white-space: nowrap;
+  text-transform: uppercase;
+  font-weight: bold !important;
+  letter-spacing: normal !important;
+  font-size: 2.5rem !important;
+  line-height: 0.75em !important;
+  color: #ffffff !important;
+  & span {
+    font-size: 0.545em;
+  }
+}
+
+.systitle {
+  font-size: 2.75rem;
+  color: color-mix(in srgb, var(--color-primary), #ffffff 60%);
+  text-transform: uppercase;
+  line-height: 1.15em;
+  & span {
+    font-weight: 600;
+    color: #ffffff;
+  }
+  & + hr {
+    width: 125px;
+    height: 4px;
+    border: none;
+    background-color: white;
+    flex-shrink: 0;
+    & + div {
+      color: color-mix(in srgb, var(--color-primary), #ffffff 75%);
+      line-height: 1.5em;
+      font-size: 1.25rem;
+      & + div {
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 600;
+        flex-grow: 1;
+        align-content: end;
+      }
+    }
+  }
+}
+
+#rc-anchor-container {
+  display: none;
+}
