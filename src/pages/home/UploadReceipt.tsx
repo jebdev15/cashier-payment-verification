@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Box, Button, FormControl, Paper, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, FormControl, Grid, Paper, TextField, Typography } from '@mui/material'
 import { UploadFile as UploadFileIcon } from '@mui/icons-material'
 import SpanningTable from './SpanningTableForUR'
 import { LazyImage } from '../../components/LazyImage'
@@ -14,7 +14,7 @@ const UploadReceipt = () => {
     const [image, setImage] = React.useState<string | null>(null);
     const [imageName, setImageName] = React.useState<string | undefined>(undefined);
     const [error, setError] = React.useState<string | null>(null);
-    const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean}>({ upload: false, log: false });
+    const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean }>({ upload: false, log: false });
     const [data, setData] = React.useState<FileUploadLogType[]>([]);
     const [referenceId, setReferenceId] = React.useState<string>("");
     const [remarks, setRemarks] = React.useState<string>("");
@@ -75,7 +75,7 @@ const UploadReceipt = () => {
         try {
             const { data, status } = await axiosInstanceWithAuthorization(accessToken).post('/api/upload/receipts', formData, { headers: { 'Content-Type': 'multipart/form-data' }, });
             alert(data.message);
-            if(status === 200) {
+            if (status === 200) {
                 setReferenceId("")
                 setRemarks("")
                 setImage("")
@@ -103,14 +103,14 @@ const UploadReceipt = () => {
             } catch (error) {
                 console.error("Error uploading file:", error);
             } finally {
-                setLoading((prevState) => ({...prevState, log: false }));
+                setLoading((prevState) => ({ ...prevState, log: false }));
             }
         }
         fetchUploadReceiptLog();
         return () => controller.abort();
-    },[accessToken, loading.upload]);
+    }, [accessToken, loading.upload]);
     return (
-        <Box sx={{ flexGrow: 1, paddingX: 4, paddingY: 2 }}>
+        <Box sx={{ height: "100%", flexGrow: 1, paddingX: 4, paddingY: 2 }}>
             <Typography
                 variant="h4"
                 color="initial"
@@ -118,69 +118,61 @@ const UploadReceipt = () => {
             >
                 Upload Receipt
             </Typography>
-            <Paper
-                sx={{
-                    display: "flex",
-                    flexDirection: {xs: "column", md: "row"},
-                    justifyContent: "center",
-                    alignItems: "center",
-                    height: "100%",
-                    width: "100%"
-                }}
+            <Grid
+                container
+                spacing={2}
+                sx={{ bgcolor: "background.paper", padding: 2, height: "100%" }}
+                component="form"
+                onSubmit={handleSubmit}
             >
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: 2,
-                        height: { xs: "100%", md: 600 },
-                        width: { xs: "100%", md: "50%" }
-                    }}
-                    component="form"
-                    onSubmit={handleSubmit}
-                >
-                    <TextField type='file' onChange={handleChangeFile} inputRef={fileInputRef} inputProps={{ accept: 'image/*' }} />
-                    <Paper sx={{ minHeight: 400, minWidth: 400 }}>
-                        {image && <LazyImage src={image} alt="Preview" height={400} width={400} />}
-                    </Paper>
-
-                    <FormControl sx={{ minWidth: 400 }}>
-                        <TextField label="Reference ID" value={referenceId} onChange={(e) => setReferenceId(e.target.value)} />
-                    </FormControl>
-                    <FormControl sx={{ minWidth: 400 }}>
-                        <TextField label="Remarks" value={remarks} multiline rows={4} onChange={(e) => setRemarks(e.target.value)} />
-                    </FormControl>
-                    <Button 
-                        variant="contained" 
-                        startIcon={<UploadFileIcon />} 
-                        disabled={!image || loading.upload || !referenceId} 
-                        type="submit" 
-                        sx={{ mt: 2 }}
-                    >
-                        {loading.upload ? "Uploading..." : "Upload File"}
-                    </Button>
-                    {error && (
-                        <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
-                        {error}
-                        </Alert>
-                    )}
-                </Box>
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: 2,
-                        height: { xs: "100%", md: 500 },
-                        width: { xs: "100%", md: "50%" },
-                    }}
-                >
+                <Grid container spacing={1} direction="column" sx={{ xs: 12, md: 7 }} >
+                    <Grid sx={{ xs: 12, md: 6 }}>
+                        <TextField fullWidth type='file' onChange={handleChangeFile} inputRef={fileInputRef} slotProps={{ htmlInput: { accept: 'image/*' } }} />
+                    </Grid>
+                    <Grid sx={{ xs: 12, md: 6, backgroundColor: "#333" }}>
+                        {image && <img
+                            src={image}
+                            alt="Preview"
+                            height={400}
+                            width={400}
+                            loading="lazy"
+                            style={{
+                                objectFit: "contain",
+                                objectPosition: "center",
+                            }}
+                        />}
+                    </Grid>
+                    <Grid sx={{ xs: 12, md: 6 }}>
+                        <FormControl fullWidth >
+                            <TextField label="Reference ID" value={referenceId} onChange={(e) => setReferenceId(e.target.value)} />
+                        </FormControl>
+                    </Grid>
+                    <Grid sx={{ xs: 12, md: 6 }}>
+                        <FormControl fullWidth sx={{ minWidth: 400 }}>
+                            <TextField label="Remarks" value={remarks} multiline rows={4} onChange={(e) => setRemarks(e.target.value)} />
+                        </FormControl>
+                    </Grid>
+                    <Grid sx={{ xs: 12, md: 6 }}>
+                        <Button
+                            variant="contained"
+                            startIcon={<UploadFileIcon />}
+                            disabled={!image || loading.upload || !referenceId}
+                            type="submit"
+                            sx={{ mt: 2, width: "100%" }}
+                        >
+                            {loading.upload ? "Uploading..." : "Upload File"}
+                        </Button>
+                        {error && (
+                            <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
+                                {error}
+                            </Alert>
+                        )}
+                    </Grid>
+                </Grid>
+                <Grid sx={{ xs: 12, md: 6 }}>
                     <SpanningTable data={data} loading={loading.log} />
-                </Box>
-            </Paper>
+                </Grid>
+            </Grid>
         </Box>
     )
 }

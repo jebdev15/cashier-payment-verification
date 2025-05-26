@@ -1,6 +1,6 @@
 import React from "react";
 import { Send as SendIcon, Person as PersonIcon, Password as PasswordIcon } from "@mui/icons-material";
-import { Box, Paper, FormControl, TextField, IconButton, Button, Typography, Tooltip } from "@mui/material";
+import { Box, FormControl, TextField, Button, Typography, Tooltip } from "@mui/material";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router";
 import { isAxiosError } from "axios";
@@ -51,13 +51,13 @@ const Login = () => {
   const onChangeRecaptcha = (value: string | null) => {
     setRecaptchaValue(value);
   };
-  const handleRedirectToHome = (accessToken: string) => {
+  const handleRedirectToHome = (token: string) => {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        setCookie("accessToken", accessToken, {
+        setCookie("accessToken", token, {
           path: "/",
           expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1), // 1 day
-        });
+    });
         navigate("/home", { replace: true });
         resolve();
       }, 1000);
@@ -133,9 +133,23 @@ const Login = () => {
               startAdornment: <PasswordIcon color="primary" sx={{ marginRight: 1 }} />,
               endAdornment: (
                 <Tooltip title="Send Code" arrow>
-                  <Button size="medium" sx={{ px: 4, ml: 1, whiteSpace: "nowrap", textTransform: "unset" }} endIcon={<SendIcon />} variant="contained" onClick={handleSendEmail} disabled={loginData.email === "" || loading.sendCode}>
-                    {loading.sendCode ? "Please wait..." : "Send Code"}
-                  </Button>
+                  <span>
+                    <Button
+                      size="medium"
+                      sx={{
+                        px: 4,
+                        ml: 1,
+                        whiteSpace: "nowrap",
+                        textTransform: "unset"
+                      }}
+                      endIcon={<SendIcon />}
+                      variant="contained"
+                      onClick={handleSendEmail}
+                      disabled={loginData.email === "" || loading.sendCode}
+                    >
+                      {loading.sendCode ? "Please wait..." : "Send Code"}
+                    </Button>
+                  </span>
                 </Tooltip>
               ),
             },

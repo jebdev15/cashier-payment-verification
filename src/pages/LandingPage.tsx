@@ -1,4 +1,4 @@
-import { Box, Divider, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import React from "react";
 import { LazyImage } from "../components/LazyImage";
 import chmsuLogo from "../assets/chmsu.jpg";
@@ -29,7 +29,7 @@ const LandingPage = () => {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <LazyImage className="chmsulogo" src={chmsuLogo} alt="chmsu logo" width={90} height={90} />
+          <LazyImage src={chmsuLogo} alt="chmsu logo" width={90} height={90} />
           <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: 1 }}>
             <Typography className="chmsutxt" variant="h5" color="initial">
               Carlos Hilado<span>Memorial State University</span>

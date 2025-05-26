@@ -1,8 +1,5 @@
 import React from 'react'
 import { Alert, Box, Paper, Typography } from '@mui/material'
-// import { axiosInstanceWithAuthorization } from '../../api/app'
-import { useCookies } from 'react-cookie'
-// import { FileUploadLogType } from '../../types/fileUpload'
 import { DataGrid } from '@mui/x-data-grid'
 import { useAxios } from '../../hooks/useAxios'
 

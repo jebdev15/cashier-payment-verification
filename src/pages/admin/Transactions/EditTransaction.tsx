@@ -1,9 +1,10 @@
 import React from 'react'
-import { Box, Typography, Alert, FormControl, TextField, Select, MenuItem, Button, InputLabel } from '@mui/material'
+import { Box, Typography, Alert, FormControl, Select, MenuItem, Button, InputLabel } from '@mui/material'
 import { useNavigate, useParams } from 'react-router'
 import { useAxios } from '../../../hooks/useAxios'
 import { isAxiosError } from 'axios'
-import { axiosInstance } from '../../../api/app'
+import { axiosInstanceWithAuthorization } from '../../../api/app'
+import { useCookies } from 'react-cookie'
 type TransactionDataType = {
     id: number
     fullName: string
@@ -35,6 +36,7 @@ const initialTransactionData: TransactionDataType = {
 }
 const EditTransaction = () => {
     const navigate = useNavigate()
+    const [{ accessToken }] = useCookies(['accessToken'])
     const { transactionId } = useParams()
     const [dataToUpdate, setDataToUpdate] = React.useState<TransactionDataType>(initialTransactionData)
     const [loadingImage, setLoadingImage] = React.useState<boolean>(true)
@@ -63,7 +65,7 @@ const EditTransaction = () => {
         const formData = new FormData();
         formData.append('status', dataToUpdate.status);
         try {
-            const { data } = await axiosInstance.put(`/api/transactions/${dataToUpdate.id}`, formData);
+            const { data } = await axiosInstanceWithAuthorization(accessToken).put(`/api/transactions/${dataToUpdate.id}`, formData);
             alert(data.message);
             if (!data) return;
             navigate("/admin/transactions", { replace: true });
@@ -105,7 +107,7 @@ const EditTransaction = () => {
                 sx={{
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
+                    // alignItems: "center",
                     alignContent: "center",
                     gap: 2,
                     height: "100%",
@@ -113,71 +115,26 @@ const EditTransaction = () => {
                     paddingX: 5,
                 }}
                 component="form"
-            onSubmit={handleSubmit}
+                onSubmit={handleSubmit}
             >
-                <FormControl fullWidth>
-                    <TextField
-                        label="Student ID"
-                        variant="outlined"
-                        value={dataToUpdate?.student_id}
-                    />
-                </FormControl>
-                <FormControl fullWidth>
-                    <TextField
-                        label="First Name"
-                        variant="outlined"
-                        value={dataToUpdate?.fullName}
-                    />
-                </FormControl>
-                <FormControl fullWidth>
-                    <TextField
-                        label="Reference Code"
-                        variant="outlined"
-                        value={dataToUpdate?.reference_code}
-                    />
-                </FormControl>
-                <FormControl fullWidth>
-                    <TextField
-                        label="Payment ID"
-                        variant="outlined"
-                        value={dataToUpdate?.payment_id}
-                    />
-                </FormControl>
-                <FormControl fullWidth>
-                    <TextField
-                        label="Purpose"
-                        variant="outlined"
-                        value={dataToUpdate?.purpose}
-                    />
-                </FormControl>
-                <FormControl fullWidth>
-                    <TextField
-                        label="Amount"
-                        variant="outlined"
-                        value={dataToUpdate?.amount}
-                    />
-                </FormControl>
-                <FormControl fullWidth>
-                    <TextField
-                        label="Created At"
-                        variant="outlined"
-                        value={dataToUpdate?.created_at}
-                    />
-                </FormControl>
-                <FormControl fullWidth>
-                    <TextField
-                        label="Expires At"
-                        variant="outlined"
-                        value={dataToUpdate?.expires_at}
-                    />
-                </FormControl>
-                <FormControl fullWidth>
+                <Typography variant="body1" color="initial">Student ID: {dataToUpdate?.student_id}</Typography>
+                <Typography variant="body1" color="initial">Name: {dataToUpdate?.fullName}</Typography>
+                <Typography variant="body1" color="initial">Reference Number: {dataToUpdate?.reference_code}</Typography>
+                <Typography variant="body1" color="initial">Purpose: {dataToUpdate?.purpose}</Typography>
+                <Typography variant="body1" color="initial">Amount: {dataToUpdate?.amount}</Typography>
+                {/* <Typography variant="body1" color="initial">{dataToUpdate?.created_at}</Typography>
+                <Typography variant="body1" color="initial">{dataToUpdate?.expires_at}</Typography> */}
+                { data && data[0]?.status === "approved" 
+                ? <Typography variant="body1" color="initial">Status: {data[0]?.status}</Typography>
+                : (
+                <FormControl sx={{ width: { xs: "100%", md: 320 } }}>
                     <InputLabel id="status">Status</InputLabel>
                     <Select
                         value={dataToUpdate?.status}
                         labelId="status"
                         label="Status"
                         name="status"
+                        disabled={data && data[0]?.status === "approved"}
                         onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
                     >
                         <MenuItem value={"pending"}>Pending</MenuItem>
@@ -185,7 +142,8 @@ const EditTransaction = () => {
                         <MenuItem value={"rejected"}>Reject</MenuItem>
                     </Select>
                 </FormControl>
-                <Button type="submit" variant="contained" disabled={loadingForm}>{loadingForm ? "Updating..." : "Update"}</Button>
+                )}
+                { data && data[0]?.status !== "approved" && <Button type="submit" variant="contained" disabled={loadingForm} sx={{ width: { xs: "100%", md: 320 } }}>{loadingForm ? "Updating..." : "Update"}</Button> }
             </Box>
         </Box>
     )

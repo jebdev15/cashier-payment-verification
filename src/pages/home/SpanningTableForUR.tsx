@@ -27,6 +27,7 @@ const SpanningTable = ({ data, loading }: { data: FileUploadLogType[], loading: 
           </TableRow>
           <TableRow>
             <TableCell>File Name</TableCell>
+            <TableCell>Reference ID</TableCell>
             <TableCell>Remarks</TableCell>
             <TableCell>Timestamp</TableCell>
           </TableRow>
@@ -36,6 +37,7 @@ const SpanningTable = ({ data, loading }: { data: FileUploadLogType[], loading: 
           {rows.length > 0 && rows.map((row, index) => (
             <TableRow key={index}>
               <TableCell>{row.fileName}</TableCell>
+              <TableCell>{row.referenceId}</TableCell>
               <TableCell>{row.remarks}</TableCell>
               <TableCell>{new Date(row.uploadedAt).toLocaleString()}</TableCell>
             </TableRow>

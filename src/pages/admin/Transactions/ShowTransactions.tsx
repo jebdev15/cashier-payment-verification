@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, Box, ButtonGroup, IconButton, Paper, Typography } from '@mui/material'
+import { Alert, Box, IconButton, Paper, Tooltip, Typography } from '@mui/material'
 import { 
   Subject as SubjectIcon,
 } from '@mui/icons-material'
@@ -29,11 +29,11 @@ const ShowTransactions = () => {
       width: 160,
       renderCell: ({ row }: { row: TransactionDataType }) => {
         return (
-          <ButtonGroup>
+          <Tooltip title={ row.status === "approved" ? "View" : "Edit" } >
             <IconButton color="primary" onClick={() => navigate(`/admin/transactions/${row.id}`)}>
               <SubjectIcon />
             </IconButton>
-          </ButtonGroup>
+          </Tooltip>
         )
       }
     }

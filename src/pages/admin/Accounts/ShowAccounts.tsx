@@ -17,7 +17,10 @@ const ShowAccounts = () => {
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'student_id', headerName: 'Student ID', width: 130 },
     { field: 'email', headerName: 'Email Address', width: 200 },
-    { field: 'fullName', headerName: 'Full name', width: 400 },
+    { field: 'fullName', headerName: 'Full name', width: 300 },
+    { field: 'college', headerName: 'College', width: 300 },
+    { field: 'program', headerName: 'Program', width: 300 },
+    { field: 'yearLevel', headerName: 'Year Level', width: 100 },
     { field: 'status', headerName: 'Status', width: 90 },
     {
       field: 'action',

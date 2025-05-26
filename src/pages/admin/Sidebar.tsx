@@ -1,5 +1,6 @@
 import React from 'react'
 import {
+    AccountCircle,
     ExitToApp as ExitToAppIcon
 } from '@mui/icons-material'
 import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
@@ -27,6 +28,7 @@ const Sidebar = () => {
             <nav aria-label="main mailbox folders">
                 <List>
                     <ListItem sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} disablePadding>
+                        <AccountCircle sx={{ height: 100, width: 100 }} />
                         <Typography gutterBottom variant="body1" component="div">
                             {cookie.fullName}
                         </Typography>
