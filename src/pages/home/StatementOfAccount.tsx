@@ -6,6 +6,9 @@ import { useAxios } from '../../hooks/useAxios'
 type StatementOfAccountDataType = {
   id: number,
   student_id: string,
+  fullName: string,
+  program_code: string,
+  year_level_roman: string,
   school_year: number,
   semester: string,
   item_title: string,

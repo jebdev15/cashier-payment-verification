@@ -22,6 +22,11 @@ function ccyFormat(num: number) {
 
 interface Row {
   item_title: string;
+  fullName: string;
+  program_code: string;
+  year_level_roman: string;
+  school_year: number;
+  semester: string;
   amount: string;
   total: string;
   balance: string;
@@ -33,34 +38,29 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
   const [totalAmount, setTotalAmount] = React.useState<number>(0);
   const [balance, setBalance] = React.useState<number>(0);
   const [referenceId, setReferenceId] = React.useState<string>("");
-  
-  const handleTimeOut = () => {
-      return new Promise<string>((resolve) => {
-        setTimeout(() => {
-          const randomString = Math.random().toString(36).substring(9, 12); // temporary reference id
-          resolve(`PVERIS-S-${randomString}`)
-        }, 1000)
-      })
+  const handleGenerateReferenceId = async () => {
+    setLoading((prevState) => ({ ...prevState, grid: true }))
+    try {
+      const formData = new FormData()
+      formData.append("name_of_payor", data[0].fullName)
+      formData.append("program_code", data[0].program_code)
+      formData.append("year_level_roman", data[0].year_level_roman)
+      formData.append("school_year", data[0].school_year.toString())
+      formData.append("semester", data[0].semester)
+      formData.append("amount", totalAmount.toString())
+      formData.append("balance", balance.toString())
+      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id`, formData)
+      setReferenceId(data2.reference_code)
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setLoading((prevState) => ({ ...prevState, grid: false }))
     }
-    const handleGenerateReferenceId = async () => {
-      setLoading((prevState) => ({ ...prevState, grid: true }))
-      try {
-        const randomString = await handleTimeOut()
-        const formData = new FormData()
-        formData.append("reference_code", randomString)
-        formData.append("amount", totalAmount.toString())
-        formData.append("balance", balance.toString())
-        const { data } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id`, formData)
-        setReferenceId(data.reference_code)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoading((prevState) => ({ ...prevState, grid: false }))
-      }
-    }
+  }
   React.useEffect(() => {
-    if(rows.length === 0) return
+    if (rows.length === 0) return
     setData(rows)
+    console.log({ rows })
     const uniqueTotal = Array.from(new Set(rows.map(row => row.total))).map(total => ({ ...rows.find(row => row.total === total), total: parseFloat(total) }));
     const uniqueBalance = Array.from(new Set(rows.map(row => row.balance))).map(balance => ({ ...rows.find(row => row.balance === balance), balance: parseFloat(balance) }));
     const formattedAmount = uniqueTotal[0].total
@@ -92,7 +92,7 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
                 <TableCell>{ccyFormat(Number(item.amount))}</TableCell>
               </TableRow>
             ))}
-            
+
           </TableBody>
           <TableFooter sx={{ position: 'sticky', bottom: 0 }}>
             <TableRow>

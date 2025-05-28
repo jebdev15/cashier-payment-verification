@@ -1,13 +1,13 @@
 import React from 'react'
-import { Alert, Box, Button, FormControl, Grid, Paper, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField, Typography } from '@mui/material'
 import { UploadFile as UploadFileIcon } from '@mui/icons-material'
 import SpanningTable from './SpanningTableForUR'
-import { LazyImage } from '../../components/LazyImage'
 import imageCompression from 'browser-image-compression'
 import { axiosInstanceWithAuthorization } from '../../api/app'
 import { base64ToBlob } from '../../utils/base64ToBlog'
 import { useCookies } from 'react-cookie'
 import { FileUploadLogType } from '../../types/fileUpload'
+import { isAxiosError } from 'axios'
 
 const UploadReceipt = () => {
     const [{ accessToken }] = useCookies(['accessToken']);
@@ -17,6 +17,7 @@ const UploadReceipt = () => {
     const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean }>({ upload: false, log: false });
     const [data, setData] = React.useState<FileUploadLogType[]>([]);
     const [referenceId, setReferenceId] = React.useState<string>("");
+    const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
     const [remarks, setRemarks] = React.useState<string>("");
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,6 +67,7 @@ const UploadReceipt = () => {
             formData.append('receipt', blob || image, imageName);  // Use the file object directly if available
             formData.append('remarks', remarks);  // Use the file object directly if available
             formData.append('referenceId', referenceId);
+            formData.append('mode_of_payment', modeOfPayment);
         } else {
             alert("No image to upload. Please select a file before proceeding.");
             setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
@@ -88,6 +90,10 @@ const UploadReceipt = () => {
             console.log(data, status);
         } catch (error) {
             console.error("Error uploading file:", error);
+            if(isAxiosError(error)){
+                if(error.request) return alert(error.request.response);
+                if(error.response) return alert(error.response.data.message);
+            }
         } finally {
             setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
         }
@@ -121,7 +127,7 @@ const UploadReceipt = () => {
             <Grid
                 container
                 spacing={2}
-                sx={{ bgcolor: "background.paper", padding: 2, height: "100%" }}
+                sx={{ height: "100%" }}
                 component="form"
                 onSubmit={handleSubmit}
             >
@@ -145,6 +151,20 @@ const UploadReceipt = () => {
                     <Grid sx={{ xs: 12, md: 6 }}>
                         <FormControl fullWidth >
                             <TextField label="Reference ID" value={referenceId} onChange={(e) => setReferenceId(e.target.value)} />
+                        </FormControl>
+                    </Grid>
+                    <Grid sx={{ xs: 12, md: 6 }}>
+                        <FormControl fullWidth >
+                            <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={modeOfPayment}
+                                label="Mode of Payment"
+                                onChange={(e) => setModeOfPayment(e.target.value)}
+                            >
+                                <MenuItem value={"GCash"}>GCash</MenuItem>
+                            </Select>
                         </FormControl>
                     </Grid>
                     <Grid sx={{ xs: 12, md: 6 }}>

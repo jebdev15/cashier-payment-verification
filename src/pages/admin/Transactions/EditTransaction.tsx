@@ -84,15 +84,6 @@ const EditTransaction = () => {
         <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', padding: 0, margin: 0 }}>
             <Box sx={{ p: 4 }}>
                 <Typography variant="h5">Transaction ID: {transactionId}</Typography>
-                {/* <Paper sx={{ mt: 2, p: 2, textAlign: 'center' }}>
-          {loadingImage ? (
-            <Typography>Loading receipt...</Typography>
-          ) : dataToUpdate?.filePath ? (
-            <img src={`${import.meta.env.VITE_API_URL}/${dataToUpdate?.filePath}`} alt="Receipt" style={{ minWidth: 300, maxHeight: 500 }} loading='lazy' />
-          ) : (
-            <Typography>No receipt image found.</Typography>
-          )}
-        </Paper> */}
                 {
                     loadingImage ? (
                         <Typography>Loading receipt...</Typography>
@@ -107,7 +98,6 @@ const EditTransaction = () => {
                 sx={{
                     display: "flex",
                     flexDirection: "column",
-                    // alignItems: "center",
                     alignContent: "center",
                     gap: 2,
                     height: "100%",
@@ -122,11 +112,8 @@ const EditTransaction = () => {
                 <Typography variant="body1" color="initial">Reference Number: {dataToUpdate?.reference_code}</Typography>
                 <Typography variant="body1" color="initial">Purpose: {dataToUpdate?.purpose}</Typography>
                 <Typography variant="body1" color="initial">Amount: {dataToUpdate?.amount}</Typography>
-                {/* <Typography variant="body1" color="initial">{dataToUpdate?.created_at}</Typography>
-                <Typography variant="body1" color="initial">{dataToUpdate?.expires_at}</Typography> */}
-                { data && data[0]?.status === "approved" 
-                ? <Typography variant="body1" color="initial">Status: {data[0]?.status}</Typography>
-                : (
+                { data && data[0]?.status === "pending" 
+                ? (
                 <FormControl sx={{ width: { xs: "100%", md: 320 } }}>
                     <InputLabel id="status">Status</InputLabel>
                     <Select
@@ -142,8 +129,9 @@ const EditTransaction = () => {
                         <MenuItem value={"rejected"}>Reject</MenuItem>
                     </Select>
                 </FormControl>
-                )}
-                { data && data[0]?.status !== "approved" && <Button type="submit" variant="contained" disabled={loadingForm} sx={{ width: { xs: "100%", md: 320 } }}>{loadingForm ? "Updating..." : "Update"}</Button> }
+                )
+                : <Typography variant="body1" color="initial">Status: { data && data[0]?.status?.toUpperCase()}</Typography>}
+                { data && data[0]?.status === "pending" && <Button type="submit" variant="contained" disabled={loadingForm} sx={{ width: { xs: "100%", md: 320 } }}>{loadingForm ? "Updating..." : "Update"}</Button> }
             </Box>
         </Box>
     )

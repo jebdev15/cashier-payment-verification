@@ -37,7 +37,7 @@ const Layout = () => {
       <Header />
       <Box sx={{ display: 'flex', height: '100%', flex: 1 }}>
         <Sidebar />
-        <Box sx={{ flex: 1, overflow: 'auto', padding: 1 }}>
+        <Box sx={{ flex: 1, overflow: 'auto', padding: 1, bgcolor: "background.paper" }}>
           <Outlet />
         </Box>
       </Box>
