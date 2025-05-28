@@ -52,7 +52,6 @@
         color: #ffffff;
         font-size: 1.5rem;
         font-weight: 600;
-        flex-grow: 1;
         align-content: end;
       }
     }
@@ -61,4 +60,46 @@
 
 #rc-anchor-container {
   display: none;
+}
+
+.landingPageBG {
+  background-image: url(..\public\landingPageBG-1.png) !important;
+  background-size: cover;
+  background-position: center;
+}
+
+@media screen and (max-width: 900px) {
+  .landingPageBG {
+    background-image: none !important;
+    & > div:first-child {
+      background-image: url(..\public\landingPageBG-2.png) !important;
+      background-size: cover;
+      background-position: bottom;
+    }
+  }
+  .systitle {
+    zoom: 80%;
+    & + hr {
+      display: none;
+    }
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .chmsulogo {
+    zoom: 0.85;
+  }
+  .chmsutxt {
+    font-size: 2rem !important;
+  }
+
+  .systitle {
+    font-size: 2.25rem;
+    & + hr + div {
+      font-size: 1rem;
+      & + div {
+        font-size: 1.25rem;
+      }
+    }
+  }
 }

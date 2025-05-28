@@ -1,5 +1,5 @@
 import React from "react";
-import { Send as SendIcon, Person as PersonIcon, Password as PasswordIcon } from "@mui/icons-material";
+import { Login as LoginIcon, Send as SendIcon, Person as PersonIcon, Password as PasswordIcon } from "@mui/icons-material";
 import { Box, FormControl, TextField, Button, Typography, Tooltip } from "@mui/material";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router";
@@ -57,7 +57,7 @@ const Login = () => {
         setCookie("accessToken", token, {
           path: "/",
           expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1), // 1 day
-    });
+        });
         navigate("/home", { replace: true });
         resolve();
       }, 1000);
@@ -91,8 +91,10 @@ const Login = () => {
         display: "flex",
         flexDirection: "column",
         alignContent: "center",
-        gap: 3,
-        minWidth: 400,
+        justifyContent: "center",
+        gap: 2,
+        width: 304,
+        py: 6,
       }}
       component={"form"}
       onSubmit={handleSubmit}
@@ -108,6 +110,7 @@ const Login = () => {
       </Typography>
       <FormControl fullWidth>
         <TextField
+          size="small"
           label="Email Address"
           name="email"
           value={loginData.email}
@@ -115,7 +118,7 @@ const Login = () => {
           slotProps={{
             input: {
               sx: { input: { px: 1 } },
-              startAdornment: <PersonIcon color="primary" sx={{ marginRight: 1 }} />,
+              startAdornment: <PersonIcon color="primary" />,
             },
           }}
           required
@@ -123,24 +126,27 @@ const Login = () => {
       </FormControl>
       <FormControl fullWidth>
         <TextField
+          size="small"
           label="Authentication Code"
           name="code"
           value={loginData.code}
           onChange={handleChange}
+          sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
           slotProps={{
             input: {
               sx: { input: { px: 1 } },
-              startAdornment: <PasswordIcon color="primary" sx={{ marginRight: 1 }} />,
+              startAdornment: <PasswordIcon color="primary" />,
               endAdornment: (
                 <Tooltip title="Send Code" arrow>
                   <span>
                     <Button
-                      size="medium"
+                      size="small"
                       sx={{
-                        px: 4,
-                        ml: 1,
+                        px: 1.5,
                         whiteSpace: "nowrap",
-                        textTransform: "unset"
+                        textTransform: "unset",
+                        height: "40px",
+                        borderRadius: 0,
                       }}
                       endIcon={<SendIcon />}
                       variant="contained"
@@ -160,7 +166,7 @@ const Login = () => {
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha} onChange={onChangeRecaptcha} />
       </Box>
-      <Button sx={{ py: 2 }} type="submit" variant="contained" disabled={disableLoginButton}>
+      <Button type="submit" endIcon={<LoginIcon />} variant="contained" disabled={disableLoginButton}>
         {loading.loginForm ? "Logging In..." : "Login"}
       </Button>
     </Box>

@@ -9,11 +9,14 @@ const LandingPage = () => {
     <Box
       sx={{
         display: "flex",
+        flexGrow: 1,
+        height: "100%",
+        minHeight: "100dvh",
         flexDirection: { md: "row", xs: "column" },
-        height: "100vh",
         width: "100%",
         backgroundColor: "#ffffff",
       }}
+      className="landingPageBG"
     >
       <Box
         sx={{
@@ -22,22 +25,24 @@ const LandingPage = () => {
           gap: 2,
           width: { xs: "100%", md: "50%" },
           height: "100%",
-          paddingX: 6,
-          paddingY: 6,
-          backgroundColor: "#047940",
-          rowGap: 5,
+          minHeight: { md: "100dvh", xs: "auto" },
+          paddingX: { md: 6, xs: 2 },
+          paddingY: { md: 6, xs: 3 },
+          paddingBottom: { md: 6, sm: 12, xs: 6 },
+          rowGap: { md: 5, xs: 2 },
+          justifyContent: "center",
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center", flexDirection: { md: "row", xs: "column" }, gap: { md: 0, sm: 1, xs: 2 }, zoom: { md: 1, sm: 0.9, xs: 0.8 } }}>
           <LazyImage src={chmsuLogo} alt="chmsu logo" width={90} height={90} />
-          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", marginLeft: { md: 1, xs: 0 } }}>
             <Typography className="chmsutxt" variant="h5" color="initial">
               Carlos Hilado<span>Memorial State University</span>
             </Typography>
           </Box>
         </Box>
         {/* <Box>{import.meta.env.VITE_APP_NAME}</Box> */}
-        <Box className="systitle">
+        <Box className="systitle" sx={{ textAlign: { md: "left", xs: "center" }, zoom: { md: 1, sm: 0.9, xs: 0.8 } }}>
           Payment
           <span> Verification</span> &
           <br /> E-Receipt
@@ -45,14 +50,14 @@ const LandingPage = () => {
           <br /> System
         </Box>
         <hr />
-        <Box>
+        <Box sx={{ display: { md: "block", xs: "none" } }}>
           The CHMSU Payment Verification and E-Receipt Issuance System is a platform developed to facilitate the verification of student and administrative payments at Carlos Hilado Memorial State University. It allows authorized personnel to securely review and validate payment
           submissions and track transaction statuses.
           <br />
           <br />
           While the issuance of official electronic receipts is planned for future implementation, the system currently focuses on ensuring accurate and efficient payment verification across departments.
         </Box>
-        <Box>Get in touch: 09123456789</Box>
+        <Box sx={{ display: { md: "block", xs: "none" } }}>Get in touch: 09123456789</Box>
       </Box>
       {/* <Divider orientation={"vertical"} flexItem /> */}
       <Box
@@ -60,6 +65,7 @@ const LandingPage = () => {
           flex: 1,
           width: { xs: "100%", md: "50%" },
           height: "100%",
+          minHeight: { md: "100dvh", xs: "auto" },
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
