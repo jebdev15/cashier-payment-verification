@@ -51,9 +51,22 @@ const Sidebar = () => {
           maxHeight: "100dvh",
         }}
       ></Box>
-      <Box sx={{ padding: 2, paddingRight: 0, height: "calc(100dvh - 64px)", width: "100%", maxWidth: 275, marginLeft: { md: sidebarOpen ? "0" : "-275px", xs: sidebarOpen ? "-275px" : "0" }, transition: "margin 300ms", position: { md: "relative", xs: "fixed" }, zIndex: "999" }}>
-        <nav aria-label="main mailbox folders">
-          <List disablePadding>
+      <Box
+        sx={{
+          padding: 2,
+          paddingRight: { md: "0", xs: "2" },
+          height: "calc(100dvh - 64px)",
+          width: "100%",
+          maxWidth: 300,
+          marginLeft: { md: sidebarOpen ? "0" : "-300px", xs: sidebarOpen ? "-300px" : "0" },
+          transition: "margin 300ms",
+          position: { md: "relative", xs: "fixed" },
+          zIndex: "999",
+          bgcolor: "#f0f0f0",
+        }}
+      >
+        <nav style={{ display: "flex", height: "100%" }} aria-label="main mailbox folders">
+          <List sx={{ display: "flex", flexDirection: "column", gap: 1, flexGrow: 1 }} disablePadding>
             <ListItem
               sx={{
                 display: "flex",
@@ -109,7 +122,7 @@ const Sidebar = () => {
                 </ListItemButton>
               </ListItem>
             ))}
-            <ListItem disablePadding>
+            <ListItem sx={{ flexGrow: 1, alignItems: "end" }} disablePadding>
               <ListItemButton
                 sx={{
                   borderRadius: 4,
