@@ -36,7 +36,7 @@ const Layout = () => {
         <Box sx={{ display: "flex", pt: "64px", height: "100%", flex: 1 }}>
           <Sidebar />
           <Box sx={{ flex: 1, padding: 2, overflow: "auto" }}>
-            <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)", padding: 4, minHeight: "100%" }}>
+            <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)", px: 5, py: 4, minHeight: "100%" }}>
               <Outlet />
             </Box>
           </Box>
