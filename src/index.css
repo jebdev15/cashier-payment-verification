@@ -63,16 +63,16 @@
 }
 
 .landingPageBG {
-  background-image: url(..\public\landingPageBG-1.png) !important;
+  background-image: url(./landingPageBG-1.png) !important;
   background-size: cover;
   background-position: center;
 }
 
-@media screen and (max-width: 900px) {
+@media screen and (max-width: 899px) {
   .landingPageBG {
     background-image: none !important;
     & > div:first-child {
-      background-image: url(..\public\landingPageBG-2.png) !important;
+      background-image: url(./landingPageBG-2.png) !important;
       background-size: cover;
       background-position: bottom;
     }
@@ -85,7 +85,7 @@
   }
 }
 
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 1199px) {
   .chmsulogo {
     zoom: 0.85;
   }

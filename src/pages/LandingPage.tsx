@@ -69,6 +69,8 @@ const LandingPage = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          position: "sticky",
+          top: 0,
         }}
       >
         <Outlet />
