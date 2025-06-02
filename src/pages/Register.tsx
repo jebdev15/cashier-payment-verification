@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Paper, FormControl, TextField, IconButton, Button, Typography, Tooltip, Select, SelectChangeEvent, MenuItem, InputLabel } from "@mui/material";
+import { Box, FormControl, TextField, Button, Typography, Tooltip, Select, SelectChangeEvent, MenuItem, InputLabel } from "@mui/material";
 import { HowToReg as RegisterIcon, Send as SendIcon, Person as PersonIcon, Badge as BadgeIcon, Email as EmailIcon, Password as PasswordIcon, AccountCircle as AccountCircleIcon, Business as BusinessIcon, MenuBook as MenuBookIcon, Stairs as StairsIcon } from "@mui/icons-material";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router";
@@ -176,7 +176,7 @@ const Register = () => {
       <FormControl fullWidth size="small">
         <InputLabel id="yearLevel-label">Year Level</InputLabel>
         <Select label="Year Level" labelId="yearLevel-label" name="yearLevel" value={registerData.yearLevel} onChange={handleChangeSelect} required startAdornment={<StairsIcon color="primary" sx={{ mr: 1 }} />}>
-          {["1st", "2nd", "3rd", "4th"].map((yearLevel, i) => (
+          {["1", "2", "3", "4"].map((yearLevel, i) => (
             <MenuItem key={i} value={yearLevel}>
               {yearLevel}
             </MenuItem>

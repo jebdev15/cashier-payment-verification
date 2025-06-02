@@ -63,7 +63,7 @@
 }
 
 .landingPageBG {
-  background-image: url(./landingPageBG-1.png) !important;
+  background-image: url(/landingPageBG-1.png) !important;
   background-size: cover;
   background-position: center;
 }
@@ -72,7 +72,7 @@
   .landingPageBG {
     background-image: none !important;
     & > div:first-child {
-      background-image: url(./landingPageBG-2.png) !important;
+      background-image: url(/landingPageBG-2.png) !important;
       background-size: cover;
       background-position: bottom;
     }

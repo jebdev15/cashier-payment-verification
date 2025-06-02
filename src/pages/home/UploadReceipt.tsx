@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 import SpanningTable from "./SpanningTableForUR";
 import imageCompression from "browser-image-compression";

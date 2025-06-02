@@ -1,6 +1,6 @@
 import React from "react";
 import { AccountCircle, ExitToApp as ExitToAppIcon } from "@mui/icons-material";
-import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
 import { useNavigate } from "react-router";
 import { sideNav } from "./sideNav";
 import { useCookies } from "react-cookie";
