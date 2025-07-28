@@ -22,7 +22,12 @@ const ShowTransactions = () => {
     { field: 'amount', headerName: 'Amount', width: 100 },
     { field: 'purpose', headerName: 'Purpose', width: 100 },
     { field: 'status', headerName: 'Status', width: 160, color: 'error' },
-    { field: 'created_at', headerName: 'Created At', width: 160 },
+    { 
+      field: 'created_at', 
+      headerName: 'Created At', 
+      width: 160,
+      valueGetter: (value: string) => new Date(value).toLocaleString()
+    },
     {
       field: 'action',
       headerName: 'Action',

@@ -18,6 +18,12 @@ export const sideNav = [
         icon: FileUploadIcon
     },
     {
+        path: "/upload-receipt/external",
+        label: "Upload Receipt",
+        abbreviation: "ur-ex",
+        icon: FileUploadIcon
+    },
+    {
         path: "/transaction-history",
         label: "Transaction History",
         abbreviation: "th",

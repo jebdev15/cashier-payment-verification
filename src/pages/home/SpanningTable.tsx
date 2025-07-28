@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
+import { Alert, Box, Button, FormControl, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { axiosInstanceWithAuthorization } from "../../api/app";
 import { useCookies } from "react-cookie";
 
@@ -17,6 +17,7 @@ interface Row {
   amount: string;
   total: string;
   balance: string;
+  amount_paid: string;
 }
 
 const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { rows: Row[]; loadingSoaTable: boolean; loadingGrid: boolean; setLoading: React.Dispatch<React.SetStateAction<{ soa: boolean; soaTable: boolean; grid: boolean }>> }) => {
@@ -24,7 +25,9 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
   const [data, setData] = React.useState<Row[]>(rows);
   const [totalAmount, setTotalAmount] = React.useState<number>(0);
   const [balance, setBalance] = React.useState<number>(0);
+  const [amountPaid, setAmountPaid] = React.useState<number>(0);
   const [referenceId, setReferenceId] = React.useState<string>("");
+  const [particulars, setParticulars] = React.useState<string>("TUITION AND MISCELLANEOUS FEES");
   const handleGenerateReferenceId = async () => {
     setLoading((prevState) => ({ ...prevState, grid: true }));
     try {
@@ -36,8 +39,10 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
       formData.append("semester", data[0].semester);
       formData.append("amount", totalAmount.toString());
       formData.append("balance", balance.toString());
+      formData.append("amount_paid", amountPaid.toString());
+      formData.append("particulars", particulars);
       const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id`, formData);
-      setReferenceId(data2.reference_code);
+      setReferenceId(data2.reference_code); 
     } catch (error) {
       console.error(error);
     } finally {
@@ -50,10 +55,10 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
     console.log({ rows });
     const uniqueTotal = Array.from(new Set(rows.map((row) => row.total))).map((total) => ({ ...rows.find((row) => row.total === total), total: parseFloat(total) }));
     const uniqueBalance = Array.from(new Set(rows.map((row) => row.balance))).map((balance) => ({ ...rows.find((row) => row.balance === balance), balance: parseFloat(balance) }));
-    const formattedAmount = uniqueTotal[0].total;
-    const formattedBalance = uniqueBalance[0].balance;
-    setTotalAmount(formattedAmount);
-    setBalance(formattedBalance);
+    const uniqueAmountPaid = Array.from(new Set(rows.map((row) => row.amount_paid))).map((amountPaid) => ({ ...rows.find((row) => row.amount_paid === amountPaid), amount_paid: parseFloat(amountPaid) }));
+    setTotalAmount(uniqueTotal[0].total);
+    setBalance(uniqueBalance[0].balance);
+    setAmountPaid(uniqueAmountPaid[0].amount_paid);
   }, [rows]);
   if (loadingSoaTable) return <div>Loading...</div>;
   if (rows.length === 0) return <div>No data</div>;
@@ -93,13 +98,33 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
               </TableCell>
               <TableCell sx={{ backgroundColor: "background.paper", zIndex: 1 }}>{ccyFormat(Number(balance))}</TableCell>
             </TableRow>
+            <TableRow>
+              <TableCell align="right" sx={{ backgroundColor: "background.paper", zIndex: 1 }}>
+                Amount Paid
+              </TableCell>
+              <TableCell sx={{ backgroundColor: "background.paper", zIndex: 1 }}>{ccyFormat(Number(amountPaid))}</TableCell>
+            </TableRow>
           </TableFooter>
         </Table>
       </TableContainer>
       {rows.length > 0 && (
-        <Button size="large" variant="contained" onClick={handleGenerateReferenceId} disabled={loadingGrid} sx={{ borderRadius: 2 }}>
-          {loadingGrid ? "Generating..." : "Generate Reference Id"}
-        </Button>
+        <>
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Particulars</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={particulars}
+              label="Particulars"
+              onChange={(e) => setParticulars(e.target.value)}
+            >
+              <MenuItem value={"TUITION AND MISCELLANEOUS FEES"}>TUITION AND MISCELLANEOUS FEES</MenuItem>
+            </Select>
+          </FormControl>
+          <Button size="large" variant="contained" onClick={handleGenerateReferenceId} disabled={loadingGrid} sx={{ borderRadius: 2 }}>
+            {loadingGrid ? "Generating..." : "Generate Reference Id"}
+          </Button>
+        </>
       )}
       {referenceId && !loadingGrid && (
         <Box component={Paper} sx={{ padding: 2, bgcolor: "background.paper", display: "flex", flexDirection: "column", gap: 1 }}>

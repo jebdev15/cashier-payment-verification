@@ -6,9 +6,11 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import { HomeLayoutContext } from "../../context/HomeLayoutContext";
+import { useMediaQuery } from "@mui/material";
 
 const Header = () => {
   const { handleToggleSidebar } = React.useContext(HomeLayoutContext);
+  const isMobileSize = useMediaQuery("(max-width: 768px)");
   return (
     <Box sx={{ width: "100%", position: "fixed", top: 0, zIndex: 1000 }}>
       <AppBar position="static">
@@ -21,7 +23,7 @@ const Header = () => {
               CHMSU
             </Typography>
             <Typography variant="h6" component="div">
-              {import.meta.env.VITE_APP_NAME}
+              {isMobileSize ? "PVERIS" : import.meta.env.VITE_APP_NAME}
             </Typography>
           </Box>
         </Toolbar>

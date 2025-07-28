@@ -13,7 +13,6 @@ const Layout = () => {
     const checkSession = () => {
       if (!accessToken) return navigate("/", { replace: true });
       const { isAuthenticated }: { isAuthenticated: boolean | number } = jwtDecode(accessToken);
-      console.log({ isAuthenticated });
       if (!isAuthenticated) return navigate("/", { replace: true });
       setLoading(false);
     };

@@ -15,6 +15,7 @@ const ShowAccounts = () => {
   })
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
+    { field: 'userType', headerName: 'User Type', width: 130 },
     { field: 'student_id', headerName: 'Student ID', width: 130 },
     { field: 'email', headerName: 'Email Address', width: 200 },
     { field: 'fullName', headerName: 'Full name', width: 300 },
@@ -27,6 +28,8 @@ const ShowAccounts = () => {
       headerName: 'Action',
       width: 160,
       renderCell: ({ row }: {row: AccountDataType}) => {
+        if(row.status !== 'pending') return null
+        // Render edit button only if the account is pending
         return (
           <IconButton color="primary" onClick={() => navigate(`/admin/accounts/${row.id}`)}>
             <EditIcon />
@@ -37,8 +40,8 @@ const ShowAccounts = () => {
   ]
   if(error) return <Alert severity="error">{error}</Alert>
   return (
-    <Box sx={{ flexGrow: 1, paddingLeft: 5}}>
-      <Typography variant="h4" color="initial">Account Management</Typography>
+    <Box sx={{ flexGrow: 1}}>
+      <Typography variant={"h4"} color="initial">Account Management</Typography>
       <Paper 
         sx={{ 
           display: "flex", 

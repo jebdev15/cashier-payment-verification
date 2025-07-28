@@ -1,23 +1,26 @@
+import React from "react";
 import { createBrowserRouter } from "react-router";
 
-import LandingPage from "../pages/LandingPage";
-import Login from "../pages/Login";
-import Register from "../pages/Register";
+const LandingPage = React.lazy(() => import("../pages/LandingPage"));
+const Login = React.lazy(() => import("../pages/Login"));
+const Register = React.lazy(() => import("../pages/Register"));
 
-import HomeLayoutContextProvider from "../context/HomeLayoutContext";
-import HomeLayout from "../pages/home/Layout";
-import StatementOfAccount from "../pages/home/StatementOfAccount";
-import UploadReceipt from "../pages/home/UploadReceipt";
-import TransactionHistory from "../pages/home/TransactionHistory";
+const HomeRouteErrorElement = React.lazy(() => import("../components/errors/RouteErrorElement"));
+const HomeLayoutContextProvider = React.lazy(() => import("../context/HomeLayoutContext"));
+const HomeLayout = React.lazy(() => import("../pages/home/Layout"));
+const StatementOfAccount = React.lazy(() => import("../pages/home/StatementOfAccount"));
+const UploadReceipt = React.lazy(() => import("../pages/home/UploadReceipt"));
+const ExternalUploadReceipt = React.lazy(() => import("../pages/home/ExternalUploadReceipt"));
+const TransactionHistory = React.lazy(() => import("../pages/home/TransactionHistory"));
 
-import AdminLogin from "../pages/admin/Login"
-import AdminLayoutContextProvider from "../context/AdminLayoutContext";
-import AdminLayout from "../pages/admin/Layout";
-import Dashboard from "../pages/admin/Dashboard";
-import ShowAccounts from "../pages/admin/Accounts/ShowAccounts";
-import EditAccount from "../pages/admin/Accounts/EditAccount";
-import ShowTransactions from "../pages/admin/Transactions/ShowTransactions";
-import EditTransaction from "../pages/admin/Transactions/EditTransaction";
+const AdminLogin = React.lazy(() => import("../pages/admin/Login"));
+const AdminLayoutContextProvider = React.lazy(() => import("../context/AdminLayoutContext"));
+const AdminLayout = React.lazy(() => import("../pages/admin/Layout"));
+const Dashboard = React.lazy(() => import("../pages/admin/Dashboard"));
+const ShowAccounts = React.lazy(() => import("../pages/admin/Accounts/ShowAccounts"));
+const EditAccount = React.lazy(() => import("../pages/admin/Accounts/EditAccount"));
+const ShowTransactions = React.lazy(() => import("../pages/admin/Transactions/ShowTransactions"));
+const EditTransaction = React.lazy(() => import("../pages/admin/Transactions/EditTransaction"));
 
 export const routes = createBrowserRouter([
     {
@@ -40,6 +43,7 @@ export const routes = createBrowserRouter([
         element: <HomeLayoutContextProvider>
                     <HomeLayout />
                 </HomeLayoutContextProvider>,
+        errorElement: <HomeRouteErrorElement />,
         children: [
             {
                 index: true,
@@ -48,6 +52,10 @@ export const routes = createBrowserRouter([
             {
                 path: "upload-receipt",
                 element: <UploadReceipt />,
+            },
+            {
+                path: "upload-receipt/external",
+                element: <ExternalUploadReceipt />,
             },
             {
                 path: "transaction-history",

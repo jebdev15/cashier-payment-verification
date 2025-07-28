@@ -35,19 +35,24 @@ const Layout = () => {
   }, [accessToken])
   if (loading) return <CircularProgress />
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100vh',
-      width: '100%',
-      padding: 0,
-      margin: 0,
-      backgroundColor: '#f5f5f5'
-    }}>
+    <Box 
+      sx={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100dvh",
+      width: "100%",
+      backgroundColor: "#f0f0f0",
+      overflow: "hidden",
+    }}
+    >
       <Header />
-      <Box sx={{ display: 'flex', height: '100%', flex: 1 }}>
+      <Box sx={{ display: 'flex', pt: "64px", height: '100%', flex: 1 }}>
         <Sidebar />
-        <Outlet />
+        <Box sx={{ flex: 1, padding: 2, overflow: "auto" }}>
+          <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)", px: { xs: 1, md: 5 }, py: 4, minHeight: "100%" }}>
+            <Outlet />
+          </Box>
+        </Box>
       </Box>
     </Box>
   )

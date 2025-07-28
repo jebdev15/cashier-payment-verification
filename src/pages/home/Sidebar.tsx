@@ -12,6 +12,14 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [{ accessToken }, , removeCookie] = useCookies(["accessToken"]);
   const [currentTab, setCurrentTab] = React.useState<string>("sao");
+  const [filteredSideNav, setFilteredSideNav] = React.useState([
+    {
+      label: "",
+      path: "",
+      icon: "",
+      abbreviation: "",
+    }
+  ]);
   const handleChange = (path: string, selectedTab: string) => {
     navigate(`/home${path}`);
     setCurrentTab(selectedTab);
@@ -27,12 +35,19 @@ const Sidebar = () => {
     fullName: "",
     email: "",
     student_id: "",
-    isStudent: true,
+    isStudent: false,
+    isExternal: false,
   });
   React.useEffect(() => {
     const decodeToken = () => {
-      const { fullName, email, student_id, isStudent }: { fullName: string; email: string; student_id: string; isStudent: boolean } = jwtDecode(accessToken);
-      setUserData({ fullName, email, student_id, isStudent });
+      const { fullName, email, student_id, isStudent, isExternal }: { fullName: string; email: string; student_id: string; isStudent: boolean; isExternal: boolean } = jwtDecode(accessToken);
+      setUserData({ fullName, email, student_id, isStudent, isExternal });
+      const filterSideNav = sideNav.filter((item) => {
+        if (isExternal) return item.abbreviation !== "sao";
+        if (isExternal) return item.abbreviation !== "up";
+        return true;
+      });
+      setFilteredSideNav(filterSideNav);
     };
     decodeToken();
   }, [accessToken]);
@@ -83,13 +98,13 @@ const Sidebar = () => {
             >
               <AccountCircle sx={{ height: "100px", width: "100px" }} />
               <Typography gutterBottom variant="body1" component="div">
-                {userData.fullName}
+                { userData.fullName }
               </Typography>
               <Typography gutterBottom variant="caption" component="div" color="text.secondary">
-                {userData.email}
+                { userData.email }
               </Typography>
               <Typography gutterBottom variant="caption" component="div" color="text.secondary">
-                {userData.isStudent ? userData.student_id : userData.email}
+                { userData.isStudent && userData.student_id}
               </Typography>
               {userData.isStudent && (
                 <Typography gutterBottom variant="caption" component="div" color="text.secondary">
@@ -99,7 +114,10 @@ const Sidebar = () => {
             </ListItem>
 
             {/* <Divider /> */}
-            {sideNav.map((item, index) => (
+            {sideNav.map((item, index) => {
+              if(userData.isExternal && ["sao", "ur"].includes(item.abbreviation)) return null;
+              if(userData.isStudent && item.abbreviation === "ur-ex") return null;
+              return (
               <ListItem disablePadding key={index}>
                 <ListItemButton
                   sx={{
@@ -121,7 +139,8 @@ const Sidebar = () => {
                   <ListItemText primary={item.label} />
                 </ListItemButton>
               </ListItem>
-            ))}
+            )
+            })}
             <ListItem sx={{ flexGrow: 1, alignItems: "end" }} disablePadding>
               <ListItemButton
                 sx={{

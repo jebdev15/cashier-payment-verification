@@ -137,7 +137,7 @@ const UploadReceipt = () => {
               }}
             />
           </Grid>
-          {/* <Grid size={{ xs: 12 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
+          <Grid size={{ xs: 12 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
             {image ? (
               <img
                 src={image}
@@ -167,8 +167,8 @@ const UploadReceipt = () => {
                 Image Preview
               </Typography>
             )}
-          </Grid> */}
-          <Grid size={{ xs: 12 }}>
+          </Grid>
+          {/* <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
               <TextField
                 slotProps={{
@@ -181,7 +181,7 @@ const UploadReceipt = () => {
                 onChange={(e) => setReferenceId(e.target.value)}
               />
             </FormControl>
-          </Grid>
+          </Grid> */}
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
@@ -211,7 +211,7 @@ const UploadReceipt = () => {
             </FormControl>
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <Button sx={{ borderRadius: 2 }} variant="contained" startIcon={<UploadFileIcon />} disabled={!image || loading.upload || !referenceId} type="submit" fullWidth size="large">
+            <Button sx={{ borderRadius: 2 }} variant="contained" startIcon={<UploadFileIcon />} disabled={!image || loading.upload} type="submit" fullWidth size="large">
               {loading.upload ? "Uploading..." : "Upload File"}
             </Button>
             {error && (
@@ -221,40 +221,9 @@ const UploadReceipt = () => {
             )}
           </Grid>
         </Grid>
-        <Grid size={{ xs: 12, lg: 8 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
-          {image ? (
-            <img
-              src={image}
-              alt="Preview"
-              height={400}
-              width={400}
-              loading="lazy"
-              style={{
-                objectFit: "contain",
-                objectPosition: "center",
-                width: "100%",
-                height: "100%",
-                padding: "8px",
-              }}
-            />
-          ) : (
-            <Typography
-              variant="h6"
-              sx={{
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "text.secondary",
-              }}
-            >
-              Image Preview
-            </Typography>
-          )}
-        </Grid>
-        {/* <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid size={{ xs: 12, lg: 8 }}>
           <SpanningTable data={data} loading={loading.log} />
-        </Grid> */}
+        </Grid>
       </Grid>
     </Box>
   );

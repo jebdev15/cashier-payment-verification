@@ -85,8 +85,8 @@ const StatementOfAccount = () => {
     );
   if (statementOfAccountData.length === 0)
     return (
-      <Typography variant="h4" color="initial">
-        No data found
+      <Typography variant="body1" color="initial">
+        No outstanding balance. There are no accounts available for payment.
       </Typography>
     );
   return (

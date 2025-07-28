@@ -1,10 +1,12 @@
 import React from 'react'
-import { Box, Typography, Alert, FormControl, Select, MenuItem, Button, InputLabel } from '@mui/material'
+import { Box, Typography, Alert, FormControl, Select, MenuItem, Button, InputLabel, Grid, TextField } from '@mui/material'
 import { useNavigate, useParams } from 'react-router'
 import { useAxios } from '../../../hooks/useAxios'
 import { isAxiosError } from 'axios'
 import { axiosInstanceWithAuthorization } from '../../../api/app'
 import { useCookies } from 'react-cookie'
+import { fees } from './fees'
+
 type TransactionDataType = {
     id: number
     fullName: string
@@ -12,6 +14,10 @@ type TransactionDataType = {
     reference_code: string
     payment_id: string
     amount: number | string
+    account: string
+    particulars: string
+    remarks: string
+    details: string
     purpose: string
     filePath: string
     referenceId: string
@@ -22,11 +28,15 @@ type TransactionDataType = {
 
 const initialTransactionData: TransactionDataType = {
     id: 0,
-    fullName: "",
+    name_of_payor: "",
     student_id: "",
     reference_code: "",
     payment_id: "",
     amount: 0,
+    account: "",
+    particulars: "",
+    remarks: "",
+    details: "",
     purpose: "",
     filePath: "",
     referenceId: "",
@@ -38,27 +48,16 @@ const EditTransaction = () => {
     const navigate = useNavigate()
     const [{ accessToken }] = useCookies(['accessToken'])
     const { transactionId } = useParams()
+    const [image, setImage] = React.useState<string | null>(null)
     const [dataToUpdate, setDataToUpdate] = React.useState<TransactionDataType>(initialTransactionData)
     const [loadingImage, setLoadingImage] = React.useState<boolean>(true)
     const [loadingForm, setLoadingForm] = React.useState<boolean>(false)
+    const [selectedAccount, setSelectedAccount] = React.useState('');
+    const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
     const { data, loading, error } = useAxios({
         url: `/api/transactions/${transactionId}`,
         authorized: true,
     })
-    React.useEffect(() => {
-        if (data) {
-            setDataToUpdate(data[0])
-            setLoadingImage(false);
-            console.log(`${import.meta.env.VITE_API_URL}/${data[0]?.filePath}`)
-        }
-    }, [data])
-    const handleOpenReceipt = () => {
-        try {
-            window.open(`${import.meta.env.VITE_API_URL}/${dataToUpdate?.filePath}`, '_blank')
-        } catch (error) {
-            console.error('Failed to open receipt:', error)
-        }
-    }
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setLoadingForm(true);
@@ -78,62 +77,174 @@ const EditTransaction = () => {
             setLoadingForm(false);
         }
     }
+    React.useEffect(() => {
+        if (selectedAccount) {
+            const filtered = fees
+                .filter((item) => item.categories.includes(selectedAccount))
+                .map((item) => item.name);
+            setFilteredParticulars(filtered);
+        } else {
+            setFilteredParticulars([]);
+        }
+    }, [selectedAccount]);
+    React.useEffect(() => {
+        if (data) {
+            setDataToUpdate(data[0]);
+            const filePath = data[0]?.filePath;
+            const imageUrl = `${import.meta.env.VITE_API_URL}/${filePath}`;
+            console.log(filePath, imageUrl)
+            // Optional: only display image if it's .jpg, .jpeg, .png
+            const validImage = /\.(jpg|jpeg|png)$/i.test(filePath);
+            if (validImage) setImage(imageUrl);
+
+            setLoadingImage(false);
+        }
+    }, [data]);
+    React.useEffect(() => {
+        console.log(image)
+    }, [image])
     if (loading) return <Typography>Loading...</Typography>
     if (error) return <Alert severity="error">{error}</Alert>
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', padding: 0, margin: 0 }}>
-            <Box sx={{ p: 4 }}>
-                <Typography variant="h5">Transaction ID: {transactionId}</Typography>
-                {
-                    loadingImage ? (
-                        <Typography>Loading receipt...</Typography>
-                    ) : dataToUpdate?.filePath ? (
-                        <Typography>View receipt here: <Button onClick={handleOpenReceipt}>View Receipt</Button></Typography>
-                    ) : (
-                        <Typography>No receipt image found.</Typography>
+        <React.Suspense fallback={<div>Loading...</div>}>
+            <Grid container spacing={2}>
+                <Grid
+                    spacing={2}
+                    gap={2}
+                    size={{ xs: 12, md: 4 }}
+                    sx={{
+                        bgcolor: 'background.paper',
+                        minHeight: 100,
+                        boxShadow: "inset 0 -1px 0 0 rgb(0 0 0 / 8%)"
+                    }}
+                    component="form"
+                    onSubmit={handleSubmit}
+                >
+                    <Typography variant="body1" color="initial">Student ID: {dataToUpdate?.student_id}</Typography>
+                    <Typography variant="body1" color="initial">Name of Payor: {dataToUpdate?.fullName}</Typography>
+                    <Typography variant="body1" color="initial">Reference Number: {dataToUpdate?.reference_code}</Typography>
+                    {/* <Typography variant="body1" color="initial">Purpose: {dataToUpdate?.purpose}</Typography> */}
+                    <Typography variant="body1" color="initial">Amount: {dataToUpdate?.amount}</Typography>
+                    {dataToUpdate?.status === "pending" ? (
+                        <>
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <InputLabel id="account-select">Account Type</InputLabel>
+                                <Select
+                                    labelId="account-select"
+                                    value={selectedAccount}
+                                    onChange={(e) => {
+                                        setSelectedAccount(e.target.value);
+                                        setDataToUpdate((prev) => ({ ...prev, purpose: '' }));
+                                    }}
+                                    label="Account Type"
+                                >
+                                    <MenuItem value="REG">REG</MenuItem>
+                                    <MenuItem value="IGP">IGP</MenuItem>
+                                    <MenuItem value="GS">GS</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth disabled={!selectedAccount}>
+                                <InputLabel id="particular-select">Particulars</InputLabel>
+                                <Select
+                                    labelId="particular-select"
+                                    value={dataToUpdate.particulars}
+                                    onChange={(e) =>
+                                        setDataToUpdate((prev) => ({ ...prev, particulars: e.target.value }))
+                                    }
+                                    label="Particulars"
+                                >
+                                    {filteredParticulars.map((name) => (
+                                        <MenuItem key={name} value={name}>
+                                            {name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth  >
+                                <TextField
+                                    fullWidth
+                                    type="text"
+                                    name="remarks"
+                                    label="Remarks"
+                                    value={dataToUpdate?.remarks}
+                                    onChange={(e) => setDataToUpdate((prev) => ({ ...prev, remarks: e.target.value }))}
+                                />
+                            </FormControl>
+                            <FormControl fullWidth  >
+                                <TextField
+                                    fullWidth
+                                    type="text"
+                                    name="details"
+                                    label="Details"
+                                    value={dataToUpdate?.details}
+                                    onChange={(e) => setDataToUpdate((prev) => ({ ...prev, details: e.target.value }))}
+                                />
+                            </FormControl>
+                        </>
                     )
-                }
-            </Box>
-            <Box
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignContent: "center",
-                    gap: 2,
-                    height: "100%",
-                    width: "100%",
-                    paddingX: 5,
-                }}
-                component="form"
-                onSubmit={handleSubmit}
-            >
-                <Typography variant="body1" color="initial">Student ID: {dataToUpdate?.student_id}</Typography>
-                <Typography variant="body1" color="initial">Name: {dataToUpdate?.fullName}</Typography>
-                <Typography variant="body1" color="initial">Reference Number: {dataToUpdate?.reference_code}</Typography>
-                <Typography variant="body1" color="initial">Purpose: {dataToUpdate?.purpose}</Typography>
-                <Typography variant="body1" color="initial">Amount: {dataToUpdate?.amount}</Typography>
-                { data && data[0]?.status === "pending" 
-                ? (
-                <FormControl sx={{ width: { xs: "100%", md: 320 } }}>
-                    <InputLabel id="status">Status</InputLabel>
-                    <Select
-                        value={dataToUpdate?.status}
-                        labelId="status"
-                        label="Status"
-                        name="status"
-                        disabled={data && data[0]?.status === "approved"}
-                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
-                    >
-                        <MenuItem value={"pending"}>Pending</MenuItem>
-                        <MenuItem value={"approved"}>Approve</MenuItem>
-                        <MenuItem value={"rejected"}>Reject</MenuItem>
-                    </Select>
-                </FormControl>
-                )
-                : <Typography variant="body1" color="initial">Status: { data && data[0]?.status?.toUpperCase()}</Typography>}
-                { data && data[0]?.status === "pending" && <Button type="submit" variant="contained" disabled={loadingForm} sx={{ width: { xs: "100%", md: 320 } }}>{loadingForm ? "Updating..." : "Update"}</Button> }
-            </Box>
-        </Box>
+                    : (
+                    <>
+                        <Typography variant="body1" color="initial">Account: {dataToUpdate?.account}</Typography>
+                        <Typography variant="body1" color="initial">Particulars: {dataToUpdate?.particulars}</Typography>
+                        <Typography variant="body1" color="initial">Remarks: {dataToUpdate?.remarks}</Typography>
+                        <Typography variant="body1" color="initial">Details: {dataToUpdate?.details}</Typography>
+                    </>
+                    )}
+                    {data && data[0]?.status === "pending"
+                        ? (
+                            <FormControl fullWidth>
+                                <InputLabel id="status">Status</InputLabel>
+                                <Select
+                                    value={dataToUpdate?.status}
+                                    labelId="status"
+                                    label="Status"
+                                    name="status"
+                                    disabled={data && data[0]?.status === "approved"}
+                                    onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
+                                >
+                                    <MenuItem value={"pending"}>Pending</MenuItem>
+                                    <MenuItem value={"approved"}>Approve</MenuItem>
+                                    <MenuItem value={"rejected"}>Reject</MenuItem>
+                                </Select>
+                            </FormControl>
+                        )
+                        : <Typography variant="body1" color="initial">Status: {data && data[0]?.status?.toUpperCase()}</Typography>}
+                    {data && data[0]?.status === "pending" && <Button type="submit" variant="contained" disabled={loadingForm || !dataToUpdate.account && !dataToUpdate.particulars || dataToUpdate.status === "pending"} fullWidth>{loadingForm ? "Updating..." : "Update"}</Button>}
+                </Grid>
+
+                <Grid size={{ xs: 12, md: 8 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
+                    {image ? (
+                        <img
+                            src={image}
+                            alt="Preview"
+                            height={400}
+                            width={400}
+                            loading="lazy"
+                            style={{
+                                objectFit: "contain",
+                                objectPosition: "center",
+                                width: "100%",
+                                height: "100%",
+                                padding: "8px",
+                            }}
+                        />
+                    ) : (
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                height: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "text.secondary",
+                            }}
+                        >
+                            Image Preview
+                        </Typography>
+                    )}
+                </Grid>
+            </Grid>
+        </React.Suspense>
     )
 }
 

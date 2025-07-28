@@ -33,7 +33,7 @@ const initialRegisterData: RegisterDataType = {
   code: "",
 };
 
-const userTypeOptions = ["Student"];
+const userTypeOptions = ["Student", "External"];
 
 const getTalisayColleges = (data: typeof campusesJson) => {
   return data["Talisay"].colleges.map((college) => ({
@@ -82,7 +82,7 @@ const Register = () => {
       alert(data.message);
     } catch (error) {
       if (isAxiosError(error)) {
-        return alert(error.response?.data || error.request?.response || "Something went wrong");
+        return alert(error.response?.data.message || error.request?.response.message || "Something went wrong");
       }
       alert("Something went wrong");
     } finally {
@@ -110,7 +110,8 @@ const Register = () => {
     }
   };
   const { middleName, ...requiredFields } = registerData;
-  const disableButton = Object.values(requiredFields).some((val) => val === "") || loading.registrationForm;
+  // const disableButton = Object.values(requiredFields).some((val) => val === "") || loading.registrationForm;
+  const disableButton = loading.registrationForm;
 
   return (
     <Box
@@ -147,62 +148,79 @@ const Register = () => {
           ))}
         </Select>
       </FormControl>
-
-      {/* College */}
-      <FormControl fullWidth size="small">
-        <InputLabel id="college-label">College</InputLabel>
-        <Select label="College" labelId="college-label" name="college" value={registerData.college} onChange={handleChangeSelect} required startAdornment={<BusinessIcon color="primary" sx={{ mr: 1 }} />}>
-          {talisayCollegeOptions.map((option) => (
-            <MenuItem key={option.college_description} value={option.college_description}>
-              {option.college_description}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      {/* Program */}
-      <FormControl fullWidth size="small">
-        <InputLabel id="program-label">Program</InputLabel>
-        <Select label="Program" labelId="program-label" name="program" value={registerData.program} onChange={handleChangeSelect} required startAdornment={<MenuBookIcon color="primary" sx={{ mr: 1 }} />}>
-          {programOptions.map((program, i) => (
-            <MenuItem key={i} value={program.course_description}>
-              {program.course_description}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      {/* Year Level */}
-      <FormControl fullWidth size="small">
-        <InputLabel id="yearLevel-label">Year Level</InputLabel>
-        <Select label="Year Level" labelId="yearLevel-label" name="yearLevel" value={registerData.yearLevel} onChange={handleChangeSelect} required startAdornment={<StairsIcon color="primary" sx={{ mr: 1 }} />}>
-          {["1", "2", "3", "4"].map((yearLevel, i) => (
-            <MenuItem key={i} value={yearLevel}>
-              {yearLevel}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-
-      {/* Student ID */}
       {registerData.userType === "Student" && (
-        <FormControl fullWidth>
-          <TextField
-            size="small"
-            label="Student ID"
-            name="studentId"
-            value={registerData.studentId}
-            onChange={handleChange}
-            slotProps={{
-              htmlInput: { maxLength: 12 },
-              input: {
-                sx: { input: { px: 1 } },
-                startAdornment: <BadgeIcon color="primary" />,
-              },
-            }}
-            required
-          />
-        </FormControl>
+        <>
+          {/* College */}
+          <FormControl fullWidth size="small">
+            <InputLabel id="college-label">College</InputLabel>
+            <Select
+              label="College"
+              labelId="college-label"
+              name="college"
+              value={registerData.college}
+              onChange={handleChangeSelect}
+              startAdornment={<BusinessIcon color="primary" sx={{ mr: 1 }} />}
+              required={registerData.userType === "Student"}
+            >
+              {talisayCollegeOptions.map((option) => (
+                <MenuItem key={option.college_description} value={option.college_description}>
+                  {option.college_description}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Program */}
+          <FormControl fullWidth size="small">
+            <InputLabel id="program-label">Program</InputLabel>
+            <Select label="Program" labelId="program-label" name="program" value={registerData.program} onChange={handleChangeSelect} required startAdornment={<MenuBookIcon color="primary" sx={{ mr: 1 }} />}>
+              {programOptions.map((program, i) => (
+                <MenuItem key={i} value={program.course_description}>
+                  {program.course_description}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Year Level */}
+          <FormControl fullWidth size="small">
+            <InputLabel id="yearLevel-label">Year Level</InputLabel>
+            <Select
+              label="Year Level"
+              labelId="yearLevel-label"
+              name="yearLevel"
+              value={registerData.yearLevel}
+              onChange={handleChangeSelect}
+              startAdornment={<StairsIcon color="primary" sx={{ mr: 1 }} />}
+              required={registerData.userType === "Student"}
+            >
+              {["1", "2", "3", "4"].map((yearLevel, i) => (
+                <MenuItem key={i} value={yearLevel}>
+                  {yearLevel}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Student ID */}
+          <FormControl fullWidth>
+            <TextField
+              size="small"
+              label="Student ID"
+              name="studentId"
+              value={registerData.studentId}
+              onChange={handleChange}
+              slotProps={{
+                htmlInput: { maxLength: 12 },
+                input: {
+                  sx: { input: { px: 1 } },
+                  startAdornment: <BadgeIcon color="primary" />,
+                },
+              }}
+              required={registerData.userType === "Student"}
+            />
+          </FormControl>
+        </>
       )}
 
       {/* First, Middle, Last Names */}
@@ -219,7 +237,7 @@ const Register = () => {
               startAdornment: <PersonIcon color="primary" />,
             },
           }}
-          required
+          required={registerData.userType === "Student"}
         />
       </FormControl>
       <FormControl fullWidth>

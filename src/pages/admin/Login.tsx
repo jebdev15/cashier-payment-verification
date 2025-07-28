@@ -8,48 +8,56 @@ import { useNavigate } from "react-router";
 import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
 import { jwtDecode } from "jwt-decode";
+import SnackbarProvider from "../../components/Snackbar";
 type GoogleTokenPayload = {
     name?: string;
     email?: string;
     sub: string;
-  };
+};
+
+interface SnackbarState {
+  open: boolean;
+  message: string;
+  severity: "success" | "error" | "warning" | "info" | undefined;
+}
+
 const Login: React.FC = () => {
     const [, setCookie] = useCookies();
     const navigate = useNavigate()
     const [loading, setLoading] = React.useState<boolean>(false);
+    const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: 'success' });
     const login = async (credentialResponse: any) => {
         setLoading(true);
         try {
             const { data } = await axiosInstance.post('/api/auth/admin-login', { token: credentialResponse.credential });
-            alert(data.message)
-            if(data.isAuthenticated) {
-                const decodedToken = jwtDecode<GoogleTokenPayload>(credentialResponse.credential);
-                const fullName = decodedToken.name || "User";
+            
+            const decodedToken = jwtDecode<GoogleTokenPayload>(credentialResponse.credential);
+            const fullName = decodedToken.name || "User";
 
-                setCookie("accessToken", data.accessToken, { path: "/" });
-                setCookie("fullName", fullName, { path: "/" });
-                setTimeout(() => navigate('/admin/dashboard'), 1000);
-            } 
+            setCookie("accessToken", data.accessToken, { path: "/" });
+            setCookie("fullName", fullName, { path: "/" });
+            setTimeout(() => navigate('/admin/dashboard'), 1000);
+            setSnackbar((prev) => ({ ...prev, message: "Login successful", severity: 'success' }));
         } catch (error) {
-            if(isAxiosError(error)) {
-                if (error.request) return alert(JSON.parse(error.request.response.toString()).message)
-                if (error.response) return alert(JSON.parse(error.response.data.toString()).message)
+            if (isAxiosError(error)) {
+                setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: 'error' }));
             }
-            alert("Something went wrong")
         } finally {
+            setSnackbar((prev) => ({ ...prev, open: false }));
             setLoading(false);
         }
     }
     return (
         <React.Suspense fallback={<div>Loading...</div>}>
-            <Box 
-                sx={{ 
-                    display: "flex", 
-                    flexDirection: "column", 
-                    justifyContent: "center", 
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
                     alignItems: "center",
                     height: "100vh",
-                    width: "100%"
+                    width: "100%",
+                    backgroundColor: "#f5f5f5",
                 }}
             >
                 <Container maxWidth="lg" fixed sx={{ height: "inherit" }}>
@@ -115,6 +123,12 @@ const Login: React.FC = () => {
                     </Box>
                 </Container>
             </Box>
+            <SnackbarProvider
+                open={snackbar.open}
+                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+                message={snackbar.message}
+                severity={snackbar.severity}
+            />
         </React.Suspense>
     );
 };
