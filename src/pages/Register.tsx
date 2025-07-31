@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { axiosInstance } from "../api/app";
 import { isAxiosError } from "axios";
 import campusesJson from "./campuses.json";
+import SnackbarProvider from "../components/Snackbar";
 
 type RegisterDataType = {
   userType: string;
@@ -18,19 +19,21 @@ type RegisterDataType = {
   lastName: string;
   email: string;
   code: string;
+  recaptchaToken: string;
 };
 
 const initialRegisterData: RegisterDataType = {
   userType: "Student",
   college: "",
   program: "",
-  yearLevel: "1st",
+  yearLevel: "1",
   studentId: "",
   firstName: "",
   middleName: "",
   lastName: "",
   email: "",
   code: "",
+  recaptchaToken: "",
 };
 
 const userTypeOptions = ["Student", "External"];
@@ -42,13 +45,20 @@ const getTalisayColleges = (data: typeof campusesJson) => {
   }));
 };
 
+type SnackbarState = {
+  open: boolean;
+  message: string;
+  severity: "success" | "error" | "warning" | "info" | undefined;
+}
+
 const Register = () => {
   const navigate = useNavigate();
   const [registerData, setRegisterData] = React.useState<RegisterDataType>(initialRegisterData);
   const [programOptions, setProgramOptions] = React.useState<{ course_code: string; course_description: string }[]>([]);
   const [loading, setLoading] = React.useState({ registrationForm: false, sendCode: false });
-  const recaptcha = React.useRef<ReCAPTCHA>(null);
+  const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: undefined });
 
+  const recaptcha = React.useRef<ReCAPTCHA>(null);
   const talisayCollegeOptions = React.useMemo(() => getTalisayColleges(campusesJson), []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +80,6 @@ const Register = () => {
   const handleSendEmail = async () => {
     if (!registerData.email) return alert("Email is required");
     setLoading((prev) => ({ ...prev, sendCode: true }));
-
     try {
       const formData = new FormData();
       formData.append("email", registerData.email);
@@ -78,14 +87,14 @@ const Register = () => {
       formData.append("college", registerData.college);
       formData.append("program", registerData.program);
 
-      const { data } = await axiosInstance.post("/api/auth/generate-code", formData);
-      alert(data.message);
+      const { data, status } = await axiosInstance.post("/api/auth/generate-code", formData);
+      setSnackbar((prev) => ({ ...prev, message: data.message, severity: status === 201 ? "success" : 'info' }));
     } catch (error) {
       if (isAxiosError(error)) {
-        return alert(error.response?.data.message || error.request?.response.message || "Something went wrong");
+        setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: 'error' }));
       }
-      alert("Something went wrong");
     } finally {
+      setSnackbar((prev) => ({ ...prev, open: true }));
       setLoading((prev) => ({ ...prev, sendCode: false }));
     }
   };
@@ -95,24 +104,38 @@ const Register = () => {
     setLoading((prev) => ({ ...prev, registrationForm: true }));
 
     try {
-      const formData = new FormData(e.currentTarget as HTMLFormElement);
+      // const token = await recaptcha.current?.executeAsync();
+      // recaptcha.current?.reset();
+
+      const formData = new FormData();
+      formData.append("userType", registerData.userType);
+      formData.append("college", registerData.college);
+      formData.append("program", registerData.program);
+      formData.append("yearLevel", registerData.yearLevel);
+      formData.append("studentId", registerData.studentId);
+      formData.append("firstName", registerData.firstName);
+      formData.append("middleName", registerData.middleName);
+      formData.append("lastName", registerData.lastName);
+      formData.append("email", registerData.email);
+      formData.append("code", registerData.code);
+      formData.append("recaptchaToken", registerData.recaptchaToken);
+
       const { data, status } = await axiosInstance.post("/api/auth/register", formData);
-      alert(data.message);
-      if (status === 201) navigate("/");
+      setSnackbar((prev) => ({ ...prev, message: data.message, severity: status === 201 ? "success" : 'info' }));
+      if (status === 201) setTimeout(() => navigate("/"), 1000);
     } catch (error) {
       if (isAxiosError(error)) {
-        const message = error.response?.data || error.request?.response;
-        return alert(typeof message === "string" ? message : JSON.stringify(message));
+        setSnackbar((prev) => ({ ...prev, message: error.response?.data || error.request?.response || "Something went wrong", severity: "error" }));
       }
-      alert("Server is busy, please try again later");
     } finally {
+      setSnackbar((prev) => ({ ...prev, open: true }));
       setLoading((prev) => ({ ...prev, registrationForm: false }));
     }
   };
+
   const { middleName, ...requiredFields } = registerData;
   // const disableButton = Object.values(requiredFields).some((val) => val === "") || loading.registrationForm;
   const disableButton = loading.registrationForm;
-
   return (
     <Box
       sx={{
@@ -140,7 +163,20 @@ const Register = () => {
       {/* User Type */}
       <FormControl fullWidth size="small">
         <InputLabel id="user-type-label">User Type</InputLabel>
-        <Select label="User Type" labelId="user-type-label" name="userType" value={registerData.userType} onChange={handleChangeSelect} required startAdornment={<AccountCircleIcon color="primary" sx={{ mr: 1 }} />}>
+        <Select
+          label="User Type"
+          labelId="user-type-label"
+          name="userType"
+          value={registerData.userType}
+          onChange={handleChangeSelect}
+          startAdornment={<AccountCircleIcon color="primary" sx={{ mr: 1 }} />}
+          inputProps={{
+            sx: {
+              whiteSpace: "normal !important",
+            },
+          }}
+          required
+        >
           {userTypeOptions.map((option) => (
             <MenuItem key={option} value={option}>
               {option}
@@ -160,10 +196,15 @@ const Register = () => {
               value={registerData.college}
               onChange={handleChangeSelect}
               startAdornment={<BusinessIcon color="primary" sx={{ mr: 1 }} />}
+              inputProps={{
+                sx: {
+                  whiteSpace: "normal !important",
+                },
+              }}
               required={registerData.userType === "Student"}
             >
               {talisayCollegeOptions.map((option) => (
-                <MenuItem key={option.college_description} value={option.college_description}>
+                <MenuItem sx={{ whiteSpace: "normal !important" }} key={option.college_description} value={option.college_description}>
                   {option.college_description}
                 </MenuItem>
               ))}
@@ -173,9 +214,22 @@ const Register = () => {
           {/* Program */}
           <FormControl fullWidth size="small">
             <InputLabel id="program-label">Program</InputLabel>
-            <Select label="Program" labelId="program-label" name="program" value={registerData.program} onChange={handleChangeSelect} required startAdornment={<MenuBookIcon color="primary" sx={{ mr: 1 }} />}>
+            <Select
+              label="Program"
+              labelId="program-label"
+              name="program"
+              value={registerData.program}
+              onChange={handleChangeSelect}
+              startAdornment={<MenuBookIcon color="primary" sx={{ mr: 1 }} />}
+              inputProps={{
+                sx: {
+                  whiteSpace: "normal !important",
+                },
+              }}
+              required
+            >
               {programOptions.map((program, i) => (
-                <MenuItem key={i} value={program.course_description}>
+                <MenuItem sx={{ whiteSpace: "normal !important" }} key={i} value={program.course_description}>
                   {program.course_description}
                 </MenuItem>
               ))}
@@ -192,10 +246,15 @@ const Register = () => {
               value={registerData.yearLevel}
               onChange={handleChangeSelect}
               startAdornment={<StairsIcon color="primary" sx={{ mr: 1 }} />}
+              inputProps={{
+                sx: {
+                  whiteSpace: "normal !important",
+                },
+              }}
               required={registerData.userType === "Student"}
             >
               {["1", "2", "3", "4"].map((yearLevel, i) => (
-                <MenuItem key={i} value={yearLevel}>
+                <MenuItem sx={{ whiteSpace: "normal !important" }} key={i} value={yearLevel}>
                   {yearLevel}
                 </MenuItem>
               ))}
@@ -336,12 +395,22 @@ const Register = () => {
       </FormControl>
 
       <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha} />
+        <ReCAPTCHA
+          sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+          ref={recaptcha}
+          onChange={(token) => setRegisterData((prev) => ({ ...prev, recaptchaToken: token || "" }))}
+        />
       </Box>
 
       <Button type="submit" endIcon={<RegisterIcon />} variant="contained" disabled={disableButton}>
         {loading.registrationForm ? "Registering..." : "Register"}
       </Button>
+      <SnackbarProvider
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      />
     </Box>
   );
 };

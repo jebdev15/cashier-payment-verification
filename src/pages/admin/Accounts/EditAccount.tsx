@@ -1,10 +1,13 @@
 import React from 'react'
-import { Alert, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from '@mui/material'
-import { axiosInstance } from '../../../api/app';
 import { isAxiosError } from 'axios';
+import { axiosInstance } from '@/api/app';
+import { Alert, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Paper, Select, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams } from 'react-router';
 import { AccountDataType } from './type';
-import { useAxios } from '../../../hooks/useAxios';
+import { useAxios } from '@/hooks/useAxios';
+import { useFeatureStateSnackbar } from '@/hooks/useFeatureState';
+import SnackbarProvider from '@/components/Snackbar';
+import { ArrowBack } from '@mui/icons-material';
 
 
 const EditAccount = () => {
@@ -18,23 +21,24 @@ const EditAccount = () => {
         firstName: "",
         middleName: "",
         lastName: "",
-        status: "approved"
+        status: "pending",
     });
+    const [snackbar, setSnackbar] = useFeatureStateSnackbar();
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setLoading((prevState) => ({ ...prevState, form: true }));
         const formData = new FormData(event.currentTarget);
         try {
-            const { data } = await axiosInstance.put(`/api/users/${dataToUpdate.id}`, formData);
+            const { data, status } = await axiosInstance.put(`/api/users/${dataToUpdate.id}`, formData);
+            setSnackbar((prev) => ({ ...prev, message: data.message, severity: status === 200 ? "success" : 'info' }));
             if (!data) return;
-            alert(data.message);
             navigate("/admin/accounts", { replace: true });
         } catch (error) {
             if (isAxiosError(error)) {
-                if (error.request) return alert(JSON.parse(error.request.toString()).message);
-                if (error.response) return alert(JSON.parse(error.response.toString()).message);
+                setSnackbar((prev) => ({ ...prev, message: JSON.parse(error.request.toString()).message || JSON.parse(error.response?.data.toString()).message || "Something went wrong", severity: 'error' }));
             }
         } finally {
+            setSnackbar((prev) => ({ ...prev, open: true }));
             setLoading((prevState) => ({ ...prevState, form: false }));
         }
     }
@@ -44,109 +48,165 @@ const EditAccount = () => {
     })
     React.useEffect(() => {
         if (!data) return;
-        setDataToUpdate(data[0]);
+        setDataToUpdate(data);
     }, [data])
     if (loadingData) return <CircularProgress />
     if (error) return <Alert severity="error">{error}</Alert>
     return (
-        (data && data[0].status === "approved")
-            ? (
-                <Box sx={{ flexGrow: 1, paddingLeft: 5 }}>
-                    <Typography variant="h4" color="initial">View Account</Typography>
-
-                    <Typography variant="body1" color="initial">Student ID: {data[0].student_id}</Typography>
-                    <Typography variant="body1" color="initial">Email Address: {data[0].email}</Typography>
-                    <Typography variant="body1" color="initial">Name: {`${data[0].lastName.toUpperCase()}, ${data[0].firstName} ${data[0].middleName.toLowerCase()}`} </Typography>
-                    <Typography variant="body1" color="initial">College: {data[0].college.toUpperCase()}</Typography>
-                    <Typography variant="body1" color="initial">College: {data[0].program.toUpperCase()}</Typography>
-                    <Typography variant="body1" color="initial">Year Level: {data[0].yearLevel}</Typography>
-                    <Typography variant="body1" color="initial">User Type: {data[0].userType}</Typography>
-                    <Typography variant="body1" color="initial">Current Status: {data[0].status.toUpperCase()}</Typography>
-                </Box>
-            ) : (
-                <Box sx={{ flexGrow: 1, paddingLeft: 5 }}>
-                    <Typography variant="h4" color="initial">Edit Account</Typography>
-                    <Box
-                        sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: 2,
-                            height: "100%",
-                            width: "100%",
-                            bgcolor: "#f5f5f5"
-                        }}
-                        component="form"
-                        onSubmit={handleSubmit}
-                    >
-                        <FormControl fullWidth>
-                            <TextField
-                                label="Student ID"
-                                variant="outlined"
-                                name="student_id"
-                                value={dataToUpdate.student_id}
-                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, student_id: e.target.value }))}
-                            />
-                        </FormControl>
-                        <FormControl fullWidth>
-                            <TextField
-                                label="Email Address"
-                                variant="outlined"
-                                name="email"
-                                value={dataToUpdate.email}
-                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
-                            />
-                        </FormControl>
-                        <FormControl fullWidth>
-                            <TextField
-                                label="First Name"
-                                variant="outlined"
-                                name="firstName"
-                                value={dataToUpdate.firstName}
-                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, firstName: e.target.value }))}
-                            />
-                        </FormControl>
-                        <FormControl fullWidth>
-                            <TextField
-                                label="Middle Name"
-                                variant="outlined"
-                                name="middleName"
-                                value={dataToUpdate.middleName}
-                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, middleName: e.target.value }))}
-                            />
-                        </FormControl>
-                        <FormControl fullWidth>
-                            <TextField
-                                label="Last Name"
-                                variant="outlined"
-                                name="lastName"
-                                value={dataToUpdate.lastName}
-                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, lastName: e.target.value }))}
-                            />
-                        </FormControl>
-                        <FormControl fullWidth>
-                            <InputLabel>Status</InputLabel>
-                            <Select
-                                value={dataToUpdate.status}
-                                label="Status"
-                                name="status"
-                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
-                                disabled={data && data[0]?.status === "approved"}
-                            >
-                                <MenuItem value={"pending"}>Pending</MenuItem>
-                                <MenuItem value={"approved"}>Approve</MenuItem>
-                                <MenuItem value={"rejected"}>Reject</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            disabled={loading.form || dataToUpdate.status === "pending"}
+        <React.Suspense fallback={<CircularProgress />}>
+            {
+                (!loadingData && (data?.status === "approved" || data?.status === "rejected"))
+                    ? (
+                        <Paper
+                            elevation={3}
+                            sx={{
+                                p: 4,
+                                mx: 'auto',
+                                mt: 3,
+                                maxWidth: 700,
+                                backgroundColor: '#fdfdfd',
+                                borderRadius: 3,
+                            }}
                         >
-                            {loading.form ? "Updating..." : "Update"}
-                        </Button>
-                    </Box>
-                </Box>
-            )
+                            <Button variant="contained" sx={{ mb: 2 }} onClick={() => navigate("/admin/accounts", { replace: true })} startIcon={<ArrowBack />}>Back</Button>
+                            <Typography variant="h5" fontWeight={600} gutterBottom>
+                                Account Details
+                            </Typography>
+
+                            <Box
+                                component="dl"
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: { xs: '1fr', sm: '150px 1fr' },
+                                    rowGap: 2,
+                                    columnGap: 3,
+                                    mt: 2,
+                                }}
+                            >
+                                <Typography component="dt" fontWeight={500}>Student ID</Typography>
+                                <Typography component="dd">{data?.student_id}</Typography>
+
+                                <Typography component="dt" fontWeight={500}>Email Address</Typography>
+                                <Typography component="dd">{data?.email}</Typography>
+
+                                <Typography component="dt" fontWeight={500}>Name</Typography>
+                                <Typography component="dd">
+                                    {`${data?.lastName.toUpperCase()}, ${data?.firstName} ${data?.middleName}`}
+                                </Typography>
+
+                                <Typography component="dt" fontWeight={500}>College</Typography>
+                                <Typography component="dd">{data?.college?.toUpperCase()}</Typography>
+
+                                <Typography component="dt" fontWeight={500}>Program</Typography>
+                                <Typography component="dd">{data?.program?.toUpperCase()}</Typography>
+
+                                <Typography component="dt" fontWeight={500}>Year Level</Typography>
+                                <Typography component="dd">{data?.yearLevel}</Typography>
+
+                                <Typography component="dt" fontWeight={500}>User Type</Typography>
+                                <Typography component="dd">{data?.userType}</Typography>
+
+                                <Typography component="dt" fontWeight={500}>Status</Typography>
+                                <Typography component="dd" sx={{ textTransform: 'capitalize' }}>
+                                    {data?.status}
+                                </Typography>
+                            </Box>
+                        </Paper>
+
+                    ) : (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                            <Paper
+                                elevation={3}
+                                sx={{
+                                    p: 4,
+                                    borderRadius: 3,
+                                    width: '100%',
+                                    maxWidth: 600,
+                                    backgroundColor: '#ffffff',
+                                }}
+                                component="form"
+                                onSubmit={handleSubmit}
+                            >
+                                <Typography variant="h5" fontWeight={600} mb={3}>
+                                    Edit Account
+                                </Typography>
+
+                                <Box display="flex" flexDirection="column" gap={2}>
+                                    <TextField
+                                        fullWidth
+                                        label="Student ID"
+                                        variant="outlined"
+                                        name="student_id"
+                                        value={dataToUpdate.student_id}
+                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, student_id: e.target.value }))}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Email Address"
+                                        variant="outlined"
+                                        name="email"
+                                        value={dataToUpdate.email}
+                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="First Name"
+                                        variant="outlined"
+                                        name="firstName"
+                                        value={dataToUpdate.firstName}
+                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, firstName: e.target.value }))}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Middle Name"
+                                        variant="outlined"
+                                        name="middleName"
+                                        value={dataToUpdate.middleName}
+                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, middleName: e.target.value }))}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="Last Name"
+                                        variant="outlined"
+                                        name="lastName"
+                                        value={dataToUpdate.lastName}
+                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, lastName: e.target.value }))}
+                                    />
+                                    <FormControl fullWidth>
+                                        <InputLabel>Status</InputLabel>
+                                        <Select
+                                            value={dataToUpdate.status}
+                                            label="Status"
+                                            name="status"
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
+                                            disabled={data && data?.status === "approved"}
+                                        >
+                                            <MenuItem value="pending">Pending</MenuItem>
+                                            <MenuItem value="approved">Approve</MenuItem>
+                                            <MenuItem value="rejected">Reject</MenuItem>
+                                        </Select>
+                                    </FormControl>
+
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        color="success"
+                                        disabled={loading.form || dataToUpdate.status === "pending"}
+                                        sx={{ mt: 2, py: 1.5, fontWeight: 600 }}
+                                    >
+                                        {loading.form ? "Updating..." : "Update"}
+                                    </Button>
+                                </Box>
+                            </Paper>
+                        </Box>
+                    )}
+            <SnackbarProvider
+                open={snackbar.open}
+                message={snackbar.message}
+                severity={snackbar.severity}
+                onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+            />
+        </React.Suspense>
     )
 }
 

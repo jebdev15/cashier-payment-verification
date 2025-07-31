@@ -48,7 +48,7 @@ const Sidebar = () => {
           bgcolor: sidebarOpen ? "rgba(0,0,0,0.0)" : "rgba(0,0,0,0.5)",
           inset: 0,
           display: { md: "none", xs: "block" },
-          pointerEvents: sidebarOpen || isMediumScreen ? "none" : "all",
+          pointerEvents: sidebarOpen ? "none" : "all",
           maxHeight: "100dvh",
         }}
       ></Box>
@@ -59,7 +59,7 @@ const Sidebar = () => {
           height: "calc(100dvh - 64px)",
           width: "100%",
           maxWidth: 300,
-          marginLeft: { md: sidebarOpen || isMediumScreen ? "0" : "-300px", xs: sidebarOpen || isMediumScreen ? "-300px" : "0" },
+          marginLeft: { md: sidebarOpen ? "0" : "-300px", xs: sidebarOpen ? "-300px" : "0" },
           transition: "margin 300ms",
           position: { md: "relative", xs: "fixed" },
           zIndex: "999",

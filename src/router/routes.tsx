@@ -5,7 +5,7 @@ const LandingPage = React.lazy(() => import("../pages/LandingPage"));
 const Login = React.lazy(() => import("../pages/Login"));
 const Register = React.lazy(() => import("../pages/Register"));
 
-const HomeRouteErrorElement = React.lazy(() => import("../components/errors/RouteErrorElement"));
+const RouteErrorElement = React.lazy(() => import("../components/errors/RouteErrorElement"));
 const HomeLayoutContextProvider = React.lazy(() => import("../context/HomeLayoutContext"));
 const HomeLayout = React.lazy(() => import("../pages/home/Layout"));
 const StatementOfAccount = React.lazy(() => import("../pages/home/StatementOfAccount"));
@@ -43,7 +43,7 @@ export const routes = createBrowserRouter([
         element: <HomeLayoutContextProvider>
                     <HomeLayout />
                 </HomeLayoutContextProvider>,
-        errorElement: <HomeRouteErrorElement />,
+        errorElement: <RouteErrorElement />,
         children: [
             {
                 index: true,
@@ -72,6 +72,7 @@ export const routes = createBrowserRouter([
         element: <AdminLayoutContextProvider>
                     <AdminLayout />
                 </AdminLayoutContextProvider>,
+        errorElement: <RouteErrorElement />,
         children: [
             {
                 path: "dashboard",
@@ -79,19 +80,31 @@ export const routes = createBrowserRouter([
             },
             {
                 path: "accounts",
-                element: <ShowAccounts />,
-            },
-            {
-                path: "accounts/:id",
-                element: <EditAccount />,
+                errorElement: <RouteErrorElement />,
+                children: [
+                    {
+                        index: true,
+                        element: <ShowAccounts />,
+                    },
+                    {
+                        path: ":id",
+                        element: <EditAccount />,
+                    },
+                ]
             },
             {
                 path: "transactions",
-                element: <ShowTransactions />,
-            },
-            {
-                path: "transactions/:transactionId",
-                element: <EditTransaction />,
+                errorElement: <RouteErrorElement />,
+                children: [
+                    {
+                        index: true,
+                        element: <ShowTransactions />,
+                    },
+                    {
+                        path: ":transactionId",
+                        element: <EditTransaction />,
+                    },
+                ]
             },
         ],
     },

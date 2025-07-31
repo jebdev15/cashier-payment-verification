@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 import SpanningTable from "./SpanningTableForUR";
 import imageCompression from "browser-image-compression";
@@ -11,6 +11,7 @@ import { isAxiosError } from "axios";
 
 const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
 const UploadReceipt = () => {
+  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const [{ accessToken }] = useCookies(["accessToken"]);
   const [image, setImage] = React.useState<string | null>(null);
   const [imageName, setImageName] = React.useState<string | undefined>(undefined);
@@ -118,7 +119,7 @@ const UploadReceipt = () => {
   }, [accessToken, loading.upload]);
   return (
     <Box sx={{ height: "100%", flexGrow: 1 }}>
-      <Typography variant="h4" color="initial" sx={{ marginBottom: 4 }}>
+      <Typography variant={isMediumScreen ? "h5" : "h4"} color="initial" sx={{ marginBottom: 4 }}>
         Upload Receipt
       </Typography>
       <Grid container spacing={4} sx={{ height: "100%" }} component="form" onSubmit={handleSubmit}>

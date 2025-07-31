@@ -1,5 +1,5 @@
 import { useRouteError, isRouteErrorResponse } from 'react-router';
-import { Box, Button, Container, Paper, Typography } from '@mui/material';
+import { Button, Container, Paper, Typography } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 export default function RouteErrorElement() {

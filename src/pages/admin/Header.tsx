@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import { AdminLayoutContext } from "../../context/AdminLayoutContext";
-import { useMediaQuery } from "@mui/material";
+import { Divider, useMediaQuery } from "@mui/material";
 
 const Header = () => {
   const { handleToggleSidebar } = React.useContext(AdminLayoutContext);
@@ -18,12 +18,13 @@ const Header = () => {
           <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={handleToggleSidebar}>
             <MenuIcon />
           </IconButton>
-          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-            <Typography variant="h6" component="div">
-              CHMSU
+          <Box sx={{ display: "flex", flexDirection: {isMobile : "row", md: "column"}, width: "100%" }}>
+            <Typography variant={isMobileSize ? "body1" : "h6"} component="div">
+              { isMobileSize ? "CHMSU" : "Carlos Hilado Memorial State University" }
             </Typography>
-            <Typography variant="h6" component="div">
-              { isMobileSize ? "PVERIS" : import.meta.env.VITE_APP_NAME }
+            <Divider orientation="vertical" flexItem sx={{ mx: 1, display: isMobileSize ? "block" : "none" }} />
+            <Typography variant={ isMobileSize ? "h6" : "h5"} component="div">
+              { isMobileSize ? "CPVERIS" : import.meta.env.VITE_APP_NAME }
             </Typography>
           </Box>
         </Toolbar>

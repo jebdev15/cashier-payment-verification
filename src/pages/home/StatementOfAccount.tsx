@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, FormControl, InputLabel, MenuItem, Paper, Select, SelectChangeEvent, Typography } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography, useMediaQuery } from "@mui/material";
 import SpanningTable from "./SpanningTable";
 import { useAxios } from "../../hooks/useAxios";
 
@@ -18,6 +18,7 @@ type StatementOfAccountDataType = {
 };
 
 const StatementOfAccount = () => {
+  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const [statementOfAccountData, setStatementOfAccountData] = React.useState<StatementOfAccountDataType[]>([]);
   const [filteredData, setFilteredData] = React.useState<StatementOfAccountDataType[]>([]);
   const [dataToFilter, setDataToFilter] = React.useState<{ school_year: number; semester: string }>({ school_year: new Date().getFullYear(), semester: "" });
@@ -91,7 +92,7 @@ const StatementOfAccount = () => {
     );
   return (
     <Box sx={{ flexGrow: 1, height: "100%" }}>
-      <Typography variant="h4" color="initial" sx={{ mb: 4 }}>
+      <Typography variant={isMediumScreen ? "h5" : "h4"} color="initial" sx={{ mb: 4 }}>
         Statement of Account
       </Typography>
       <Box sx={{ display: "flex", flexDirection: { xs: "column", lg: "row" }, gap: 4, height: "100%", width: "100%" }}>

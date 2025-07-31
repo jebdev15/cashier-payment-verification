@@ -16,9 +16,9 @@ type GoogleTokenPayload = {
 };
 
 interface SnackbarState {
-  open: boolean;
-  message: string;
-  severity: "success" | "error" | "warning" | "info" | undefined;
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "warning" | "info" | undefined;
 }
 
 const Login: React.FC = () => {
@@ -30,12 +30,18 @@ const Login: React.FC = () => {
         setLoading(true);
         try {
             const { data } = await axiosInstance.post('/api/auth/admin-login', { token: credentialResponse.credential });
-            
+
             const decodedToken = jwtDecode<GoogleTokenPayload>(credentialResponse.credential);
             const fullName = decodedToken.name || "User";
 
-            setCookie("accessToken", data.accessToken, { path: "/" });
-            setCookie("fullName", fullName, { path: "/" });
+            setCookie("accessToken", data.accessToken, {
+                path: "/",
+                expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1) // 1 day
+            });
+            setCookie("fullName", fullName, {
+                path: "/",
+                expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1) // 1 day
+            });
             setTimeout(() => navigate('/admin/dashboard'), 1000);
             setSnackbar((prev) => ({ ...prev, message: "Login successful", severity: 'success' }));
         } catch (error) {

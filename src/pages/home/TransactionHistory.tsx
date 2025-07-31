@@ -1,9 +1,10 @@
 import React from "react";
-import { Alert, Box, Paper, Typography } from "@mui/material";
+import { Alert, Box, Typography, useMediaQuery } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useAxios } from "../../hooks/useAxios";
 
 const TransactionHistory = () => {
+  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const { data, loading, error } = useAxios({
     url: "/api/transactions/student-id",
     authorized: true,
@@ -22,7 +23,7 @@ const TransactionHistory = () => {
   if (error) return <Alert severity="error">{error}</Alert>;
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Typography variant="h4" color="initial" sx={{ marginBottom: 4 }}>
+      <Typography variant={isMediumScreen ? "h5" : "h4"} color="initial" sx={{ marginBottom: 4 }}>
         Transaction History
       </Typography>
       <Box
@@ -35,7 +36,7 @@ const TransactionHistory = () => {
           width: "100%",
         }}
       >
-        <DataGrid sx={{ borderRadius: 2, borderColor: "rgba(0,0,0,0.23)" }} rows={data} columns={columns} loading={loading} />
+        <DataGrid sx={{ borderRadius: 2, borderColor: "rgba(0,0,0,0.23)", width: "100%", height: "100%" }} rows={data} columns={columns} loading={loading} />
       </Box>
     </Box>
   );

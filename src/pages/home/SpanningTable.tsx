@@ -42,7 +42,7 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
       formData.append("amount_paid", amountPaid.toString());
       formData.append("particulars", particulars);
       const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id`, formData);
-      setReferenceId(data2.reference_code); 
+      setReferenceId(data2.reference_code);
     } catch (error) {
       console.error(error);
     } finally {
@@ -117,8 +117,13 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
               value={particulars}
               label="Particulars"
               onChange={(e) => setParticulars(e.target.value)}
+              inputProps={{
+                sx: {
+                  whiteSpace: "normal !important",
+                },
+              }}
             >
-              <MenuItem value={"TUITION AND MISCELLANEOUS FEES"}>TUITION AND MISCELLANEOUS FEES</MenuItem>
+              <MenuItem sx={{ whiteSpace: "normal !important" }} value={"TUITION AND MISCELLANEOUS FEES"}>TUITION AND MISCELLANEOUS FEES</MenuItem>
             </Select>
           </FormControl>
           <Button size="large" variant="contained" onClick={handleGenerateReferenceId} disabled={loadingGrid} sx={{ borderRadius: 2 }}>

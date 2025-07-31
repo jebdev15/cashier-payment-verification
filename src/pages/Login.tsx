@@ -10,10 +10,12 @@ import SnackbarProvider from "../components/Snackbar";
 type LoginData = {
   email: string;
   code: string;
+  recaptchaToken: string;
 };
 const initialLoginData: LoginData = {
   email: "",
   code: "",
+  recaptchaToken: "",
 };
 
 type SnackbarState = {
@@ -27,7 +29,6 @@ const Login = () => {
   const navigate = useNavigate();
   const handleRedirectToRegister = () => navigate("/register");
   const [loginData, setLoginData] = React.useState<LoginData>(initialLoginData);
-  const [recaptchaValue, setRecaptchaValue] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<{ loginForm: boolean; sendCode: boolean }>({ loginForm: false, sendCode: false });
   const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: undefined });
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +58,7 @@ const Login = () => {
     }
   };
   const onChangeRecaptcha = (value: string | null) => {
-    setRecaptchaValue(value);
+    setLoginData((prevData) => ({ ...prevData, recaptchaToken: value || "" }));
   };
   const handleRedirectToHome = (token: string) => {
     return new Promise<void>((resolve) => {
@@ -77,6 +78,7 @@ const Login = () => {
     const formData = new FormData();
     formData.append("email", loginData.email);
     formData.append("code", loginData.code);
+    formData.append("recaptchaToken", loginData.recaptchaToken);
     try {
       const { data } = await axiosInstance.post("/api/auth/login", formData);
       setSnackbar((prev) => ({ ...prev, message: data.message, severity: 'success' }));
@@ -91,7 +93,7 @@ const Login = () => {
       setLoading((prevState) => ({ ...prevState, loginForm: false, sendCode: false }));
     }
   };
-  const disableLoginButton = !loginData.email || !loginData.code || !recaptchaValue || loading.loginForm;
+  const disableLoginButton = !loginData.email || !loginData.code || !loginData.recaptchaToken || loading.loginForm;
   return (
     <React.Suspense fallback={<CircularProgress />}>
       <Box
@@ -172,7 +174,7 @@ const Login = () => {
           />
         </FormControl>
         <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <ReCAPTCHA sitekey={import.meta.env.VITE_SITE_KEY} ref={recaptcha} onChange={onChangeRecaptcha} />
+          <ReCAPTCHA sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY} ref={recaptcha} onChange={onChangeRecaptcha} />
         </Box>
         <Button type="submit" endIcon={<LoginIcon />} variant="contained" disabled={disableLoginButton}>
           {loading.loginForm ? "Logging In..." : "Login"}

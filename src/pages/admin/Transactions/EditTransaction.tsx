@@ -125,7 +125,7 @@ const EditTransaction = () => {
                     <Typography variant="body1" color="initial">Reference Number: {dataToUpdate?.reference_code}</Typography>
                     {/* <Typography variant="body1" color="initial">Purpose: {dataToUpdate?.purpose}</Typography> */}
                     <Typography variant="body1" color="initial">Amount: {dataToUpdate?.amount}</Typography>
-                    {data[0]?.status === "pending" ? (
+                    {data && data[0]?.status === "pending" ? (
                         <>
                             <FormControl fullWidth sx={{ mb: 2 }}>
                                 <InputLabel id="account-select">Account Type</InputLabel>
