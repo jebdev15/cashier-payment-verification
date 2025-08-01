@@ -16,6 +16,10 @@ const EditAccount = () => {
     const [loading, setLoading] = React.useState<{ form: boolean; fetch: boolean }>({ form: false, fetch: false });
     const [dataToUpdate, setDataToUpdate] = React.useState<AccountDataType>({
         id: 0,
+        user_id: 0,
+        college: "",
+        program: "",
+        yearLevel: "",
         student_id: "",
         email: "",
         firstName: "",
@@ -35,7 +39,7 @@ const EditAccount = () => {
             navigate("/admin/accounts", { replace: true });
         } catch (error) {
             if (isAxiosError(error)) {
-                setSnackbar((prev) => ({ ...prev, message: JSON.parse(error.request.toString()).message || JSON.parse(error.response?.data.toString()).message || "Something went wrong", severity: 'error' }));
+                setSnackbar((prev) => ({ ...prev, message: error.request?.response.message || error.response?.data.message || "Something went wrong", severity: 'error' }));
             }
         } finally {
             setSnackbar((prev) => ({ ...prev, open: true }));
@@ -171,6 +175,23 @@ const EditAccount = () => {
                                         name="lastName"
                                         value={dataToUpdate.lastName}
                                         onChange={(e) => setDataToUpdate((prev) => ({ ...prev, lastName: e.target.value }))}
+                                    />
+                                    <TextField
+                                        fullWidth
+                                        label="College"
+                                        variant="outlined"
+                                        name="college"
+                                        value={dataToUpdate.college}
+                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, college: e.target.value }))}
+                                    />
+
+                                    <TextField
+                                        fullWidth
+                                        label="Program"
+                                        variant="outlined"
+                                        name="program"
+                                        value={dataToUpdate.program}
+                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, program: e.target.value }))}
                                     />
                                     <FormControl fullWidth>
                                         <InputLabel>Status</InputLabel>

@@ -13,7 +13,7 @@ export const sideNav = [
     },
     {
         path: "/accounts",
-        label: "Accounts",
+        label: "User Accounts",
         abbreviation: "am",
         icon: PeopleIcon
     },

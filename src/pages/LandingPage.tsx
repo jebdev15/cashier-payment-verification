@@ -43,7 +43,7 @@ const LandingPage = () => {
         </Box>
         {/* <Box>{import.meta.env.VITE_APP_NAME}</Box> */}
         <Box className="systitle" sx={{ textAlign: { md: "left", xs: "center" }, zoom: { md: 1, sm: 0.9, xs: 0.8 } }}>
-          Payment
+          Cashier Payment
           <span> Verification</span> &
           <br /> E-Receipt
           <span> Issuance</span>

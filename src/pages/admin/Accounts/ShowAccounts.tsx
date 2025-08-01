@@ -54,11 +54,11 @@ const ShowAccounts = () => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <Typography variant={isMediumScreen ? "h5" : "h4"} color="initial" gutterBottom>
-        Account Management
+        User Account Management
       </Typography>
 
       <Typography variant="h6" mt={3} mb={1} color="primary">
-        Student Accounts
+        Student User Accounts
       </Typography>
       <Paper sx={{ height: 400, width: '100%', mb: 4 }}>
         <DataGrid
@@ -82,7 +82,7 @@ const ShowAccounts = () => {
       <Divider sx={{ my: 2 }} />
 
       <Typography variant="h6" mt={3} mb={1} color="secondary">
-        External Accounts
+        External User Accounts
       </Typography>
       <Paper sx={{ height: 400, width: '100%' }}>
         <DataGrid
