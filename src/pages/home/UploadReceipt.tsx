@@ -8,6 +8,8 @@ import { base64ToBlob } from "../../utils/base64ToBlog";
 import { useCookies } from "react-cookie";
 import { FileUploadLogType } from "../../types/fileUpload";
 import { isAxiosError } from "axios";
+import { useAxios } from "@/hooks/useAxios";
+import SnackbarProvider from "@/components/Snackbar";
 
 const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
 const UploadReceipt = () => {
@@ -21,7 +23,13 @@ const UploadReceipt = () => {
   const [referenceId, setReferenceId] = React.useState<string>("");
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
   const [remarks, setRemarks] = React.useState<string>("");
+  const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: 'error' | 'warning' | 'info' | 'success' }>({ open: false, message: "", severity: "info" });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { data: referenceData } = useAxios({
+    url: "/api/transactions/valid-reference-id",
+    method: "GET",
+    authorized: true
+  })
   const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -78,7 +86,7 @@ const UploadReceipt = () => {
 
     try {
       const { data, status } = await axiosInstanceWithAuthorization(accessToken).post("/api/upload/receipts", formData, { headers: { "Content-Type": "multipart/form-data" } });
-      alert(data.message);
+      setSnackbar((prev) => ({ ...prev, message: data.message, severity: 'success' }));
       if (status === 200) {
         setReferenceId("");
         setRemarks("");
@@ -89,34 +97,19 @@ const UploadReceipt = () => {
           fileInputRef.current.value = ""; // clears file
         }
       }
-      console.log(data, status);
     } catch (error) {
       console.error("Error uploading file:", error);
       if (isAxiosError(error)) {
-        if (error.request) return alert(error.request.response);
-        if (error.response) return alert(error.response.data.message);
+        setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: 'error' }));
       }
     } finally {
+      setSnackbar((prev) => ({ ...prev, open: true }));
       setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
     }
   };
   React.useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const fetchUploadReceiptLog = async () => {
-      try {
-        const { data, status } = await axiosInstanceWithAuthorization(accessToken).get("/api/upload/receipts", { signal });
-        setData(data);
-        console.log(data, status);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-      } finally {
-        setLoading((prevState) => ({ ...prevState, log: false }));
-      }
-    };
-    fetchUploadReceiptLog();
-    return () => controller.abort();
-  }, [accessToken, loading.upload]);
+        setReferenceId(referenceData?.reference_code)
+    }, [referenceData])
   return (
     <Box sx={{ height: "100%", flexGrow: 1 }}>
       <Typography variant={isMediumScreen ? "h5" : "h4"} color="initial" sx={{ marginBottom: 4 }}>
@@ -138,37 +131,6 @@ const UploadReceipt = () => {
               }}
             />
           </Grid>
-          {/* <Grid size={{ xs: 12 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
-            {image ? (
-              <img
-                src={image}
-                alt="Preview"
-                height={400}
-                width={400}
-                loading="lazy"
-                style={{
-                  objectFit: "contain",
-                  objectPosition: "center",
-                  width: "100%",
-                  height: "100%",
-                  padding: "8px",
-                }}
-              />
-            ) : (
-              <Typography
-                variant="h6"
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "text.secondary",
-                }}
-              >
-                Image Preview
-              </Typography>
-            )}
-          </Grid> */}
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
               <TextField
@@ -179,6 +141,7 @@ const UploadReceipt = () => {
                 }}
                 label="Reference ID"
                 value={referenceId}
+                disabled={referenceData?.reference_code !== ""}
                 onChange={(e) => setReferenceId(e.target.value)}
               />
             </FormControl>
@@ -253,10 +216,13 @@ const UploadReceipt = () => {
             </Typography>
           )}
         </Grid>
-        {/* <Grid size={{ xs: 12, lg: 8 }}>
-          <SpanningTable data={data} loading={loading.log} />
-        </Grid> */}
       </Grid>
+      <SnackbarProvider 
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      />
     </Box>
   );
 };

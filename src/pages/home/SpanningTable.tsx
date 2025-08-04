@@ -136,7 +136,7 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
           <Typography variant="h6" color="initial">
             Reference ID: {referenceId}
           </Typography>
-          <Alert severity="info">Please be informed that your reference ID will expire in 1 hour, after which you may generate a new one. Kindly copy the reference ID and paste it into the Reference ID field on the Upload Receipt page.</Alert>
+          <Alert severity="info">Please be informed that your reference ID will expire in 24 hours, after which you may generate a new one. Kindly copy the reference ID and paste it into the Reference ID field on the Upload Receipt page.</Alert>
         </Box>
       )}
     </Box>

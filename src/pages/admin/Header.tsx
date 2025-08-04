@@ -19,11 +19,11 @@ const Header = () => {
             <MenuIcon />
           </IconButton>
           <Box sx={{ display: "flex", flexDirection: {isMobile : "row", md: "column"}, width: "100%" }}>
-            <Typography variant={isMobileSize ? "body1" : "h6"} component="div">
+            <Typography variant={isMobileSize ? "h6" : "h5"} component="div">
               { isMobileSize ? "CHMSU" : "Carlos Hilado Memorial State University" }
             </Typography>
             <Divider orientation="vertical" flexItem sx={{ mx: 1, display: isMobileSize ? "block" : "none" }} />
-            <Typography variant={ isMobileSize ? "h6" : "h5"} component="div">
+            <Typography variant={ isMobileSize ? "body1" : "h6"} component="div" >
               { isMobileSize ? "CPVERIS" : import.meta.env.VITE_APP_NAME }
             </Typography>
           </Box>
