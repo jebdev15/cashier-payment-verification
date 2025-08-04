@@ -8,4 +8,5 @@ export type TransactionDataType = {
   status: string;
   expires_at: Date;
   created_at: Date;
+  userType: string;
 };

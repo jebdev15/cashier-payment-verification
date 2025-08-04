@@ -18,7 +18,7 @@ export const sideNav = [
         icon: FileUploadIcon
     },
     {
-        path: "/upload-receipt/external",
+        path: "/external/upload-receipt",
         label: "Upload Receipt",
         abbreviation: "ur-ex",
         icon: FileUploadIcon

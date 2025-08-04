@@ -1,12 +1,10 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
-import SpanningTable from "./SpanningTableForUR";
 import imageCompression from "browser-image-compression";
-import { axiosInstanceWithAuthorization } from "../../api/app";
-import { base64ToBlob } from "../../utils/base64ToBlog";
+import { axiosInstanceWithAuthorization } from "@/api/app";
+import { base64ToBlob } from "@/utils/base64ToBlog";
 import { useCookies } from "react-cookie";
-import { FileUploadLogType } from "../../types/fileUpload";
 import { isAxiosError } from "axios";
 
 const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
@@ -16,7 +14,6 @@ const UploadReceipt = () => {
   const [imageName, setImageName] = React.useState<string | undefined>(undefined);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean }>({ upload: false, log: false });
-  const [data, setData] = React.useState<FileUploadLogType[]>([]);
   const [referenceId, setReferenceId] = React.useState<string>("");
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
   const [remarks, setRemarks] = React.useState<string>("");
@@ -99,23 +96,7 @@ const UploadReceipt = () => {
       setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
     }
   };
-  React.useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const fetchUploadReceiptLog = async () => {
-      try {
-        const { data, status } = await axiosInstanceWithAuthorization(accessToken).get("/api/upload/receipts", { signal });
-        setData(data);
-        console.log(data, status);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-      } finally {
-        setLoading((prevState) => ({ ...prevState, log: false }));
-      }
-    };
-    fetchUploadReceiptLog();
-    return () => controller.abort();
-  }, [accessToken, loading.upload]);
+
   return (
     <Box sx={{ height: "100%", flexGrow: 1 }}>
       <Typography variant="h4" color="initial" sx={{ marginBottom: 4 }}>
@@ -137,51 +118,43 @@ const UploadReceipt = () => {
               }}
             />
           </Grid>
-          <Grid size={{ xs: 12 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
-            {image ? (
-              <img
-                src={image}
-                alt="Preview"
-                height={400}
-                width={400}
-                loading="lazy"
-                style={{
-                  objectFit: "contain",
-                  objectPosition: "center",
-                  width: "100%",
-                  height: "100%",
-                  padding: "8px",
-                }}
-              />
-            ) : (
-              <Typography
-                variant="h6"
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "text.secondary",
-                }}
-              >
-                Image Preview
-              </Typography>
-            )}
-          </Grid>
-          {/* <Grid size={{ xs: 12 }}>
+
+          <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
               <TextField
                 slotProps={{
                   input: {
                     sx: { borderRadius: 2 },
+                    endAdornment: (
+                      <Tooltip title="Send Code">
+                        <span>
+                          <Button
+                            size="small"
+                            sx={{
+                              px: 1.5,
+                              whiteSpace: "nowrap",
+                              textTransform: "unset",
+                              height: "40px",
+                              borderRadius: 0,
+                            }}
+                            // endIcon={<SendIcon />}
+                            variant="contained"
+                            // onClick={handleSendEmail}
+                            // disabled={!registerData.email || loading.sendCode}
+                          >
+                            {/* {loading.sendCode ? "Generating..." : "Generate Reference ID"} */}
+                            Generate Reference ID
+                          </Button>
+                        </span>
+                      </Tooltip>
+                    ),
                   },
                 }}
                 label="Reference ID"
                 value={referenceId}
-                onChange={(e) => setReferenceId(e.target.value)}
               />
             </FormControl>
-          </Grid> */}
+          </Grid>
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
@@ -222,7 +195,37 @@ const UploadReceipt = () => {
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, lg: 8 }}>
-          <SpanningTable data={data} loading={loading.log} />
+          <Grid size={{ xs: 12 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
+            {image ? (
+              <img
+                src={image}
+                alt="Preview"
+                height={400}
+                width={400}
+                loading="lazy"
+                style={{
+                  objectFit: "contain",
+                  objectPosition: "center",
+                  width: "100%",
+                  height: "100%",
+                  padding: "8px",
+                }}
+              />
+            ) : (
+              <Typography
+                variant="h6"
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "text.secondary",
+                }}
+              >
+                Image Preview
+              </Typography>
+            )}
+          </Grid>
         </Grid>
       </Grid>
     </Box>

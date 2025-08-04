@@ -1,30 +1,26 @@
 import React from 'react'
-import { Alert, Box, IconButton, Paper, Tooltip, Typography } from '@mui/material'
-import { 
-  Subject as SubjectIcon,
-} from '@mui/icons-material'
+import { Alert, Box, IconButton, Paper, Tooltip, Typography, Divider } from '@mui/material'
+import { Subject as SubjectIcon } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
 import { TransactionDataType } from './type'
 import { useNavigate } from 'react-router'
-import { useAxios } from '../../../hooks/useAxios'
+import { useAxios } from '@/hooks/useAxios'
 
 const ShowTransactions = () => {
   const navigate = useNavigate();
   const { data, loading, error } = useAxios({
     url: '/api/transactions',
     authorized: true,
-  })
+  });
+
   const columns = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'student_id', headerName: 'Student ID', width: 130 },
-    { field: 'fullName', headerName: 'Full name', width: 300 },
-    { field: 'reference_code', headerName: 'Reference ID', width: 200 },
-    { field: 'amount', headerName: 'Amount', width: 100 },
-    { field: 'purpose', headerName: 'Purpose', width: 100 },
-    { field: 'status', headerName: 'Status', width: 160, color: 'error' },
-    { 
-      field: 'created_at', 
-      headerName: 'Created At', 
+    { field: '_id', headerName: 'No.', width: 70 },
+    { field: 'fullName', headerName: 'Full name', width: 180 },
+    { field: 'reference_code', headerName: 'Reference ID', width: 160 },
+    { field: 'status', headerName: 'Status', width: 120 },
+    {
+      field: 'created_at',
+      headerName: 'Created At',
       width: 160,
       valueGetter: (value: string) => new Date(value).toLocaleString()
     },
@@ -32,48 +28,99 @@ const ShowTransactions = () => {
       field: 'action',
       headerName: 'Action',
       width: 160,
-      renderCell: ({ row }: { row: TransactionDataType }) => {
-        return (
-          <Tooltip title={ row.status === "approved" ? "View" : "Edit" } >
-            <IconButton color="primary" onClick={() => navigate(`/admin/transactions/${row.id}`)}>
-              <SubjectIcon />
-            </IconButton>
-          </Tooltip>
-        )
-      }
+      renderCell: ({ row }: { row: TransactionDataType }) => (
+        <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
+          <IconButton color="primary" onClick={() => navigate(`/admin/transactions/${row.id}`)}>
+            <SubjectIcon />
+          </IconButton>
+        </Tooltip>
+      )
     }
-  ]
+  ];
+
+  const externalColumns = [
+    { field: '_id', headerName: 'No.', width: 70 },
+    { field: 'name_of_payor', headerName: 'Payor Name', width: 180 },
+    { field: 'reference_code', headerName: 'Reference ID', width: 160 },
+    { field: 'status', headerName: 'Status', width: 120 },
+    {
+      field: 'created_at',
+      headerName: 'Created At',
+      width: 160,
+      valueGetter: (value: string) => new Date(value).toLocaleString()
+    },
+    {
+      field: 'action',
+      headerName: 'Action',
+      width: 160,
+      renderCell: ({ row }: { row: TransactionDataType }) => (
+        <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
+          <IconButton color="primary" onClick={() => navigate(`/admin/transactions/${row.id}`)}>
+            <SubjectIcon />
+          </IconButton>
+        </Tooltip>
+      )
+    }
+  ];
 
   if (error) return <Alert severity="error">{error}</Alert>;
+
+  const studentTransactions = data?.filter((item: TransactionDataType) => item.userType === 'Student').map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
+  const externalTransactions = data?.filter((item: TransactionDataType) => item.userType === 'External').map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
+
   return (
-    <Box sx={{ flexGrow: 1, paddingX: 4, paddingY: 2 }}>
-      <Typography
-        variant="h4"
-        color="initial"
-        sx={{ marginBottom: 2 }}
-      >
+    <Box sx={{ flexGrow: 1 }}>
+      <Typography variant="h4" color="initial" sx={{ marginBottom: 2 }}>
         Transactions
       </Typography>
-      <Paper
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100%",
-          width: "100%"
-        }}
-      >
+
+      <Typography variant="h6" mt={3} mb={1} color="secondary">
+        External Transactions
+      </Typography>
+      <Paper sx={{ width: '100%', height: 400, mb: 4 }}>
         <DataGrid
-          rows={data}
+          rows={externalTransactions}
+          columns={externalColumns}
+          loading={loading}
+          disableRowSelectionOnClick
+          sx={{
+            '& .MuiDataGrid-cell': {
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              lineHeight: 1.4,
+              paddingTop: '8px',
+              paddingBottom: '8px',
+              alignContent: 'center',
+            },
+          }}
+        />
+      </Paper>
+
+      <Divider sx={{ my: 2 }} />
+
+      <Typography variant="h6" mt={3} mb={1} color="primary">
+        Student Transactions
+      </Typography>
+      <Paper sx={{ width: '100%', height: 400 }}>
+        <DataGrid
+          rows={studentTransactions}
           columns={columns}
           loading={loading}
-          showToolbar
-          sx={{ textAlign: 'center' }}
+          disableRowSelectionOnClick
+          sx={{
+            '& .MuiDataGrid-cell': {
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              lineHeight: 1.4,
+              paddingTop: '8px',
+              paddingBottom: '8px',
+              alignContent: 'center',
+            },
+          }}
         />
       </Paper>
     </Box>
-  )
-}
+  );
+};
 
-export default React.memo(ShowTransactions)
+export default React.memo(ShowTransactions);

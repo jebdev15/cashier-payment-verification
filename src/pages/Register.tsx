@@ -14,6 +14,7 @@ type RegisterDataType = {
   program: string;
   yearLevel: string;
   studentId: string;
+  payor_name: string;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -28,6 +29,7 @@ const initialRegisterData: RegisterDataType = {
   program: "",
   yearLevel: "1",
   studentId: "",
+  payor_name: "",
   firstName: "",
   middleName: "",
   lastName: "",
@@ -112,6 +114,7 @@ const Register = () => {
       formData.append("college", registerData.college);
       formData.append("program", registerData.program);
       formData.append("yearLevel", registerData.yearLevel);
+      formData.append("payorName", registerData.payor_name);
       formData.append("studentId", registerData.studentId);
       formData.append("firstName", registerData.firstName);
       formData.append("middleName", registerData.middleName);
@@ -279,58 +282,75 @@ const Register = () => {
               required={registerData.userType === "Student"}
             />
           </FormControl>
+          {/* First, Middle, Last Names */}
+          <FormControl fullWidth>
+            <TextField
+              size="small"
+              label="First Name"
+              name="firstName"
+              value={registerData.firstName}
+              onChange={handleChange}
+              slotProps={{
+                input: {
+                  sx: { input: { px: 1 } },
+                  startAdornment: <PersonIcon color="primary" />,
+                },
+              }}
+              required={registerData.userType === "Student"}
+            />
+          </FormControl>
+          <FormControl fullWidth>
+            <TextField
+              size="small"
+              label="Middle Name"
+              name="middleName"
+              value={registerData.middleName}
+              onChange={handleChange}
+              slotProps={{
+                input: {
+                  sx: { input: { px: 1 } },
+                  startAdornment: <PersonIcon color="primary" />,
+                },
+              }}
+            />
+          </FormControl>
+          <FormControl fullWidth>
+            <TextField
+              size="small"
+              label="Last Name"
+              name="lastName"
+              value={registerData.lastName}
+              onChange={handleChange}
+              slotProps={{
+                input: {
+                  sx: { input: { px: 1 } },
+                  startAdornment: <PersonIcon color="primary" />,
+                },
+              }}
+              required
+            />
+          </FormControl>
         </>
       )}
 
-      {/* First, Middle, Last Names */}
-      <FormControl fullWidth>
-        <TextField
-          size="small"
-          label="First Name"
-          name="firstName"
-          value={registerData.firstName}
-          onChange={handleChange}
-          slotProps={{
-            input: {
-              sx: { input: { px: 1 } },
-              startAdornment: <PersonIcon color="primary" />,
-            },
-          }}
-          required={registerData.userType === "Student"}
-        />
-      </FormControl>
-      <FormControl fullWidth>
-        <TextField
-          size="small"
-          label="Middle Name"
-          name="middleName"
-          value={registerData.middleName}
-          onChange={handleChange}
-          slotProps={{
-            input: {
-              sx: { input: { px: 1 } },
-              startAdornment: <PersonIcon color="primary" />,
-            },
-          }}
-        />
-      </FormControl>
-      <FormControl fullWidth>
-        <TextField
-          size="small"
-          label="Last Name"
-          name="lastName"
-          value={registerData.lastName}
-          onChange={handleChange}
-          slotProps={{
-            input: {
-              sx: { input: { px: 1 } },
-              startAdornment: <PersonIcon color="primary" />,
-            },
-          }}
-          required
-        />
-      </FormControl>
-
+      {registerData.userType === "External" && (
+        <FormControl fullWidth>
+          <TextField
+            size="small"
+            label="Name of Institution/Agency"
+            name="payor_name"
+            value={registerData.payor_name}
+            onChange={handleChange}
+            slotProps={{
+              input: {
+                sx: { input: { px: 1 } },
+                startAdornment: <BusinessIcon sx={{ mr: 1 }} color="primary" />,
+              }
+            }}
+            required
+          />
+        </FormControl>
+      )}
       {/* Email */}
       <FormControl fullWidth>
         <TextField

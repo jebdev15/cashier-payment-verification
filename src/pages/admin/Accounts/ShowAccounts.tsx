@@ -22,13 +22,14 @@ const ShowAccounts = () => {
     // { field: 'college', headerName: 'College', width: 200 },
     { field: 'program', headerName: 'Program', width: 200 },
     { field: 'yearLevel', headerName: 'Year Level', width: 100 },
-    { field: 'status', headerName: 'Status', width: 90,
+    {
+      field: 'status', headerName: 'Status', width: 90,
       renderCell: ({ row }: { row: AccountDataType }) => {
         return (
           <Typography variant="caption" sx={{ color: row.status === 'approved' ? 'green' : row.status === 'rejected' ? 'red' : 'orange' }}>{row.status.toUpperCase()}</Typography>
         )
       }
-     },
+    },
     {
       field: 'action',
       headerName: 'Action',
@@ -45,7 +46,34 @@ const ShowAccounts = () => {
       },
     },
   ];
-
+  const externalUserColumns = [
+    { field: 'id', headerName: 'No.', width: 70 },
+    { field: 'payor_name', headerName: 'Name of Institution/Agency', width: 250 },
+    { field: 'email', headerName: 'Email Address', width: 200 },
+    {
+      field: 'status', headerName: 'Status', width: 90,
+      renderCell: ({ row }: { row: AccountDataType }) => {
+        return (
+          <Typography variant="caption" sx={{ color: row.status === 'approved' ? 'green' : row.status === 'rejected' ? 'red' : 'orange' }}>{row.status.toUpperCase()}</Typography>
+        )
+      }
+    },
+    {
+      field: 'action',
+      headerName: 'Action',
+      width: 160,
+      renderCell: ({ row }: { row: AccountDataType }) => {
+        // if (row.status !== 'pending') return null;
+        return (
+          <Tooltip title={row.status === 'pending' ? 'Edit' : 'View'}>
+            <IconButton color="primary" onClick={() => navigate(`/admin/accounts/${row.user_id}`)}>
+              {(row.status === 'pending') ? <EditIcon /> : <SubjectIcon />}
+            </IconButton>
+          </Tooltip>
+        );
+      },
+    },
+  ];
   if (error) return <Alert severity="error">{error}</Alert>;
 
   const studentAccounts = data?.filter((item: AccountDataType) => item.userType === 'Student').map((item: AccountDataType, index: number) => ({ ...item, id: ++index, user_id: item.id })) || [];
@@ -56,6 +84,30 @@ const ShowAccounts = () => {
       <Typography variant={isMediumScreen ? "h5" : "h4"} color="initial" gutterBottom>
         User Account Management
       </Typography>
+
+      <Typography variant="h6" mt={3} mb={1} color="secondary">
+        External User Accounts
+      </Typography>
+      <Paper sx={{ height: 400, width: '100%' }}>
+        <DataGrid
+          columns={externalUserColumns}
+          rows={externalAccounts}
+          loading={loading}
+          disableRowSelectionOnClick
+          sx={{
+            '& .MuiDataGrid-cell': {
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              lineHeight: 1.4,
+              paddingTop: '8px',
+              paddingBottom: '8px',
+              alignContent: 'center',
+            },
+          }}
+        />
+      </Paper>
+      
+      <Divider sx={{ my: 2 }} />
 
       <Typography variant="h6" mt={3} mb={1} color="primary">
         Student User Accounts
@@ -79,25 +131,6 @@ const ShowAccounts = () => {
         />
       </Paper>
 
-      <Divider sx={{ my: 2 }} />
-
-      <Typography variant="h6" mt={3} mb={1} color="secondary">
-        External User Accounts
-      </Typography>
-      <Paper sx={{ height: 400, width: '100%' }}>
-        <DataGrid
-          columns={columns}
-          rows={externalAccounts}
-          loading={loading}
-          disableRowSelectionOnClick
-          sx={{
-            '& .MuiDataGrid-cell': {
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
-            },
-          }}
-        />
-      </Paper>
     </Box>
   );
 };

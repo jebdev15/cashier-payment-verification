@@ -11,6 +11,7 @@ const HomeLayout = React.lazy(() => import("../pages/home/Layout"));
 const StatementOfAccount = React.lazy(() => import("../pages/home/StatementOfAccount"));
 const UploadReceipt = React.lazy(() => import("../pages/home/UploadReceipt"));
 const ExternalUploadReceipt = React.lazy(() => import("../pages/home/ExternalUploadReceipt"));
+const ExternalHomePage = React.lazy(() => import("../pages/home/ExternalHomepage"));
 const TransactionHistory = React.lazy(() => import("../pages/home/TransactionHistory"));
 
 const AdminLogin = React.lazy(() => import("../pages/admin/Login"));
@@ -41,8 +42,8 @@ export const routes = createBrowserRouter([
     {
         path: "/home",
         element: <HomeLayoutContextProvider>
-                    <HomeLayout />
-                </HomeLayoutContextProvider>,
+            <HomeLayout />
+        </HomeLayoutContextProvider>,
         errorElement: <RouteErrorElement />,
         children: [
             {
@@ -54,13 +55,22 @@ export const routes = createBrowserRouter([
                 element: <UploadReceipt />,
             },
             {
-                path: "upload-receipt/external",
-                element: <ExternalUploadReceipt />,
-            },
-            {
                 path: "transaction-history",
                 element: <TransactionHistory />,
             },
+            {
+                path: "external",
+                children: [
+                    {
+                        index: true,
+                        element: <ExternalHomePage />,
+                    },
+                    {
+                        path: "upload-receipt",
+                        element: <ExternalUploadReceipt />,
+                    },
+                ]
+            }
         ],
     },
     {
@@ -70,8 +80,8 @@ export const routes = createBrowserRouter([
     {
         path: "/admin",
         element: <AdminLayoutContextProvider>
-                    <AdminLayout />
-                </AdminLayoutContextProvider>,
+            <AdminLayout />
+        </AdminLayoutContextProvider>,
         errorElement: <RouteErrorElement />,
         children: [
             {

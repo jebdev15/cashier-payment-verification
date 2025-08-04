@@ -1,6 +1,14 @@
 import React from "react";
 import { AccountCircle, ExitToApp as ExitToAppIcon } from "@mui/icons-material";
-import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
+import {
+  Box,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 import { useNavigate } from "react-router";
 import { sideNav } from "./sideNav";
 import { useCookies } from "react-cookie";
@@ -12,14 +20,6 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const [{ accessToken }, , removeCookie] = useCookies(["accessToken"]);
   const [currentTab, setCurrentTab] = React.useState<string>("sao");
-  const [filteredSideNav, setFilteredSideNav] = React.useState([
-    {
-      label: "",
-      path: "",
-      icon: "",
-      abbreviation: "",
-    }
-  ]);
   const handleChange = (path: string, selectedTab: string) => {
     navigate(`/home${path}`);
     setCurrentTab(selectedTab);
@@ -32,6 +32,8 @@ const Sidebar = () => {
     navigate("/", { replace: true });
   };
   const [userData, setUserData] = React.useState({
+    user_id: "",
+    payor_name: "",
     fullName: "",
     email: "",
     student_id: "",
@@ -40,14 +42,30 @@ const Sidebar = () => {
   });
   React.useEffect(() => {
     const decodeToken = () => {
-      const { fullName, email, student_id, isStudent, isExternal }: { fullName: string; email: string; student_id: string; isStudent: boolean; isExternal: boolean } = jwtDecode(accessToken);
-      setUserData({ fullName, email, student_id, isStudent, isExternal });
-      const filterSideNav = sideNav.filter((item) => {
-        if (isExternal) return item.abbreviation !== "sao";
-        if (isExternal) return item.abbreviation !== "up";
-        return true;
-      });
-      setFilteredSideNav(filterSideNav);
+      const {
+        payor_name,
+        fullName,
+        email,
+        student_id,
+        isStudent,
+        isExternal,
+      }: {
+        payor_name: string;
+        fullName: string;
+        email: string;
+        student_id: string;
+        isStudent: boolean;
+        isExternal: boolean;
+      } = jwtDecode(accessToken);
+      setUserData((prev) => ({
+        ...prev,
+        payor_name,
+        fullName,
+        email,
+        student_id,
+        isStudent,
+        isExternal,
+      }));
     };
     decodeToken();
   }, [accessToken]);
@@ -73,15 +91,29 @@ const Sidebar = () => {
           height: "calc(100dvh - 64px)",
           width: "100%",
           maxWidth: 300,
-          marginLeft: { md: sidebarOpen ? "0" : "-300px", xs: sidebarOpen ? "-300px" : "0" },
+          marginLeft: {
+            md: sidebarOpen ? "0" : "-300px",
+            xs: sidebarOpen ? "-300px" : "0",
+          },
           transition: "margin 300ms",
           position: { md: "relative", xs: "fixed" },
           zIndex: "999",
           bgcolor: "#f0f0f0",
         }}
       >
-        <nav style={{ display: "flex", height: "100%" }} aria-label="main mailbox folders">
-          <List sx={{ display: "flex", flexDirection: "column", gap: 1, flexGrow: 1 }} disablePadding>
+        <nav
+          style={{ display: "flex", height: "100%" }}
+          aria-label="main mailbox folders"
+        >
+          <List
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              flexGrow: 1,
+            }}
+            disablePadding
+          >
             <ListItem
               sx={{
                 display: "flex",
@@ -97,49 +129,78 @@ const Sidebar = () => {
               disablePadding
             >
               <AccountCircle sx={{ height: "100px", width: "100px" }} />
-              <Typography gutterBottom variant="body1" component="div">
-                { userData.fullName }
+              {userData.isStudent && (
+                <Typography gutterBottom variant="body1" component="div">
+                  {userData.fullName}
+                </Typography>
+              )}
+              {userData.isExternal && (
+                <Typography gutterBottom variant="body1" component="div">
+                  {userData.payor_name}
+                </Typography>
+              )}
+              <Typography
+                gutterBottom
+                variant="caption"
+                component="div"
+                color="text.secondary"
+              >
+                {userData.email}
               </Typography>
-              <Typography gutterBottom variant="caption" component="div" color="text.secondary">
-                { userData.email }
-              </Typography>
-              <Typography gutterBottom variant="caption" component="div" color="text.secondary">
-                { userData.isStudent && userData.student_id}
+              <Typography
+                gutterBottom
+                variant="caption"
+                component="div"
+                color="text.secondary"
+              >
+                {userData.isStudent && userData.student_id}
+
               </Typography>
               {userData.isStudent && (
-                <Typography gutterBottom variant="caption" component="div" color="text.secondary">
-                  Student
+                <Typography
+                  gutterBottom
+                  variant="caption"
+                  component="div"
+                  color="text.secondary"
+                >
+                  {userData.isStudent && "Student"}
+                  {userData.isExternal && "External"}
                 </Typography>
               )}
             </ListItem>
 
             {/* <Divider /> */}
             {sideNav.map((item, index) => {
-              if(userData.isExternal && ["sao", "ur"].includes(item.abbreviation)) return null;
-              if(userData.isStudent && item.abbreviation === "ur-ex") return null;
+              if (
+                userData.isExternal &&
+                ["sao", "ur"].includes(item.abbreviation)
+              )
+                return null;
+              if (userData.isStudent && item.abbreviation === "ur-ex")
+                return null;
               return (
-              <ListItem disablePadding key={index}>
-                <ListItemButton
-                  sx={{
-                    borderRadius: 4,
-                    "&.Mui-selected": {
-                      bgcolor: "background.paper",
-                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-                      "& *": {
-                        color: "primary.main",
+                <ListItem disablePadding key={index}>
+                  <ListItemButton
+                    sx={{
+                      borderRadius: 4,
+                      "&.Mui-selected": {
+                        bgcolor: "background.paper",
+                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+                        "& *": {
+                          color: "primary.main",
+                        },
                       },
-                    },
-                  }}
-                  selected={currentTab === item.abbreviation}
-                  onClick={() => handleChange(item.path, item.abbreviation)}
-                >
-                  <ListItemIcon sx={{ minWidth: 32 }}>
-                    <item.icon />
-                  </ListItemIcon>
-                  <ListItemText primary={item.label} />
-                </ListItemButton>
-              </ListItem>
-            )
+                    }}
+                    selected={currentTab === item.abbreviation}
+                    onClick={() => handleChange(item.path, item.abbreviation)}
+                  >
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <item.icon />
+                    </ListItemIcon>
+                    <ListItemText primary={item.label} />
+                  </ListItemButton>
+                </ListItem>
+              );
             })}
             <ListItem sx={{ flexGrow: 1, alignItems: "end" }} disablePadding>
               <ListItemButton

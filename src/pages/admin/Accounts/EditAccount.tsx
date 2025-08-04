@@ -20,12 +20,14 @@ const EditAccount = () => {
         college: "",
         program: "",
         yearLevel: "",
+        payor_name: "",
         student_id: "",
         email: "",
         firstName: "",
         middleName: "",
         lastName: "",
         status: "pending",
+        userType: "",
     });
     const [snackbar, setSnackbar] = useFeatureStateSnackbar();
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,7 +76,7 @@ const EditAccount = () => {
                         >
                             <Button variant="contained" sx={{ mb: 2 }} onClick={() => navigate("/admin/accounts", { replace: true })} startIcon={<ArrowBack />}>Back</Button>
                             <Typography variant="h5" fontWeight={600} gutterBottom>
-                                Account Details
+                                User Account Details
                             </Typography>
 
                             <Box
@@ -116,7 +118,6 @@ const EditAccount = () => {
                                 </Typography>
                             </Box>
                         </Paper>
-
                     ) : (
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                             <Paper
@@ -134,90 +135,135 @@ const EditAccount = () => {
                                 <Typography variant="h5" fontWeight={600} mb={3}>
                                     Edit Account
                                 </Typography>
+                                {data?.userType === "Student" && (
+                                    <Box display="flex" flexDirection="column" gap={2}>
+                                        <TextField
+                                            fullWidth
+                                            label="Student ID"
+                                            variant="outlined"
+                                            name="student_id"
+                                            value={dataToUpdate.student_id}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, student_id: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Email Address"
+                                            variant="outlined"
+                                            name="email"
+                                            value={dataToUpdate.email}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="First Name"
+                                            variant="outlined"
+                                            name="firstName"
+                                            value={dataToUpdate.firstName}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, firstName: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Middle Name"
+                                            variant="outlined"
+                                            name="middleName"
+                                            value={dataToUpdate.middleName}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, middleName: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Last Name"
+                                            variant="outlined"
+                                            name="lastName"
+                                            value={dataToUpdate.lastName}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, lastName: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="College"
+                                            variant="outlined"
+                                            name="college"
+                                            value={dataToUpdate.college}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, college: e.target.value }))}
+                                        />
 
-                                <Box display="flex" flexDirection="column" gap={2}>
-                                    <TextField
-                                        fullWidth
-                                        label="Student ID"
-                                        variant="outlined"
-                                        name="student_id"
-                                        value={dataToUpdate.student_id}
-                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, student_id: e.target.value }))}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        label="Email Address"
-                                        variant="outlined"
-                                        name="email"
-                                        value={dataToUpdate.email}
-                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        label="First Name"
-                                        variant="outlined"
-                                        name="firstName"
-                                        value={dataToUpdate.firstName}
-                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, firstName: e.target.value }))}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        label="Middle Name"
-                                        variant="outlined"
-                                        name="middleName"
-                                        value={dataToUpdate.middleName}
-                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, middleName: e.target.value }))}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        label="Last Name"
-                                        variant="outlined"
-                                        name="lastName"
-                                        value={dataToUpdate.lastName}
-                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, lastName: e.target.value }))}
-                                    />
-                                    <TextField
-                                        fullWidth
-                                        label="College"
-                                        variant="outlined"
-                                        name="college"
-                                        value={dataToUpdate.college}
-                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, college: e.target.value }))}
-                                    />
+                                        <TextField
+                                            fullWidth
+                                            label="Program"
+                                            variant="outlined"
+                                            name="program"
+                                            value={dataToUpdate.program}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, program: e.target.value }))}
+                                        />
+                                        <FormControl fullWidth>
+                                            <InputLabel>Status</InputLabel>
+                                            <Select
+                                                value={dataToUpdate.status}
+                                                label="Status"
+                                                name="status"
+                                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
+                                                disabled={data && data?.status === "approved"}
+                                            >
+                                                <MenuItem value="pending">Pending</MenuItem>
+                                                <MenuItem value="approved">Approve</MenuItem>
+                                                <MenuItem value="rejected">Reject</MenuItem>
+                                            </Select>
+                                        </FormControl>
 
-                                    <TextField
-                                        fullWidth
-                                        label="Program"
-                                        variant="outlined"
-                                        name="program"
-                                        value={dataToUpdate.program}
-                                        onChange={(e) => setDataToUpdate((prev) => ({ ...prev, program: e.target.value }))}
-                                    />
-                                    <FormControl fullWidth>
-                                        <InputLabel>Status</InputLabel>
-                                        <Select
-                                            value={dataToUpdate.status}
-                                            label="Status"
-                                            name="status"
-                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
-                                            disabled={data && data?.status === "approved"}
+                                        <Button
+                                            type="submit"
+                                            variant="contained"
+                                            color="success"
+                                            disabled={loading.form || dataToUpdate.status === "pending"}
+                                            sx={{ mt: 2, py: 1.5, fontWeight: 600 }}
                                         >
-                                            <MenuItem value="pending">Pending</MenuItem>
-                                            <MenuItem value="approved">Approve</MenuItem>
-                                            <MenuItem value="rejected">Reject</MenuItem>
-                                        </Select>
-                                    </FormControl>
+                                            {loading.form ? "Updating..." : "Update"}
+                                        </Button>
+                                    </Box>
+                                )}
+                                {data?.userType === "External" && (
+                                    <Box display="flex" flexDirection="column" gap={2}>
+                                        <TextField
+                                            fullWidth
+                                            label="Name of Institution/Agency"
+                                            variant="outlined"
+                                            name="payor_name"
+                                            value={dataToUpdate.payor_name}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, payor_name: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Email Address"
+                                            variant="outlined"
+                                            name="email"
+                                            value={dataToUpdate.email}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
+                                        />
+                                        <FormControl fullWidth>
+                                            <InputLabel>Status</InputLabel>
+                                            <Select
+                                                value={dataToUpdate.status}
+                                                label="Status"
+                                                name="status"
+                                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
+                                                disabled={data && data?.status === "approved"}
+                                            >
+                                                <MenuItem value="pending">Pending</MenuItem>
+                                                <MenuItem value="approved">Approve</MenuItem>
+                                                <MenuItem value="rejected">Reject</MenuItem>
+                                            </Select>
+                                        </FormControl>
 
-                                    <Button
-                                        type="submit"
-                                        variant="contained"
-                                        color="success"
-                                        disabled={loading.form || dataToUpdate.status === "pending"}
-                                        sx={{ mt: 2, py: 1.5, fontWeight: 600 }}
-                                    >
-                                        {loading.form ? "Updating..." : "Update"}
-                                    </Button>
-                                </Box>
+                                        <Button
+                                            type="submit"
+                                            variant="contained"
+                                            color="success"
+                                            disabled={loading.form || dataToUpdate.status === "pending"}
+                                            sx={{ mt: 2, py: 1.5, fontWeight: 600 }}
+                                        >
+                                            {loading.form ? "Updating..." : "Update"}
+                                        </Button>
+                                    </Box>
+                                )}
                             </Paper>
                         </Box>
                     )}

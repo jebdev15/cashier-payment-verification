@@ -4,6 +4,7 @@ export type AccountDataType = {
     college: string;
     program: string;
     yearLevel: string;
+    payor_name: string;
     student_id: string;
     email: string;
     firstName: string;

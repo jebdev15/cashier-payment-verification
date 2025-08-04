@@ -1,12 +1,10 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from "@mui/material";
+import { Alert, Box, Button, FormControl, FormLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
-import SpanningTable from "./SpanningTableForUR";
 import imageCompression from "browser-image-compression";
 import { axiosInstanceWithAuthorization } from "../../api/app";
 import { base64ToBlob } from "../../utils/base64ToBlog";
 import { useCookies } from "react-cookie";
-import { FileUploadLogType } from "../../types/fileUpload";
 import { isAxiosError } from "axios";
 import { useAxios } from "@/hooks/useAxios";
 import SnackbarProvider from "@/components/Snackbar";
@@ -19,7 +17,6 @@ const UploadReceipt = () => {
   const [imageName, setImageName] = React.useState<string | undefined>(undefined);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean }>({ upload: false, log: false });
-  const [data, setData] = React.useState<FileUploadLogType[]>([]);
   const [referenceId, setReferenceId] = React.useState<string>("");
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
   const [remarks, setRemarks] = React.useState<string>("");
@@ -108,8 +105,8 @@ const UploadReceipt = () => {
     }
   };
   React.useEffect(() => {
-        setReferenceId(referenceData?.reference_code)
-    }, [referenceData])
+    setReferenceId(referenceData?.reference_code)
+  }, [referenceData])
   return (
     <Box sx={{ height: "100%", flexGrow: 1 }}>
       <Typography variant={isMediumScreen ? "h5" : "h4"} color="initial" sx={{ marginBottom: 4 }}>
@@ -141,9 +138,13 @@ const UploadReceipt = () => {
                 }}
                 label="Reference ID"
                 value={referenceId}
-                disabled={referenceData?.reference_code !== ""}
-                onChange={(e) => setReferenceId(e.target.value)}
+                disabled
               />
+              {referenceId === "" && (
+                <FormLabel>
+                  <Alert severity="info">Please generate a reference ID first before uploading a receipt.</Alert>
+                </FormLabel>
+              )}
             </FormControl>
           </Grid>
           <Grid size={{ xs: 12 }}>
@@ -217,7 +218,7 @@ const UploadReceipt = () => {
           )}
         </Grid>
       </Grid>
-      <SnackbarProvider 
+      <SnackbarProvider
         open={snackbar.open}
         message={snackbar.message}
         severity={snackbar.severity}

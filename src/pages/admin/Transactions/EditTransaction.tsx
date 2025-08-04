@@ -100,9 +100,6 @@ const EditTransaction = () => {
             setLoadingImage(false);
         }
     }, [data]);
-    React.useEffect(() => {
-        console.log(image)
-    }, [image])
     if (loading) return <Typography>Loading...</Typography>
     if (error) return <Alert severity="error">{error}</Alert>
     return (
