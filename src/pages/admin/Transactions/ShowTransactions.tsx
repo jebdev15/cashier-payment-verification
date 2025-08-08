@@ -5,9 +5,13 @@ import { DataGrid } from '@mui/x-data-grid'
 import { TransactionDataType } from './type'
 import { useNavigate } from 'react-router'
 import { useAxios } from '@/hooks/useAxios'
+import TransactionModal from '@/components/modals/TransactionModal'
 
 const ShowTransactions = () => {
   const navigate = useNavigate();
+  const [open, setOpen] = React.useState(false);
+  const [selectedRow, setSelectedRow] = React.useState<TransactionDataType | null>(null);
+  const [editable, setEditable] = React.useState(false);
   const { data, loading, error } = useAxios({
     url: '/api/transactions',
     authorized: true,
@@ -28,13 +32,20 @@ const ShowTransactions = () => {
       field: 'action',
       headerName: 'Action',
       width: 160,
-      renderCell: ({ row }: { row: TransactionDataType }) => (
-        <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
-          <IconButton color="primary" onClick={() => navigate(`/admin/transactions/${row.id}`)}>
-            <SubjectIcon />
-          </IconButton>
-        </Tooltip>
-      )
+      renderCell: ({ row }: { row: TransactionDataType }) => {
+        const handleClick = () => {
+          setOpen(true);
+          setSelectedRow(row);
+          setEditable(row.status === 'pending');
+        }
+        return (
+          <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
+            <IconButton color="primary" onClick={handleClick}>
+              <SubjectIcon />
+            </IconButton>
+          </Tooltip>
+        );
+      }
     }
   ];
 
@@ -53,13 +64,19 @@ const ShowTransactions = () => {
       field: 'action',
       headerName: 'Action',
       width: 160,
-      renderCell: ({ row }: { row: TransactionDataType }) => (
-        <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
-          <IconButton color="primary" onClick={() => navigate(`/admin/transactions/${row.id}`)}>
-            <SubjectIcon />
-          </IconButton>
-        </Tooltip>
-      )
+      renderCell: ({ row }: { row: TransactionDataType }) => {
+        const handleClick = () => {
+          setOpen(true);
+          setSelectedRow(row);
+        }
+        return (
+          <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
+            <IconButton color="primary" onClick={handleClick}>
+              <SubjectIcon />
+            </IconButton>
+          </Tooltip>
+        );
+      }
     }
   ];
 
@@ -69,57 +86,65 @@ const ShowTransactions = () => {
   const externalTransactions = data?.filter((item: TransactionDataType) => item.userType === 'External').map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Typography variant="h4" color="initial" sx={{ marginBottom: 2 }}>
-        Transactions
-      </Typography>
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <Box sx={{ flexGrow: 1 }}>
+        <Typography variant="h4" color="initial" sx={{ marginBottom: 2 }}>
+          Transactions
+        </Typography>
 
-      <Typography variant="h6" mt={3} mb={1} color="secondary">
-        External Transactions
-      </Typography>
-      <Paper sx={{ width: '100%', height: 400, mb: 4 }}>
-        <DataGrid
-          rows={externalTransactions}
-          columns={externalColumns}
-          loading={loading}
-          disableRowSelectionOnClick
-          sx={{
-            '& .MuiDataGrid-cell': {
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
-              lineHeight: 1.4,
-              paddingTop: '8px',
-              paddingBottom: '8px',
-              alignContent: 'center',
-            },
-          }}
-        />
-      </Paper>
+        <Typography variant="h6" mt={3} mb={1} color="secondary">
+          External Transactions
+        </Typography>
+        <Paper sx={{ width: '100%', height: 400, mb: 4 }}>
+          <DataGrid
+            rows={externalTransactions}
+            columns={externalColumns}
+            loading={loading}
+            disableRowSelectionOnClick
+            sx={{
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+                lineHeight: 1.4,
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                alignContent: 'center',
+              },
+            }}
+          />
+        </Paper>
 
-      <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 2 }} />
 
-      <Typography variant="h6" mt={3} mb={1} color="primary">
-        Student Transactions
-      </Typography>
-      <Paper sx={{ width: '100%', height: 400 }}>
-        <DataGrid
-          rows={studentTransactions}
-          columns={columns}
-          loading={loading}
-          disableRowSelectionOnClick
-          sx={{
-            '& .MuiDataGrid-cell': {
-              whiteSpace: 'normal',
-              wordBreak: 'break-word',
-              lineHeight: 1.4,
-              paddingTop: '8px',
-              paddingBottom: '8px',
-              alignContent: 'center',
-            },
-          }}
-        />
-      </Paper>
-    </Box>
+        <Typography variant="h6" mt={3} mb={1} color="primary">
+          Student Transactions
+        </Typography>
+        <Paper sx={{ width: '100%', height: 400 }}>
+          <DataGrid
+            rows={studentTransactions}
+            columns={columns}
+            loading={loading}
+            disableRowSelectionOnClick
+            sx={{
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+                lineHeight: 1.4,
+                paddingTop: '8px',
+                paddingBottom: '8px',
+                alignContent: 'center',
+              },
+            }}
+          />
+        </Paper>
+      </Box>
+      <TransactionModal
+        open={open}
+        onClose={() => setOpen(false)}
+        data={selectedRow}
+        editable={editable}
+      />
+    </React.Suspense>
   );
 };
 

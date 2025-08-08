@@ -26,7 +26,7 @@ const ExternalHomePage = () => {
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button size="small" onClick={() => navigate("/home/external/upload")}>
+                            <Button size="small" onClick={() => navigate("/home/external/upload-receipt")}>
                                 Upload Now
                             </Button>
                         </CardActions>
@@ -43,7 +43,7 @@ const ExternalHomePage = () => {
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button size="small" onClick={() => navigate("/home/external/transactions")}>
+                            <Button size="small" onClick={() => navigate("/home/transaction-history")}>
                                 View History
                             </Button>
                         </CardActions>

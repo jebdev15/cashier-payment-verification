@@ -9,6 +9,7 @@ import {
     Grid,
     Typography,
 } from "@mui/material";
+import fees from "@/pages/admin/Transactions/fees";
 
 export type TransactionData = {
     id?: string;
@@ -20,8 +21,10 @@ export type TransactionData = {
     amount_paid?: number;
     particulars?: string;
     purpose?: string;
+    payment_id?: string;
     status?: string;
-    created_at?: string;
+    expires_at?: Date;
+    created_at?: Date;
     filePath?: string;
 };
 

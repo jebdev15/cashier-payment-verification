@@ -89,30 +89,30 @@ const EditAccount = () => {
                                     mt: 2,
                                 }}
                             >
-                                <Typography component="dt" fontWeight={500}>Student ID</Typography>
+                                <Typography component="dt" fontWeight={600}>Student ID</Typography>
                                 <Typography component="dd">{data?.student_id}</Typography>
 
-                                <Typography component="dt" fontWeight={500}>Email Address</Typography>
+                                <Typography component="dt" fontWeight={600}>Email Address</Typography>
                                 <Typography component="dd">{data?.email}</Typography>
 
-                                <Typography component="dt" fontWeight={500}>Name</Typography>
+                                <Typography component="dt" fontWeight={600}>Name</Typography>
                                 <Typography component="dd">
-                                    {`${data?.lastName.toUpperCase()}, ${data?.firstName} ${data?.middleName}`}
+                                    {`${data?.lastName?.toUpperCase()}, ${data?.firstName} ${data?.middleName}`}
                                 </Typography>
 
-                                <Typography component="dt" fontWeight={500}>College</Typography>
+                                <Typography component="dt" fontWeight={600}>College</Typography>
                                 <Typography component="dd">{data?.college?.toUpperCase()}</Typography>
 
-                                <Typography component="dt" fontWeight={500}>Program</Typography>
+                                <Typography component="dt" fontWeight={600}>Program</Typography>
                                 <Typography component="dd">{data?.program?.toUpperCase()}</Typography>
 
-                                <Typography component="dt" fontWeight={500}>Year Level</Typography>
+                                <Typography component="dt" fontWeight={600}>Year Level</Typography>
                                 <Typography component="dd">{data?.yearLevel}</Typography>
 
-                                <Typography component="dt" fontWeight={500}>User Type</Typography>
+                                <Typography component="dt" fontWeight={600}>User Type</Typography>
                                 <Typography component="dd">{data?.userType}</Typography>
 
-                                <Typography component="dt" fontWeight={500}>Status</Typography>
+                                <Typography component="dt" fontWeight={600}>Status</Typography>
                                 <Typography component="dd" sx={{ textTransform: 'capitalize' }}>
                                     {data?.status}
                                 </Typography>

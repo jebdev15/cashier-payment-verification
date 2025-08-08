@@ -7,6 +7,7 @@ import { isAxiosError } from "axios";
 import { axiosInstance } from "../api/app";
 import { useCookies } from "react-cookie";
 import SnackbarProvider from "../components/Snackbar";
+import { jwtDecode } from "jwt-decode";
 type LoginData = {
   email: string;
   code: string;
@@ -62,12 +63,13 @@ const Login = () => {
   };
   const handleRedirectToHome = (token: string) => {
     return new Promise<void>((resolve) => {
+      const { isExternal } = jwtDecode<{ isExternal: boolean }>(token);
       setTimeout(() => {
         setCookie("accessToken", token, {
           path: "/",
           expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1), // 1 day
         });
-        navigate("/home", { replace: true });
+        navigate(isExternal ? "/home/external" : "/home", { replace: true });
         resolve();
       }, 1000);
     });

@@ -13,11 +13,22 @@ const UploadReceipt = () => {
   const [image, setImage] = React.useState<string | null>(null);
   const [imageName, setImageName] = React.useState<string | undefined>(undefined);
   const [error, setError] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean }>({ upload: false, log: false });
+  const [loading, setLoading] = React.useState<{ upload: boolean; generateCode: boolean }>({ upload: false, generateCode: false });
   const [referenceId, setReferenceId] = React.useState<string>("");
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
   const [remarks, setRemarks] = React.useState<string>("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const handleGenerateReferenceId = async () => {
+    setLoading((prevState) => ({ ...prevState, generateCode: true }));
+    try {
+      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/External`);
+      setReferenceId(data2.reference_code);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading((prevState) => ({ ...prevState, generateCode: false }));
+    }
+  };
   const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -122,9 +133,10 @@ const UploadReceipt = () => {
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
               <TextField
+                sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
                 slotProps={{
                   input: {
-                    sx: { borderRadius: 2 },
+                    sx: { borderRadius: 2, input: { px: 1 } },
                     endAdornment: (
                       <Tooltip title="Send Code">
                         <span>
@@ -139,11 +151,9 @@ const UploadReceipt = () => {
                             }}
                             // endIcon={<SendIcon />}
                             variant="contained"
-                            // onClick={handleSendEmail}
-                            // disabled={!registerData.email || loading.sendCode}
+                            onClick={handleGenerateReferenceId}
                           >
-                            {/* {loading.sendCode ? "Generating..." : "Generate Reference ID"} */}
-                            Generate Reference ID
+                            {loading.generateCode ? "Generating..." : "Generate Reference ID"}
                           </Button>
                         </span>
                       </Tooltip>
@@ -152,6 +162,7 @@ const UploadReceipt = () => {
                 }}
                 label="Reference ID"
                 value={referenceId}
+                disabled
               />
             </FormControl>
           </Grid>
