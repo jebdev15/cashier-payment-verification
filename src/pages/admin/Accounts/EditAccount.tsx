@@ -89,25 +89,39 @@ const EditAccount = () => {
                                     mt: 2,
                                 }}
                             >
-                                <Typography component="dt" fontWeight={600}>Student ID</Typography>
-                                <Typography component="dd">{data?.student_id}</Typography>
+                                {data?.userType === "Student" && (
+                                    <>
+                                        <Typography component="dt" fontWeight={600}>Student ID</Typography>
+                                        <Typography component="dd">{data?.student_id}</Typography>
 
-                                <Typography component="dt" fontWeight={600}>Email Address</Typography>
-                                <Typography component="dd">{data?.email}</Typography>
+                                        <Typography component="dt" fontWeight={600}>Email Address</Typography>
+                                        <Typography component="dd">{data?.email}</Typography>
 
-                                <Typography component="dt" fontWeight={600}>Name</Typography>
-                                <Typography component="dd">
-                                    {`${data?.lastName?.toUpperCase()}, ${data?.firstName} ${data?.middleName}`}
-                                </Typography>
+                                        <Typography component="dt" fontWeight={600}>Full name</Typography>
+                                        <Typography component="dd">
+                                            {`${data?.lastName?.toUpperCase()}, ${data?.firstName} ${data?.middleName}`}
+                                        </Typography>
 
-                                <Typography component="dt" fontWeight={600}>College</Typography>
-                                <Typography component="dd">{data?.college?.toUpperCase()}</Typography>
+                                        <Typography component="dt" fontWeight={600}>College</Typography>
+                                        <Typography component="dd">{data?.college?.toUpperCase()}</Typography>
 
-                                <Typography component="dt" fontWeight={600}>Program</Typography>
-                                <Typography component="dd">{data?.program?.toUpperCase()}</Typography>
+                                        <Typography component="dt" fontWeight={600}>Program</Typography>
+                                        <Typography component="dd">{data?.program?.toUpperCase()}</Typography>
 
-                                <Typography component="dt" fontWeight={600}>Year Level</Typography>
-                                <Typography component="dd">{data?.yearLevel}</Typography>
+                                        <Typography component="dt" fontWeight={600}>Year Level</Typography>
+                                        <Typography component="dd">{data?.yearLevel}</Typography>
+                                    </>
+                                )}
+                                {data?.userType === "External" && (
+                                    <>
+                                        <Typography component="dt" fontWeight={600}>Email Address</Typography>
+                                        <Typography component="dd">{data?.email}</Typography>
+
+                                        <Typography component="dt" fontWeight={600}>Name of Instituion/Agency</Typography>
+                                        <Typography component="dd">{data?.payor_name}</Typography>
+                                    </>
+                                )}
+
 
                                 <Typography component="dt" fontWeight={600}>User Type</Typography>
                                 <Typography component="dd">{data?.userType}</Typography>

@@ -16,7 +16,7 @@ const ExternalHomePage = () => {
             </Typography>
 
             <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card elevation={3}>
                         <CardContent>
                             <CloudUpload color="primary" sx={{ fontSize: 40, mb: 1 }} />
@@ -33,7 +33,7 @@ const ExternalHomePage = () => {
                     </Card>
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Card elevation={3}>
                         <CardContent>
                             <History color="secondary" sx={{ fontSize: 40, mb: 1 }} />
@@ -50,7 +50,7 @@ const ExternalHomePage = () => {
                     </Card>
                 </Grid>
 
-                <Grid size={{ xs: 12, md: 4 }}>
+                {/* <Grid size={{ xs: 12, md: 4 }}>
                     <Card elevation={3}>
                         <CardContent>
                             <Info color="action" sx={{ fontSize: 40, mb: 1 }} />
@@ -65,7 +65,7 @@ const ExternalHomePage = () => {
                             </Button>
                         </CardActions>
                     </Card>
-                </Grid>
+                </Grid> */}
             </Grid>
         </Box>
     );

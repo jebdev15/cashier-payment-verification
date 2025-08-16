@@ -8,7 +8,13 @@ import {
     Button,
     Grid,
     Typography,
+    Select,
+    MenuItem,
+    InputLabel,
+    FormControl,
+    IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import fees from "@/pages/admin/Transactions/fees";
 
 export type TransactionData = {
@@ -73,9 +79,25 @@ const TransactionModal: React.FC<Props> = ({
         }
     }, [data]);
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-            <DialogTitle>
-                {editable ? "Update Transaction" : "View Transaction"}
+        <Dialog open={open} onClose={!editable ? onClose : undefined} maxWidth="md" fullWidth>
+            <DialogTitle
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    pr: 2, // Add padding to prevent close icon from touching the edge
+                }}
+            >
+                <Typography variant="h6">
+                    {editable ? "Update Transaction" : "View Transaction"}
+                </Typography>
+                <IconButton
+                    aria-label="close"
+                    onClick={onClose} // your close function
+                    size="small"
+                >
+                    <CloseIcon />
+                </IconButton>
             </DialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2}>
@@ -142,14 +164,19 @@ const TransactionModal: React.FC<Props> = ({
                         />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
-                        <TextField
-                            label="Status"
-                            name="status"
-                            value={formData?.status || ""}
-                            onChange={handleChange}
-                            fullWidth
-                            disabled={!editable}
-                        />
+                        <FormControl fullWidth>
+                            <InputLabel htmlFor="purpose-select">Purpose</InputLabel>
+                            <Select
+                                label="Status"
+                                name="status"
+                                value={formData?.status || ""}
+                                onChange={(e) => setFormData((prev) => ({ ...prev!, status: e.target.value }))}
+                                fullWidth
+                                disabled={!editable}
+                            >
+                                {["pending", "approved", "rejected"].map((status) => <MenuItem key={status} selected={status === formData?.status} value={status}>{status}</MenuItem>)}
+                            </Select>
+                        </FormControl>
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <TextField
@@ -192,16 +219,13 @@ const TransactionModal: React.FC<Props> = ({
                     </Grid>
                 </Grid>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} color="inherit">
-                    Close
-                </Button>
-                {editable && (
+            {editable && (
+                <DialogActions>
                     <Button onClick={handleSubmit} variant="contained" color="primary">
                         Save
                     </Button>
-                )}
-            </DialogActions>
+                </DialogActions>
+            )}
         </Dialog>
     );
 };

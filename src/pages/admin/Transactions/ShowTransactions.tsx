@@ -51,7 +51,7 @@ const ShowTransactions = () => {
 
   const externalColumns = [
     { field: '_id', headerName: 'No.', width: 70 },
-    { field: 'name_of_payor', headerName: 'Payor Name', width: 180 },
+    { field: 'name_of_payor', headerName: 'Name of Institution/Agency', width: 250 },
     { field: 'reference_code', headerName: 'Reference ID', width: 160 },
     { field: 'status', headerName: 'Status', width: 120 },
     {
