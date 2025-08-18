@@ -16,7 +16,7 @@ const TransactionHistory = () => {
   });
   const columns = [
     { field: "_id", headerName: "No.", width: 70 },
-    { field: "reference_code", headerName: "Reference ID", width: 200 },
+    { field: "reference_id", headerName: "Reference ID", width: 200 },
     { field: "status", headerName: "Status", width: 160 },
     { field: "created_at", headerName: "Created At", width: 200, valueGetter: (value: string) => new Date(value).toLocaleString() },
     {

@@ -1,11 +1,12 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from "@mui/material";
-import { UploadFile as UploadFileIcon } from "@mui/icons-material";
+import { Alert, Box, Button, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from "@mui/material";
+import { GeneratingTokens as GeneratingTokensIcon, UploadFile as UploadFileIcon } from "@mui/icons-material";
 import imageCompression from "browser-image-compression";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { base64ToBlob } from "@/utils/base64ToBlog";
 import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
+import { useAxios } from "@/hooks/useAxios";
 
 const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
 const UploadReceipt = () => {
@@ -18,11 +19,18 @@ const UploadReceipt = () => {
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
   const [remarks, setRemarks] = React.useState<string>("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const { data: referenceData } = useAxios({
+    url: "/api/transactions/valid-reference-id",
+    method: "GET",
+    authorized: true
+  })
+
   const handleGenerateReferenceId = async () => {
     setLoading((prevState) => ({ ...prevState, generateCode: true }));
     try {
       const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/External`);
-      setReferenceId(data2.reference_code);
+      setReferenceId(data2.reference_id);
     } catch (error) {
       console.error(error);
     } finally {
@@ -107,7 +115,9 @@ const UploadReceipt = () => {
       setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
     }
   };
-
+  React.useEffect(() => {
+    setReferenceId(referenceData?.reference_id)
+  }, [referenceData])
   return (
     <Box sx={{ height: "100%", flexGrow: 1 }}>
       <Typography variant="h4" color="initial" sx={{ marginBottom: 4 }}>
@@ -138,8 +148,8 @@ const UploadReceipt = () => {
                   input: {
                     sx: { borderRadius: 2, input: { px: 1 } },
                     endAdornment: (
-                      <Tooltip title="Send Code">
-                        <span>
+                      <Tooltip title="Generate Reference ID" placement="top">
+                        {/* <span>
                           <Button
                             size="small"
                             sx={{
@@ -155,7 +165,12 @@ const UploadReceipt = () => {
                           >
                             {loading.generateCode ? "Generating..." : "Generate Reference ID"}
                           </Button>
-                        </span>
+                        </span> */}
+                        <IconButton
+                          size="small"
+                          onClick={handleGenerateReferenceId}>
+                          <GeneratingTokensIcon />
+                        </IconButton>
                       </Tooltip>
                     ),
                   },

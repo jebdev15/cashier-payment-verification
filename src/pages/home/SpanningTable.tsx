@@ -8,6 +8,7 @@ function ccyFormat(num: number) {
 }
 
 interface Row {
+  student_account_id: number;
   item_title: string;
   fullName: string;
   program_code: string;
@@ -27,11 +28,13 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
   const [balance, setBalance] = React.useState<number>(0);
   const [amountPaid, setAmountPaid] = React.useState<number>(0);
   const [referenceId, setReferenceId] = React.useState<string>("");
+  const [studentAccountId, setStudentAccountId] = React.useState<number>(0);
   const [particulars, setParticulars] = React.useState<string>("TUITION AND MISCELLANEOUS FEES");
   const handleGenerateReferenceId = async () => {
     setLoading((prevState) => ({ ...prevState, grid: true }));
     try {
       const formData = new FormData();
+      formData.append("student_account_id", studentAccountId.toString());
       formData.append("name_of_payor", data[0].fullName);
       formData.append("program_code", data[0].program_code);
       formData.append("year_level_roman", data[0].year_level_roman);
@@ -41,8 +44,8 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
       formData.append("balance", balance.toString());
       formData.append("amount_paid", amountPaid.toString());
       formData.append("particulars", particulars);
-      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id`, formData);
-      setReferenceId(data2.reference_code);
+      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/Student`, formData);
+      setReferenceId(data2.reference_id);
     } catch (error) {
       console.error(error);
     } finally {
@@ -56,6 +59,8 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
     const uniqueTotal = Array.from(new Set(rows.map((row) => row.total))).map((total) => ({ ...rows.find((row) => row.total === total), total: parseFloat(total) }));
     const uniqueBalance = Array.from(new Set(rows.map((row) => row.balance))).map((balance) => ({ ...rows.find((row) => row.balance === balance), balance: parseFloat(balance) }));
     const uniqueAmountPaid = Array.from(new Set(rows.map((row) => row.amount_paid))).map((amountPaid) => ({ ...rows.find((row) => row.amount_paid === amountPaid), amount_paid: parseFloat(amountPaid) }));
+    const uniqueStudentAccountIds = Array.from(new Set(rows.map((row) => row.student_account_id)));
+    setStudentAccountId(uniqueStudentAccountIds[0]);
     setTotalAmount(uniqueTotal[0].total);
     setBalance(uniqueBalance[0].balance);
     setAmountPaid(uniqueAmountPaid[0].amount_paid);

@@ -106,9 +106,6 @@ const Register = () => {
     setLoading((prev) => ({ ...prev, registrationForm: true }));
 
     try {
-      // const token = await recaptcha.current?.executeAsync();
-      // recaptcha.current?.reset();
-
       const formData = new FormData();
       formData.append("userType", registerData.userType);
       formData.append("college", registerData.college);
@@ -125,10 +122,10 @@ const Register = () => {
 
       const { data, status } = await axiosInstance.post("/api/auth/register", formData);
       setSnackbar((prev) => ({ ...prev, message: data.message, severity: status === 201 ? "success" : 'info' }));
-      if (status === 201) setTimeout(() => navigate("/"), 1000);
+      if (status === 201) setTimeout(() => navigate("/"), 3000);
     } catch (error) {
       if (isAxiosError(error)) {
-        setSnackbar((prev) => ({ ...prev, message: error.response?.data || error.request?.response || "Something went wrong", severity: "error" }));
+        setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: "error" }));
       }
     } finally {
       setSnackbar((prev) => ({ ...prev, open: true }));

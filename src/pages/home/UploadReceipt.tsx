@@ -105,7 +105,7 @@ const UploadReceipt = () => {
     }
   };
   React.useEffect(() => {
-    setReferenceId(referenceData?.reference_code)
+    setReferenceId(referenceData?.reference_id)
   }, [referenceData])
   return (
     <Box sx={{ height: "100%", flexGrow: 1 }}>

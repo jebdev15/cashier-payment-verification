@@ -2,25 +2,33 @@ import React from 'react'
 import { Alert, Box, IconButton, Paper, Tooltip, Typography, Divider } from '@mui/material'
 import { Subject as SubjectIcon } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
-import { TransactionDataType } from './type'
-import { useNavigate } from 'react-router'
+import { SnackbarState, TransactionDataType,  } from './type'
+// import { useNavigate } from 'react-router'
 import { useAxios } from '@/hooks/useAxios'
 import TransactionModal from '@/components/modals/TransactionModal'
+// import { axiosInstanceWithAuthorization } from '@/api/app'
 
 const ShowTransactions = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<TransactionDataType | null>(null);
   const [editable, setEditable] = React.useState(false);
+  const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: undefined });
+  const [entryModes, setEntryModes] = React.useState<string[]>([]);
+
   const { data, loading, error } = useAxios({
     url: '/api/transactions',
     authorized: true,
   });
 
+  const { data: entryModeData } = useAxios({
+    url: '/api/transactions/entry-mode',
+    authorized: true,
+  });
   const columns = [
     { field: '_id', headerName: 'No.', width: 70 },
     { field: 'fullName', headerName: 'Full name', width: 180 },
-    { field: 'reference_code', headerName: 'Reference ID', width: 160 },
+    { field: 'reference_id', headerName: 'Reference ID', width: 160 },
     { field: 'status', headerName: 'Status', width: 120 },
     {
       field: 'created_at',
@@ -52,7 +60,7 @@ const ShowTransactions = () => {
   const externalColumns = [
     { field: '_id', headerName: 'No.', width: 70 },
     { field: 'name_of_payor', headerName: 'Name of Institution/Agency', width: 250 },
-    { field: 'reference_code', headerName: 'Reference ID', width: 160 },
+    { field: 'reference_id', headerName: 'Reference ID', width: 160 },
     { field: 'status', headerName: 'Status', width: 120 },
     {
       field: 'created_at',
@@ -80,6 +88,11 @@ const ShowTransactions = () => {
     }
   ];
 
+  React.useEffect(() => {
+    if(entryModeData && entryModeData.length > 0) {
+      setEntryModes(entryModeData)
+    }
+  },[entryModeData])
   if (error) return <Alert severity="error">{error}</Alert>;
 
   const studentTransactions = data?.filter((item: TransactionDataType) => item.userType === 'Student').map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
@@ -138,14 +151,22 @@ const ShowTransactions = () => {
           />
         </Paper>
       </Box>
-      <TransactionModal
-        open={open}
-        onClose={() => setOpen(false)}
-        data={selectedRow}
-        editable={editable}
-      />
+      {
+        open && (
+          <TransactionModal
+            open={open}
+            onClose={() => setOpen(false)}
+            data={selectedRow}
+            editable={editable}
+          />
+        )
+      }
     </React.Suspense>
   );
 };
 
 export default React.memo(ShowTransactions);
+function useEffect(arg0: () => void, arg1: any[]) {
+  throw new Error('Function not implemented.')
+}
+

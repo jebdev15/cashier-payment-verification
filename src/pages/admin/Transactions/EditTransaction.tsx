@@ -11,7 +11,7 @@ type TransactionDataType = {
     id: number
     fullName: string
     student_id: string
-    reference_code: string
+    reference_id: string
     payment_id: string
     amount: number | string
     account: string
@@ -30,7 +30,7 @@ const initialTransactionData: TransactionDataType = {
     id: 0,
     name_of_payor: "",
     student_id: "",
-    reference_code: "",
+    reference_id: "",
     payment_id: "",
     amount: 0,
     account: "",
@@ -119,7 +119,7 @@ const EditTransaction = () => {
                 >
                     <Typography variant="body1" color="initial">Student ID: {dataToUpdate?.student_id}</Typography>
                     <Typography variant="body1" color="initial">Name of Payor: {dataToUpdate?.fullName}</Typography>
-                    <Typography variant="body1" color="initial">Reference Number: {dataToUpdate?.reference_code}</Typography>
+                    <Typography variant="body1" color="initial">Reference Number: {dataToUpdate?.reference_id}</Typography>
                     {/* <Typography variant="body1" color="initial">Purpose: {dataToUpdate?.purpose}</Typography> */}
                     <Typography variant="body1" color="initial">Amount: {dataToUpdate?.amount}</Typography>
                     {data && data[0]?.status === "pending" ? (
