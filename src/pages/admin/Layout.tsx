@@ -5,6 +5,7 @@ import Header from './Header'
 import Sidebar from './Sidebar'
 import { useCookies } from 'react-cookie'
 import { jwtDecode } from 'jwt-decode'
+import CustomCircularProgress from '@/components/CustomCircularProgress'
 
 type JWTDecodeDataType = {
   isAuthenticated: boolean | number
@@ -33,7 +34,7 @@ const Layout = () => {
     }
     verifySession()
   }, [accessToken])
-  if (loading) return <CircularProgress />
+  if (loading) return <CustomCircularProgress />
   return (
     <Box 
       sx={{

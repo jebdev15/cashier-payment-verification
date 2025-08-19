@@ -24,6 +24,8 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { axiosInstance } from "@/api/app";
 import { fees } from "@/pages/admin/Transactions/fees"; // Assuming fees is an array of fee objects
+import { SnackbarState } from "@/pages/admin/Transactions/type";
+import SnackbarProvider from "../Snackbar";
 
 export type TransactionData = {
     id?: string;
@@ -47,14 +49,25 @@ export type TransactionData = {
 type Props = {
     open: boolean;
     data: TransactionData | null;
+    entryModes?: TransactionModalEntryModeType[];
+    snackbar?: SnackbarState;
     onClose: () => void;
     onSave?: (updatedData: TransactionData) => void;
     editable?: boolean;
 };
 
+type TransactionModalEntryModeType = {
+    entry_mode_id: number;
+    entry_mode_title: string;
+    entry_mode_desc: string;
+    credit: string;
+    debit: string;
+}
 const TransactionModal: React.FC<Props> = ({
     open,
     data,
+    entryModes,
+    snackbar,
     onClose,
     onSave,
     editable = false,
@@ -111,6 +124,10 @@ const TransactionModal: React.FC<Props> = ({
             if (validImage) setImage(imageUrl);
         }
     }, [data]);
+    React.useEffect(() => {
+        // Handle changes to checkedItems
+        console.log("Checked items changed:", checkedItems);
+    }, [checkedItems]);
     React.useEffect(() => {
         const fetchStudentMiscellaneousFees = async () => {
             try {
@@ -190,17 +207,17 @@ const TransactionModal: React.FC<Props> = ({
                                 disabled
                             />
                             <TextField
-                                label="Student ID"
-                                value={formData?.student_id || ""}
+                                label="Reference ID"
+                                name="reference_id"
+                                value={formData?.reference_id || ""}
+                                onChange={handleChange}
                                 fullWidth
                                 margin="dense"
                                 disabled
                             />
                             <TextField
-                                label="Reference ID"
-                                name="reference_id"
-                                value={formData?.reference_id || ""}
-                                onChange={handleChange}
+                                label="Student ID"
+                                value={formData?.student_id || ""}
                                 fullWidth
                                 margin="dense"
                                 disabled
@@ -214,14 +231,6 @@ const TransactionModal: React.FC<Props> = ({
                                 margin="dense"
                                 disabled
                             />
-                        </Grid>
-
-                        {/* 2. Payment */}
-                        <Grid size={{ xs: 12, md: 4 }}>
-                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                                &nbsp;
-                            </Typography>
-                            <Divider sx={{ mb: 2 }} />
                             <TextField
                                 label="Balance"
                                 name="balance"
@@ -254,11 +263,36 @@ const TransactionModal: React.FC<Props> = ({
                         </Grid>
 
                         {/* 2. Payment */}
+                        {/* <Grid size={{ xs: 12, md: 4 }}>
+                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                &nbsp;
+                            </Typography>
+                            <Divider sx={{ mb: 2 }} />
+                        </Grid> */}
+
+                        {/* 2. Payment */}
                         <Grid size={{ xs: 12, md: 4 }}>
                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                                 Payment
                             </Typography>
                             <Divider sx={{ mb: 2 }} />
+                            <FormControl fullWidth sx={{ mb: 2 }}>
+                                <InputLabel id="account-select">Entry Mode</InputLabel>
+                                <Select
+                                    labelId="account-select"
+                                    value={entryMode}
+                                    onChange={(e) => {
+                                        setEntryMode(e.target.value);
+                                    }}
+                                    label="Entry Mode"
+                                    margin="dense"
+                                    disabled={!editable}
+                                >
+                                    {entryModes && entryModes.map((mode) => (
+                                        <MenuItem key={mode.entry_mode_id} value={mode.entry_mode_id}>{mode.entry_mode_title}</MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                             <FormControl fullWidth sx={{ mb: 2 }}>
                                 <InputLabel id="account-select">Account Type</InputLabel>
                                 <Select
@@ -286,10 +320,15 @@ const TransactionModal: React.FC<Props> = ({
                                     }
                                     label="Particulars"
                                     margin="dense"
-                                    disabled={!editable}
+                                    disabled={!editable || !selectedAccount}
+                                    inputProps={{
+                                        sx: {
+                                            whiteSpace: "normal !important",
+                                        },
+                                    }}
                                 >
                                     {filteredParticulars.map((name) => (
-                                        <MenuItem key={name} value={name}>
+                                        <MenuItem key={name} value={name} sx={{ whiteSpace: "normal !important" }}>
                                             {name}
                                         </MenuItem>
                                     ))}
@@ -344,7 +383,7 @@ const TransactionModal: React.FC<Props> = ({
                         </Grid>
 
                         {/* 3. Miscellaneous Fees */}
-                        <Grid size={12}>
+                        <Grid size={{ xs: 12, md: 4 }}>
                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                                 Miscellaneous Fees
                             </Typography>
@@ -363,7 +402,6 @@ const TransactionModal: React.FC<Props> = ({
                                         <TableRow key={fee.id}>
                                             <TableCell padding="checkbox">
                                                 <Checkbox
-                                                    key={fee.id}
                                                     onChange={handleCheckedItems}
                                                     value={fee.nature_of_collection_id}
                                                     disabled={editable && fee.balance <= 0}
@@ -380,7 +418,8 @@ const TransactionModal: React.FC<Props> = ({
                         </Grid>
 
                         {/* 4. Summary */}
-                        {/* <Grid size={{ xs: 12, md: 4 }}>
+                        {/* <Grid size={12}>
+                            <Divider sx={{ mb: 2 }} />
                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                                 Summary
                             </Typography>
@@ -543,8 +582,16 @@ const TransactionModal: React.FC<Props> = ({
                     </Button>
                 </DialogActions>
             )}
+            {snackbar.open && (
+                <SnackbarProvider
+                    open={snackbar?.open}
+                    message={snackbar?.message}
+                    severity={snackbar?.severity}
+                />
+            )}
+
         </Dialog>
     );
 };
 
-export default TransactionModal;
+export default React.memo(TransactionModal);

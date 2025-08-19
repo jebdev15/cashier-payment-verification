@@ -5,6 +5,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode";
+import CustomCircularProgress from "@/components/CustomCircularProgress";
 const Layout = () => {
   const navigate = useNavigate();
   const [{ accessToken }] = useCookies(["accessToken"]);
@@ -18,7 +19,7 @@ const Layout = () => {
     };
     checkSession();
   }, [accessToken]);
-
+  if(loading) return <CustomCircularProgress />;
   return (
     !loading && (
       <Box

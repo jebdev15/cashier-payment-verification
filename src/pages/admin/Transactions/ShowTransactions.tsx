@@ -2,7 +2,7 @@ import React from 'react'
 import { Alert, Box, IconButton, Paper, Tooltip, Typography, Divider } from '@mui/material'
 import { Subject as SubjectIcon } from '@mui/icons-material'
 import { DataGrid } from '@mui/x-data-grid'
-import { SnackbarState, TransactionDataType,  } from './type'
+import { SnackbarState, TransactionDataType } from './type'
 // import { useNavigate } from 'react-router'
 import { useAxios } from '@/hooks/useAxios'
 import TransactionModal from '@/components/modals/TransactionModal'
@@ -88,6 +88,9 @@ const ShowTransactions = () => {
     }
   ];
 
+  const handleUpdateTransaction = (updatedData: TransactionDataType) => {
+    console.log("Updated Data:", updatedData);
+  }
   React.useEffect(() => {
     if(entryModeData && entryModeData.length > 0) {
       setEntryModes(entryModeData)
@@ -157,6 +160,9 @@ const ShowTransactions = () => {
             open={open}
             onClose={() => setOpen(false)}
             data={selectedRow}
+            entryModes={entryModes}
+            snackbar={snackbar}
+            onSave={handleUpdateTransaction}
             editable={editable}
           />
         )
@@ -166,7 +172,3 @@ const ShowTransactions = () => {
 };
 
 export default React.memo(ShowTransactions);
-function useEffect(arg0: () => void, arg1: any[]) {
-  throw new Error('Function not implemented.')
-}
-
