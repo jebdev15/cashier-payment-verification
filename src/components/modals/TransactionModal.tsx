@@ -63,6 +63,7 @@ type TransactionModalEntryModeType = {
     credit: string;
     debit: string;
 }
+
 const TransactionModal: React.FC<Props> = ({
     open,
     data,
@@ -76,6 +77,7 @@ const TransactionModal: React.FC<Props> = ({
     const [image, setImage] = React.useState<string | null>(null);
     const [miscellaneousFees, setMiscellaneousFees] = React.useState<any[]>([]);
     const [miscellaneousFeesBalance, setMiscellaneousFeesBalance] = React.useState<string>("0.00");
+    const [tuitionFee, setTuitionFee] = React.useState<string>("0.00");
     const [amountToPay, setAmountToPay] = React.useState<number>(0.00);
     const [amountTendered, setAmountTendered] = React.useState<number>(0.00);
     const [selectedAccount, setSelectedAccount] = React.useState('');
@@ -83,22 +85,30 @@ const TransactionModal: React.FC<Props> = ({
     const [details, setDetails] = React.useState<string>('');
     const [remarks, setRemarks] = React.useState<string>('');
     const [entryMode, setEntryMode] = React.useState<string>('manual');
-    // const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
-    const handleCheckedItems = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
+    const handleCheckedItems = (
+        event: React.ChangeEvent<HTMLInputElement>,
+        checked: boolean
+    ) => {
         const itemId = event.target.value;
-        if (checked) {
-            setCheckedItems((prev) => [...prev, itemId]);
-        } else {
-            setCheckedItems((prev) => prev.filter((id) => id !== itemId));
-        }
+
+        setCheckedItems((prev) => {
+            if (checked) {
+                // ✅ Add only if it doesn't exist
+                return prev.includes(itemId.toString()) ? prev : [...prev, itemId.toString()];
+            } else {
+                // ❌ Remove when unchecked
+                return prev.filter((id) => id !== itemId.toString());
+            }
+        });
     };
 
     // To default to checking all, you can initialize checkedItems with all item IDs
-    const allItemIds = miscellaneousFees.map((fee) => fee.id);
-    const [checkedItems, setCheckedItems] = React.useState<string[]>(allItemIds);
+    // const allItemIds = miscellaneousFees.map((fee) => fee.id);
+    // const [checkedItems, setCheckedItems] = React.useState<string[]>(allItemIds);
     React.useEffect(() => {
         setFormData(data);
-        setEntryMode(data?.entryMode || '');
+        // setEntryMode(data?.entryMode || '');
     }, [data]);
 
     const handleChange = (
@@ -263,14 +273,6 @@ const TransactionModal: React.FC<Props> = ({
                         </Grid>
 
                         {/* 2. Payment */}
-                        {/* <Grid size={{ xs: 12, md: 4 }}>
-                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                                &nbsp;
-                            </Typography>
-                            <Divider sx={{ mb: 2 }} />
-                        </Grid> */}
-
-                        {/* 2. Payment */}
                         <Grid size={{ xs: 12, md: 4 }}>
                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                                 Payment
@@ -327,8 +329,8 @@ const TransactionModal: React.FC<Props> = ({
                                         },
                                     }}
                                 >
-                                    {filteredParticulars.map((name) => (
-                                        <MenuItem key={name} value={name} sx={{ whiteSpace: "normal !important" }}>
+                                    {filteredParticulars.map((name, index) => (
+                                        <MenuItem key={index} value={name} sx={{ whiteSpace: "normal !important" }}>
                                             {name}
                                         </MenuItem>
                                     ))}
@@ -405,7 +407,7 @@ const TransactionModal: React.FC<Props> = ({
                                                     onChange={handleCheckedItems}
                                                     value={fee.nature_of_collection_id}
                                                     disabled={editable && fee.balance <= 0}
-                                                    checked={checkedItems.includes(fee.nature_of_collection_id)}
+                                                    checked={!!checkedItems.includes(fee.nature_of_collection_id)}
                                                 />
                                             </TableCell>
                                             <TableCell>{fee.item_title}</TableCell>
@@ -418,35 +420,35 @@ const TransactionModal: React.FC<Props> = ({
                         </Grid>
 
                         {/* 4. Summary */}
-                        {/* <Grid size={12}>
+                        <Grid size={12}>
                             <Divider sx={{ mb: 2 }} />
                             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                                 Summary
                             </Typography>
                             <Divider sx={{ mb: 2 }} />
                             <Grid container spacing={2}>
-                                <Grid size={12}>
+                                <Grid size={{ xs: 12, md: 4 }}>
                                     <Typography variant="body1" fontWeight="bold">
                                         Payable
                                     </Typography>
                                     <Typography>Miscellaneous: {miscellaneousFeesBalance}</Typography>
-                                    <Typography>Tuition: 3,675.00</Typography>
+                                    <Typography>Tuition: {tuitionFee}</Typography>
                                 </Grid>
-                                <Grid size={12}>
+                                <Grid size={{ xs: 12, md: 4 }}>
                                     <Typography variant="body1" fontWeight="bold">
                                         Distribution
                                     </Typography>
                                     <Typography>For Miscellaneous: 0.00</Typography>
                                     <Typography>For Tuition: 0.00</Typography>
                                 </Grid>
-                                <Grid size={12}>
+                                <Grid size={{ xs: 12, md: 4 }}>
                                     <Typography variant="body1" fontWeight="bold">
                                         Accounts Payable
                                     </Typography>
                                     <Typography>Amount: 0.00</Typography>
                                 </Grid>
                             </Grid>
-                        </Grid> */}
+                        </Grid>
                     </Grid>
                 )}
                 {formData?.userType === "External" && (
