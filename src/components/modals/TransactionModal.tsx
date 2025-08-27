@@ -91,7 +91,7 @@ const TransactionModal: React.FC<Props> = ({
         checked: boolean
     ) => {
         const itemId = event.target.value;
-
+        console.log({ itemId, checked });
         setCheckedItems((prev) => {
             if (checked) {
                 // ✅ Add only if it doesn't exist
@@ -146,22 +146,17 @@ const TransactionModal: React.FC<Props> = ({
                     // Process the fees data as needed
                     console.log("Fees data:", response.data);
 
-                    const implementMiscellaneousFeesId = response.data.map((fee: any) => ({
+                    const implementMiscellaneousFeesId = response.data?.miscellaneous_fee.map((fee: any, index: number) => ({
                         ...fee,
-                        id: fee._id, // Ensure each fee has a unique id
+                        id: ++index, // Ensure each fee has a unique id
                     }));
+                    console.log({ implementMiscellaneousFeesId });
                     setMiscellaneousFees(implementMiscellaneousFeesId);
 
-                    // Calculate total balance from the fees array
-                    const totalMiscellaneousBalance = implementMiscellaneousFeesId
-                        .map((fee: any) => Number(fee.balance) || 0)
-                        .reduce((acc: number, current: number) => acc + current, 0);
-
-                    console.log(totalMiscellaneousBalance);
-
                     // Log the balances to the console
-                    console.log("Balances:", totalMiscellaneousBalance);
-                    setMiscellaneousFeesBalance(totalMiscellaneousBalance.toFixed(2));
+                    console.log("Balances:", response.data?.unpaid_miscellaneous_fees);
+                    setMiscellaneousFeesBalance(response.data?.unpaid_miscellaneous_fees || "0.00");
+                    setTuitionFee(response.data?.tuition_fee.total || "0.00");
                 }
             } catch (error) {
                 console.error("Error fetching fees:", error);
@@ -401,13 +396,13 @@ const TransactionModal: React.FC<Props> = ({
                                 </TableHead>
                                 <TableBody>
                                     {miscellaneousFees && miscellaneousFees.map((fee) => (
-                                        <TableRow key={fee.id}>
+                                        <TableRow key={fee._id}>
                                             <TableCell padding="checkbox">
                                                 <Checkbox
                                                     onChange={handleCheckedItems}
                                                     value={fee.nature_of_collection_id}
                                                     disabled={editable && fee.balance <= 0}
-                                                    checked={!!checkedItems.includes(fee.nature_of_collection_id)}
+                                                    checked={!!checkedItems.includes(fee.nature_of_collection_id.toString())}
                                                 />
                                             </TableCell>
                                             <TableCell>{fee.item_title}</TableCell>
@@ -584,13 +579,13 @@ const TransactionModal: React.FC<Props> = ({
                     </Button>
                 </DialogActions>
             )}
-            {snackbar.open && (
+            {/* {snackbar.open && (
                 <SnackbarProvider
                     open={snackbar?.open}
                     message={snackbar?.message}
                     severity={snackbar?.severity}
                 />
-            )}
+            )} */}
 
         </Dialog>
     );
