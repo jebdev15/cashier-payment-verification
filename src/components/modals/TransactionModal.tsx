@@ -52,7 +52,7 @@ type Props = {
     entryModes?: TransactionModalEntryModeType[];
     snackbar?: SnackbarState;
     onClose: () => void;
-    onSave?: (updatedData: TransactionData) => void;
+    onSave?: (updatedData: TransactionData, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, transactionStatus?: string) => void;
     editable?: boolean;
 };
 
@@ -84,8 +84,9 @@ const TransactionModal: React.FC<Props> = ({
     const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
     const [details, setDetails] = React.useState<string>('');
     const [remarks, setRemarks] = React.useState<string>('');
-    const [entryMode, setEntryMode] = React.useState<string>('manual');
+    const [entryMode, setEntryMode] = React.useState<string>('1');
     const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
+    const [transactionStatus, setTransactionStatus] = React.useState<string>(data?.status || 'pending');
     const handleCheckedItems = (
         event: React.ChangeEvent<HTMLInputElement>,
         checked: boolean
@@ -120,8 +121,10 @@ const TransactionModal: React.FC<Props> = ({
     };
 
     const handleSubmit = () => {
-        if (formData && onSave) {
-            onSave(formData);
+        if (editable) {
+            if (formData && onSave) {
+                onSave(formData, checkedItems, entryMode, details, remarks, amountToPay, amountTendered, transactionStatus);
+            }
         }
     };
     React.useEffect(() => {
@@ -265,6 +268,23 @@ const TransactionModal: React.FC<Props> = ({
                                 margin="dense"
                                 disabled
                             />
+                            <FormControl fullWidth>
+                                <InputLabel id="transactionStatus-select">Status</InputLabel>
+                                <Select
+                                    labelId="transactionStatus-select"
+                                    value={transactionStatus}
+                                    onChange={(e) => {
+                                        setTransactionStatus(e.target.value);
+                                    }}
+                                    label="Status"
+                                    margin="dense"
+                                    disabled={!editable}
+                                >
+                                    <MenuItem value="pending">Pending</MenuItem>
+                                    <MenuItem value="approved">Approve</MenuItem>
+                                    <MenuItem value="rejected">Reject</MenuItem>
+                                </Select>
+                            </FormControl>
                         </Grid>
 
                         {/* 2. Payment */}
@@ -274,16 +294,16 @@ const TransactionModal: React.FC<Props> = ({
                             </Typography>
                             <Divider sx={{ mb: 2 }} />
                             <FormControl fullWidth sx={{ mb: 2 }}>
-                                <InputLabel id="account-select">Entry Mode</InputLabel>
+                                <InputLabel id="entryMode-select">Entry Mode</InputLabel>
                                 <Select
-                                    labelId="account-select"
+                                    labelId="entryMode-select"
                                     value={entryMode}
                                     onChange={(e) => {
                                         setEntryMode(e.target.value);
                                     }}
                                     label="Entry Mode"
                                     margin="dense"
-                                    disabled={!editable}
+                                    disabled={!editable || transactionStatus !== 'approved'}
                                 >
                                     {entryModes && entryModes.map((mode) => (
                                         <MenuItem key={mode.entry_mode_id} value={mode.entry_mode_id}>{mode.entry_mode_title}</MenuItem>
@@ -300,7 +320,7 @@ const TransactionModal: React.FC<Props> = ({
                                     }}
                                     label="Account Type"
                                     margin="dense"
-                                    disabled={!editable}
+                                    disabled={!editable || transactionStatus !== 'approved'}
                                 >
                                     <MenuItem value="REG">REG</MenuItem>
                                     <MenuItem value="IGP">IGP</MenuItem>
@@ -317,7 +337,7 @@ const TransactionModal: React.FC<Props> = ({
                                     }
                                     label="Particulars"
                                     margin="dense"
-                                    disabled={!editable || !selectedAccount}
+                                    disabled={!editable || !selectedAccount || transactionStatus !== 'approved'}
                                     inputProps={{
                                         sx: {
                                             whiteSpace: "normal !important",
@@ -340,7 +360,7 @@ const TransactionModal: React.FC<Props> = ({
                                     value={remarks}
                                     onChange={(e) => setRemarks(e.target.value)}
                                     margin="dense"
-                                    disabled={!editable}
+                                    disabled={!editable || transactionStatus !== 'approved'}
                                 />
                             </FormControl>
                             <FormControl fullWidth  >
@@ -352,18 +372,19 @@ const TransactionModal: React.FC<Props> = ({
                                     value={details}
                                     onChange={(e) => setDetails(e.target.value)}
                                     margin="dense"
-                                    disabled={!editable}
+                                    disabled={!editable || transactionStatus !== 'approved'}
                                 />
                             </FormControl>
                             <TextField
                                 label="Amount"
                                 name="amount_to_pay"
-                                value={amountToPay ? amountToPay.toFixed(2) : "0.00"}
+                                placeholder="0.00"
+                                value={amountToPay.toFixed(2)}
                                 onChange={(e) => setAmountToPay(Number(e.target.value))}
                                 type="number"
                                 fullWidth
                                 margin="dense"
-                                disabled={!editable}
+                                disabled={!editable || transactionStatus !== 'approved'}
                             />
                             <TextField
                                 label="Tendered Amount"
@@ -372,7 +393,7 @@ const TransactionModal: React.FC<Props> = ({
                                 onChange={(e) => setAmountTendered(Number(e.target.value))}
                                 fullWidth
                                 margin="dense"
-                                disabled={!editable}
+                                disabled={!editable || transactionStatus !== 'approved'}
                             />
                             <Typography variant="body2" color="textSecondary" mt={1}>
                                 Change: {amountTendered > 0 ? (amountTendered - amountToPay).toFixed(2) : "0.00"}
@@ -397,14 +418,16 @@ const TransactionModal: React.FC<Props> = ({
                                 <TableBody>
                                     {miscellaneousFees && miscellaneousFees.map((fee) => (
                                         <TableRow key={fee._id}>
-                                            <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    onChange={handleCheckedItems}
-                                                    value={fee.nature_of_collection_id}
-                                                    disabled={editable && fee.balance <= 0}
-                                                    checked={!!checkedItems.includes(fee.nature_of_collection_id.toString())}
-                                                />
-                                            </TableCell>
+                                            {editable && (
+                                                <TableCell padding="checkbox">
+                                                    <Checkbox
+                                                        onChange={handleCheckedItems}
+                                                        value={fee.nature_of_collection_id}
+                                                        disabled={fee.balance <= 0 || transactionStatus !== 'approved'}
+                                                        checked={!!checkedItems.includes(fee.nature_of_collection_id.toString())}
+                                                    />
+                                                </TableCell>
+                                            )}
                                             <TableCell>{fee.item_title}</TableCell>
                                             <TableCell>{fee.amount}</TableCell>
                                             <TableCell>{fee.balance}</TableCell>
@@ -572,7 +595,7 @@ const TransactionModal: React.FC<Props> = ({
                     )}
                 </Grid>
             </DialogContent>
-            {editable && (
+            {(editable && formData?.status === 'pending') && (
                 <DialogActions>
                     <Button onClick={handleSubmit} variant="contained" color="primary">
                         Save

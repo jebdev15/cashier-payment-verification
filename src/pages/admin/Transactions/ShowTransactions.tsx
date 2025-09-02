@@ -6,10 +6,13 @@ import { SnackbarState, TransactionDataType } from './type'
 // import { useNavigate } from 'react-router'
 import { useAxios } from '@/hooks/useAxios'
 import TransactionModal from '@/components/modals/TransactionModal'
+import { axiosInstanceWithAuthorization } from '@/api/app'
+import { useCookies } from 'react-cookie'
 // import { axiosInstanceWithAuthorization } from '@/api/app'
 
 const ShowTransactions = () => {
   // const navigate = useNavigate();
+  const [cookie] = useCookies(['accessToken']);
   const [open, setOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState<TransactionDataType | null>(null);
   const [editable, setEditable] = React.useState(false);
@@ -88,8 +91,23 @@ const ShowTransactions = () => {
     }
   ];
 
-  const handleUpdateTransaction = (updatedData: TransactionDataType) => {
-    console.log("Updated Data:", updatedData);
+  const handleUpdateTransaction = async (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, transactionStatus?: string) => {
+    const formData = new FormData();
+    formData.append('reference_id', updatedData.reference_id);
+    formData.append('status', updatedData.status);
+    formData.append('entryMode', entryMode || '');
+    formData.append('details', details || '');
+    formData.append('remarks', remarks || '');
+    formData.append('amountToPay', amountToPay ? amountToPay.toString() : '0');
+    formData.append('amountTendered', amountTendered ? amountTendered.toString() : '0');
+    formData.append('checkedItems', JSON.stringify(checkedItems || []));
+    formData.append('transactionStatus', transactionStatus || '');
+
+    const response = await axiosInstanceWithAuthorization(cookie.accessToken).put(`/api/transactions/${updatedData.id}`, formData)
+    console.log({
+      message: response.data.message,
+    })
+  
   }
   React.useEffect(() => {
     if(entryModeData && entryModeData.length > 0) {
