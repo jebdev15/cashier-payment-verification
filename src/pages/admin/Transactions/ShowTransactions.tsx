@@ -91,17 +91,28 @@ const ShowTransactions = () => {
     }
   ];
 
-  const handleUpdateTransaction = async (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, transactionStatus?: string) => {
+  const handleUpdateTransaction = async (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, selectedAccount?: string) => {
     const formData = new FormData();
-    formData.append('reference_id', updatedData.reference_id);
-    formData.append('status', updatedData.status);
+    formData.append('id', updatedData.id || '');
+    formData.append('studentAccountID', updatedData.student_account_id || '');
+    formData.append('referenceID', updatedData.reference_id || '');
+    formData.append('studentID', updatedData.student_id || '');
+    formData.append('nameOfPayor', updatedData.name_of_payor || '');
+    formData.append('email', updatedData.email || '');
+    formData.append('programCode', updatedData.program_code || '');
+    formData.append('yearLevelRoman', updatedData.year_level_roman || '');
+    formData.append('schoolYear', updatedData.school_year || '');
+    formData.append('semester', updatedData.semester || '');
+    formData.append('modeOfPayment', updatedData.mode_of_payment || '');
+    formData.append('status', updatedData.status || '');
     formData.append('entryMode', entryMode || '');
+    formData.append('accountType', selectedAccount || '');
+    formData.append('particulars', updatedData.particulars || '');
     formData.append('details', details || '');
     formData.append('remarks', remarks || '');
     formData.append('amountToPay', amountToPay ? amountToPay.toString() : '0');
     formData.append('amountTendered', amountTendered ? amountTendered.toString() : '0');
     formData.append('checkedItems', JSON.stringify(checkedItems || []));
-    formData.append('transactionStatus', transactionStatus || '');
 
     const response = await axiosInstanceWithAuthorization(cookie.accessToken).put(`/api/transactions/${updatedData.id}`, formData)
     console.log({

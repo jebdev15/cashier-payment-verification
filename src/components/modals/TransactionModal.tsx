@@ -24,35 +24,17 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { axiosInstance } from "@/api/app";
 import { fees } from "@/pages/admin/Transactions/fees"; // Assuming fees is an array of fee objects
-import { SnackbarState } from "@/pages/admin/Transactions/type";
+import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
 import SnackbarProvider from "../Snackbar";
 
-export type TransactionData = {
-    id?: string;
-    student_account_id?: string;
-    name_of_payor?: string;
-    student_id?: string;
-    reference_id?: string;
-    amount?: number;
-    balance?: number;
-    amount_paid?: number;
-    particulars?: string;
-    purpose?: string;
-    payment_id?: string;
-    status?: string;
-    expires_at?: Date;
-    created_at?: Date;
-    filePath?: string;
-    userType?: string;
-};
 
 type Props = {
     open: boolean;
-    data: TransactionData | null;
+    data: TransactionDataType | null;
     entryModes?: TransactionModalEntryModeType[];
     snackbar?: SnackbarState;
     onClose: () => void;
-    onSave?: (updatedData: TransactionData, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, transactionStatus?: string) => void;
+    onSave?: (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, selectedAccount?: string) => void;
     editable?: boolean;
 };
 
@@ -73,20 +55,19 @@ const TransactionModal: React.FC<Props> = ({
     onSave,
     editable = false,
 }) => {
-    const [formData, setFormData] = React.useState<TransactionData | null>(data);
+    const [formData, setFormData] = React.useState<TransactionDataType | null>(data);
     const [image, setImage] = React.useState<string | null>(null);
     const [miscellaneousFees, setMiscellaneousFees] = React.useState<any[]>([]);
     const [miscellaneousFeesBalance, setMiscellaneousFeesBalance] = React.useState<string>("0.00");
     const [tuitionFee, setTuitionFee] = React.useState<string>("0.00");
-    const [amountToPay, setAmountToPay] = React.useState<number>(0.00);
-    const [amountTendered, setAmountTendered] = React.useState<number>(0.00);
+    const [amountToPay, setAmountToPay] = React.useState<number>(0);
+    const [amountTendered, setAmountTendered] = React.useState<number>(0);
     const [selectedAccount, setSelectedAccount] = React.useState('');
     const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
     const [details, setDetails] = React.useState<string>('');
     const [remarks, setRemarks] = React.useState<string>('');
     const [entryMode, setEntryMode] = React.useState<string>('1');
     const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
-    const [transactionStatus, setTransactionStatus] = React.useState<string>(data?.status || 'pending');
     const handleCheckedItems = (
         event: React.ChangeEvent<HTMLInputElement>,
         checked: boolean
@@ -104,14 +85,6 @@ const TransactionModal: React.FC<Props> = ({
         });
     };
 
-    // To default to checking all, you can initialize checkedItems with all item IDs
-    // const allItemIds = miscellaneousFees.map((fee) => fee.id);
-    // const [checkedItems, setCheckedItems] = React.useState<string[]>(allItemIds);
-    React.useEffect(() => {
-        setFormData(data);
-        // setEntryMode(data?.entryMode || '');
-    }, [data]);
-
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
@@ -123,7 +96,7 @@ const TransactionModal: React.FC<Props> = ({
     const handleSubmit = () => {
         if (editable) {
             if (formData && onSave) {
-                onSave(formData, checkedItems, entryMode, details, remarks, amountToPay, amountTendered, transactionStatus);
+                onSave(formData, checkedItems, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount);
             }
         }
     };
@@ -272,9 +245,9 @@ const TransactionModal: React.FC<Props> = ({
                                 <InputLabel id="transactionStatus-select">Status</InputLabel>
                                 <Select
                                     labelId="transactionStatus-select"
-                                    value={transactionStatus}
+                                    value={formData?.status || ""}
                                     onChange={(e) => {
-                                        setTransactionStatus(e.target.value);
+                                        setFormData((prev) => ({ ...prev, status: e.target.value }));
                                     }}
                                     label="Status"
                                     margin="dense"
@@ -303,7 +276,7 @@ const TransactionModal: React.FC<Props> = ({
                                     }}
                                     label="Entry Mode"
                                     margin="dense"
-                                    disabled={!editable || transactionStatus !== 'approved'}
+                                    disabled={!editable || formData?.status !== 'approved'}
                                 >
                                     {entryModes && entryModes.map((mode) => (
                                         <MenuItem key={mode.entry_mode_id} value={mode.entry_mode_id}>{mode.entry_mode_title}</MenuItem>
@@ -320,7 +293,7 @@ const TransactionModal: React.FC<Props> = ({
                                     }}
                                     label="Account Type"
                                     margin="dense"
-                                    disabled={!editable || transactionStatus !== 'approved'}
+                                    disabled={!editable || formData?.status !== 'approved'}
                                 >
                                     <MenuItem value="REG">REG</MenuItem>
                                     <MenuItem value="IGP">IGP</MenuItem>
@@ -337,7 +310,7 @@ const TransactionModal: React.FC<Props> = ({
                                     }
                                     label="Particulars"
                                     margin="dense"
-                                    disabled={!editable || !selectedAccount || transactionStatus !== 'approved'}
+                                    disabled={!editable || !selectedAccount || formData?.status !== 'approved'}
                                     inputProps={{
                                         sx: {
                                             whiteSpace: "normal !important",
@@ -360,7 +333,7 @@ const TransactionModal: React.FC<Props> = ({
                                     value={remarks}
                                     onChange={(e) => setRemarks(e.target.value)}
                                     margin="dense"
-                                    disabled={!editable || transactionStatus !== 'approved'}
+                                    disabled={!editable || formData?.status !== 'approved'}
                                 />
                             </FormControl>
                             <FormControl fullWidth  >
@@ -372,31 +345,33 @@ const TransactionModal: React.FC<Props> = ({
                                     value={details}
                                     onChange={(e) => setDetails(e.target.value)}
                                     margin="dense"
-                                    disabled={!editable || transactionStatus !== 'approved'}
+                                    disabled={!editable || formData?.status !== 'approved'}
                                 />
                             </FormControl>
                             <TextField
                                 label="Amount"
                                 name="amount_to_pay"
                                 placeholder="0.00"
-                                value={amountToPay.toFixed(2)}
-                                onChange={(e) => setAmountToPay(Number(e.target.value))}
+                                value={amountToPay}
+                                onChange={(e) => setAmountToPay(parseFloat(Number(e.target.value).toFixed(2)))}
                                 type="number"
                                 fullWidth
                                 margin="dense"
-                                disabled={!editable || transactionStatus !== 'approved'}
+                                disabled={!editable || formData?.status !== 'approved'}
                             />
                             <TextField
                                 label="Tendered Amount"
                                 name="tendered_amount"
-                                value={amountTendered ? amountTendered.toFixed(2) : "0.00"}
-                                onChange={(e) => setAmountTendered(Number(e.target.value))}
+                                placeholder="0.00"
+                                type="number"
+                                value={amountTendered}
+                                onChange={(e) => setAmountTendered(parseFloat(Number(e.target.value).toFixed(2)))}
                                 fullWidth
                                 margin="dense"
-                                disabled={!editable || transactionStatus !== 'approved'}
+                                disabled={!editable || formData?.status !== 'approved'}
                             />
                             <Typography variant="body2" color="textSecondary" mt={1}>
-                                Change: {amountTendered > 0 ? (amountTendered - amountToPay).toFixed(2) : "0.00"}
+                                Change: {amountTendered > 0 ? (amountTendered - amountToPay).toFixed(2) : 0.00}
                             </Typography>
                         </Grid>
 
@@ -423,7 +398,7 @@ const TransactionModal: React.FC<Props> = ({
                                                     <Checkbox
                                                         onChange={handleCheckedItems}
                                                         value={fee.nature_of_collection_id}
-                                                        disabled={fee.balance <= 0 || transactionStatus !== 'approved'}
+                                                        disabled={fee.balance <= 0 || formData?.status !== 'approved'}
                                                         checked={!!checkedItems.includes(fee.nature_of_collection_id.toString())}
                                                     />
                                                 </TableCell>
@@ -595,20 +570,20 @@ const TransactionModal: React.FC<Props> = ({
                     )}
                 </Grid>
             </DialogContent>
-            {(editable && formData?.status === 'pending') && (
+            {(editable) && (
                 <DialogActions>
                     <Button onClick={handleSubmit} variant="contained" color="primary">
                         Save
                     </Button>
                 </DialogActions>
             )}
-            {/* {snackbar.open && (
+            {(snackbar && snackbar.open) && 
                 <SnackbarProvider
                     open={snackbar?.open}
                     message={snackbar?.message}
                     severity={snackbar?.severity}
                 />
-            )} */}
+            }
 
         </Dialog>
     );

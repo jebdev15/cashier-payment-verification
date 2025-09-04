@@ -1,14 +1,26 @@
 export type TransactionDataType = {
-  id: number;
-  fullName: string;
-  student_id: string | number;
-  reference_id: string;
-  payment_id: string;
-  purpose: string;
-  status: string;
-  expires_at: Date;
-  created_at: Date;
-  userType: string;
+    id?: string;
+    student_account_id?: string;
+    reference_id?: string;
+    student_id?: string;
+    name_of_payor?: string;
+    email?: string;
+    program_code?: string;
+    year_level_roman?: string;
+    school_year?: string;
+    semester?: string;
+    mode_of_payment?: string;
+    amount?: number;
+    balance?: number;
+    amount_paid?: number;
+    particulars?: string;
+    purpose?: string;
+    payment_id?: string;
+    status?: string;
+    expires_at?: Date;
+    created_at?: Date;
+    filePath?: string;
+    userType?: string;
 };
 
 export type SnackbarState = {
