@@ -137,7 +137,7 @@ const StatementOfAccount = () => {
             justifyContent: "center",
             alignItems: "center",
             bgcolor: "#f0f0f0",
-            borderRadius: 3,
+            borderRadius: 4,
             padding: 2,
           }}
         >

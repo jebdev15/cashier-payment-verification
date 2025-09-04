@@ -1,14 +1,6 @@
 import React from "react";
 import { AccountCircle, ExitToApp as ExitToAppIcon } from "@mui/icons-material";
-import {
-  Box,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-} from "@mui/material";
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
 import { useNavigate } from "react-router";
 import { sideNav } from "./sideNav";
 import { useCookies } from "react-cookie";
@@ -101,10 +93,7 @@ const Sidebar = () => {
           bgcolor: "#f0f0f0",
         }}
       >
-        <nav
-          style={{ display: "flex", height: "100%" }}
-          aria-label="main mailbox folders"
-        >
+        <nav style={{ display: "flex", height: "100%" }} aria-label="main mailbox folders">
           <List
             sx={{
               display: "flex",
@@ -139,30 +128,14 @@ const Sidebar = () => {
                   {userData.payor_name}
                 </Typography>
               )}
-              <Typography
-                gutterBottom
-                variant="caption"
-                component="div"
-                color="text.secondary"
-              >
+              <Typography gutterBottom variant="caption" component="div" color="text.secondary">
                 {userData.email}
               </Typography>
-              <Typography
-                gutterBottom
-                variant="caption"
-                component="div"
-                color="text.secondary"
-              >
+              <Typography gutterBottom variant="caption" component="div" color="text.secondary">
                 {userData.isStudent && userData.student_id}
-
               </Typography>
               {userData.isStudent && (
-                <Typography
-                  gutterBottom
-                  variant="caption"
-                  component="div"
-                  color="text.secondary"
-                >
+                <Typography gutterBottom variant="caption" component="div" color="text.secondary">
                   {userData.isStudent && "Student"}
                   {userData.isExternal && "External"}
                 </Typography>
@@ -171,13 +144,8 @@ const Sidebar = () => {
 
             {/* <Divider /> */}
             {sideNav.map((item, index) => {
-              if (
-                userData.isExternal &&
-                ["sao", "ur"].includes(item.abbreviation)
-              )
-                return null;
-              if (userData.isStudent && item.abbreviation === "ur-ex")
-                return null;
+              if (userData.isExternal && ["sao", "ur"].includes(item.abbreviation)) return null;
+              if (userData.isStudent && item.abbreviation === "ur-ex") return null;
               return (
                 <ListItem disablePadding key={index}>
                   <ListItemButton

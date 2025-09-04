@@ -6,6 +6,7 @@ import { sideNav } from "./sideNav";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode";
 import { AdminLayoutContext } from "../../context/AdminLayoutContext";
+import { theme } from "@/theme/theme";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const Sidebar = () => {
   const handleChange = (path: string, selectedTab: string) => {
     navigate(`/admin${path}`);
     setCurrentTab(selectedTab);
-  };    
+  };
   const handleLogout = () => {
     removeCookie("accessToken", {
       path: "/",
@@ -56,9 +57,10 @@ const Sidebar = () => {
         sx={{
           padding: 2,
           paddingRight: { md: "0", xs: "2" },
-          height: "calc(100dvh - 64px)",
+          height: "calc(100dvh - 72px)",
           width: "100%",
           maxWidth: 300,
+          flexShrink: 0,
           marginLeft: { md: sidebarOpen ? "0" : "-300px", xs: sidebarOpen ? "-300px" : "0" },
           transition: "margin 300ms",
           position: { md: "relative", xs: "fixed" },
@@ -67,18 +69,16 @@ const Sidebar = () => {
         }}
       >
         <nav style={{ display: "flex", height: "100%" }} aria-label="main mailbox folders">
-          <List sx={{ display: "flex", flexDirection: "column", gap: 1, flexGrow: 1 }} disablePadding>
+          <List sx={{ display: "flex", flexDirection: "column", gap: 1, flexGrow: 1, backgroundColor: "background.paper", borderRadius: 4, boxShadow: 2, overflow: "hidden" }} disablePadding>
             <ListItem
               sx={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 bgcolor: "background.paper",
-                borderRadius: 4,
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-                p: 2,
                 py: 1,
-                mb: 2,
+                px: 2,
+                borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
               }}
               disablePadding
             >
@@ -96,49 +96,56 @@ const Sidebar = () => {
               )}
             </ListItem>
 
-            {/* <Divider /> */}
-            {sideNav.map((item, index) => (
-              <ListItem disablePadding key={index}>
+            <Box sx={{ px: 1, display: "grid", gap: 1 }}>
+              {sideNav.map((item, index) => (
+                <ListItem disablePadding key={index}>
+                  <ListItemButton
+                    sx={{
+                      borderRadius: 3,
+                      "&.Mui-selected": {
+                        bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                        "& *": {
+                          color: "white",
+                        },
+                        "&:hover": {
+                          bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                        },
+                      },
+                    }}
+                    selected={currentTab === item.abbreviation}
+                    onClick={() => handleChange(item.path, item.abbreviation)}
+                  >
+                    <ListItemIcon sx={{ minWidth: 32 }}>
+                      <item.icon />
+                    </ListItemIcon>
+                    <ListItemText primary={item.label} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </Box>
+            <ListItem sx={{ flexGrow: 1, alignItems: "end" }} disablePadding>
+              <Box sx={{ width: "100%", p: 1, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
                 <ListItemButton
                   sx={{
-                    borderRadius: 4,
+                    borderRadius: 3,
                     "&.Mui-selected": {
-                      bgcolor: "background.paper",
-                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+                      bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
                       "& *": {
-                        color: "primary.main",
+                        color: "white",
+                      },
+                      "&:hover": {
+                        bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
                       },
                     },
                   }}
-                  selected={currentTab === item.abbreviation}
-                  onClick={() => handleChange(item.path, item.abbreviation)}
+                  onClick={handleLogout}
                 >
                   <ListItemIcon sx={{ minWidth: 32 }}>
-                    <item.icon />
+                    <ExitToAppIcon />
                   </ListItemIcon>
-                  <ListItemText primary={item.label} />
+                  <ListItemText primary={"Logout"} />
                 </ListItemButton>
-              </ListItem>
-            ))}
-            <ListItem sx={{ flexGrow: 1, alignItems: "end" }} disablePadding>
-              <ListItemButton
-                sx={{
-                  borderRadius: 4,
-                  "&.Mui-selected": {
-                    bgcolor: "background.paper",
-                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-                    "& *": {
-                      color: "primary.main",
-                    },
-                  },
-                }}
-                onClick={handleLogout}
-              >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  <ExitToAppIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Logout"} />
-              </ListItemButton>
+              </Box>
             </ListItem>
           </List>
         </nav>

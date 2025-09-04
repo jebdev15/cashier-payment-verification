@@ -19,7 +19,7 @@ const Layout = () => {
     };
     checkSession();
   }, [accessToken]);
-  if(loading) return <CustomCircularProgress />;
+  if (loading) return <CustomCircularProgress />;
   return (
     !loading && (
       <Box
@@ -29,7 +29,6 @@ const Layout = () => {
           height: "100dvh",
           width: "100%",
           backgroundColor: "#f0f0f0",
-          overflow: "hidden",
         }}
       >
         <Header />
