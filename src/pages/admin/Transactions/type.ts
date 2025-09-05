@@ -21,6 +21,14 @@ export type TransactionDataType = {
     created_at?: Date;
     filePath?: string;
     userType?: string;
+    checkedItems?: string[];
+    entryMode?: string;
+    details?: string;
+    remarks?: string;
+    amountToPay?: number;
+    amountTendered?: number;
+    selectedAccount?: string;
+    miscellaneousFees?: any[];
 };
 
 export type SnackbarState = {

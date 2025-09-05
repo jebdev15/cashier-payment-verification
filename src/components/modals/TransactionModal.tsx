@@ -73,7 +73,6 @@ const TransactionModal: React.FC<Props> = ({
         checked: boolean
     ) => {
         const itemId = event.target.value;
-        console.log({ itemId, checked });
         setCheckedItems((prev) => {
             if (checked) {
                 // ✅ Add only if it doesn't exist
@@ -96,7 +95,8 @@ const TransactionModal: React.FC<Props> = ({
     const handleSubmit = () => {
         if (editable) {
             if (formData && onSave) {
-                onSave(formData, checkedItems, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount);
+
+                onSave({ ...formData, checkedItems, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount, miscellaneousFees });
             }
         }
     };
@@ -110,10 +110,6 @@ const TransactionModal: React.FC<Props> = ({
             if (validImage) setImage(imageUrl);
         }
     }, [data]);
-    React.useEffect(() => {
-        // Handle changes to checkedItems
-        console.log("Checked items changed:", checkedItems);
-    }, [checkedItems]);
     React.useEffect(() => {
         const fetchStudentMiscellaneousFees = async () => {
             try {
@@ -284,7 +280,7 @@ const TransactionModal: React.FC<Props> = ({
                                 </Select>
                             </FormControl>
                             <FormControl fullWidth sx={{ mb: 2 }}>
-                                <InputLabel id="account-select">Account Type</InputLabel>
+                                <InputLabel id="account-select">Account Title</InputLabel>
                                 <Select
                                     labelId="account-select"
                                     value={selectedAccount}
@@ -577,7 +573,7 @@ const TransactionModal: React.FC<Props> = ({
                     </Button>
                 </DialogActions>
             )}
-            {(snackbar && snackbar.open) && 
+            {(snackbar && snackbar.open) &&
                 <SnackbarProvider
                     open={snackbar?.open}
                     message={snackbar?.message}

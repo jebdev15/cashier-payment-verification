@@ -8,8 +8,12 @@ import { useAxios } from '@/hooks/useAxios'
 import TransactionModal from '@/components/modals/TransactionModal'
 import { axiosInstanceWithAuthorization } from '@/api/app'
 import { useCookies } from 'react-cookie'
-// import { axiosInstanceWithAuthorization } from '@/api/app'
 
+const filterMiscellaneousFeeAsPayload = (checkedItems: string[], miscellaneousFees: any[]) => {
+  const filteredMiscellaneousFee = miscellaneousFees.filter(fee => Number(fee.balance) > 0 && checkedItems.includes(fee.nature_of_collection_id.toString()));
+  // console.log({ checkedItems, filteredMiscellaneousFee })
+  return filteredMiscellaneousFee;
+}
 const ShowTransactions = () => {
   // const navigate = useNavigate();
   const [cookie] = useCookies(['accessToken']);
@@ -91,7 +95,8 @@ const ShowTransactions = () => {
     }
   ];
 
-  const handleUpdateTransaction = async (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, selectedAccount?: string) => {
+  const handleUpdateTransaction = async (updatedData: TransactionDataType) => {
+    const miscFee = filterMiscellaneousFeeAsPayload(updatedData.checkedItems || [], updatedData.  miscellaneousFees || []);
     const formData = new FormData();
     formData.append('id', updatedData.id || '');
     formData.append('studentAccountID', updatedData.student_account_id || '');
@@ -105,26 +110,30 @@ const ShowTransactions = () => {
     formData.append('semester', updatedData.semester || '');
     formData.append('modeOfPayment', updatedData.mode_of_payment || '');
     formData.append('status', updatedData.status || '');
-    formData.append('entryMode', entryMode || '');
-    formData.append('accountType', selectedAccount || '');
+    formData.append('entryMode', updatedData.entryMode || '');
+    formData.append('accountType', updatedData.selectedAccount || '');
     formData.append('particulars', updatedData.particulars || '');
-    formData.append('details', details || '');
-    formData.append('remarks', remarks || '');
-    formData.append('amountToPay', amountToPay ? amountToPay.toString() : '0');
-    formData.append('amountTendered', amountTendered ? amountTendered.toString() : '0');
-    formData.append('checkedItems', JSON.stringify(checkedItems || []));
+    formData.append('details', updatedData.details || '');
+    formData.append('remarks', updatedData.remarks || '');
+    formData.append('amountToPay', updatedData.amountToPay ? updatedData.amountToPay.toString() : '0');
+    formData.append('amountTendered', updatedData.amountTendered ? updatedData.amountTendered.toString() : '0');
+    formData.append('checkedItems', JSON.stringify(updatedData.checkedItems || []));
+    formData.append('miscellaneousFees', JSON.stringify(miscFee || []));
 
+    // for(const [index, fee] of miscFee.entries()) {
+    //   console.log(`Miscellaneous Fee ${index + 1}:`, fee.item_title, fee.amount);
+    // }
     const response = await axiosInstanceWithAuthorization(cookie.accessToken).put(`/api/transactions/${updatedData.id}`, formData)
     console.log({
       message: response.data.message,
     })
-  
+
   }
   React.useEffect(() => {
-    if(entryModeData && entryModeData.length > 0) {
+    if (entryModeData && entryModeData.length > 0) {
       setEntryModes(entryModeData)
     }
-  },[entryModeData])
+  }, [entryModeData])
   if (error) return <Alert severity="error">{error}</Alert>;
 
   const studentTransactions = data?.filter((item: TransactionDataType) => item.userType === 'Student').map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
