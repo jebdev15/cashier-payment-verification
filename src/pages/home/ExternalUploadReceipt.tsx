@@ -16,6 +16,7 @@ const UploadReceipt = () => {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<{ upload: boolean; generateCode: boolean }>({ upload: false, generateCode: false });
   const [referenceId, setReferenceId] = React.useState<string>("");
+  const [referenceNumber, setReferenceNumber] = React.useState<string>("");
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
   const [remarks, setRemarks] = React.useState<string>("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -84,6 +85,7 @@ const UploadReceipt = () => {
       formData.append("receipt", blob || image, imageName); // Use the file object directly if available
       formData.append("remarks", remarks); // Use the file object directly if available
       formData.append("referenceId", referenceId);
+      formData.append("referenceNumber", referenceNumber);
       formData.append("mode_of_payment", modeOfPayment);
     } else {
       alert("No image to upload. Please select a file before proceeding.");
@@ -125,20 +127,7 @@ const UploadReceipt = () => {
       </Typography>
       <Grid container spacing={4} sx={{ height: "100%" }} component="form" onSubmit={handleSubmit}>
         <Grid container spacing={2} direction="column" size={{ xs: 12, lg: 4 }}>
-          <Grid size={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              type="file"
-              onChange={handleChangeFile}
-              inputRef={fileInputRef}
-              slotProps={{
-                htmlInput: { accept: "image/*" },
-                input: {
-                  sx: { borderRadius: 2 },
-                },
-              }}
-            />
-          </Grid>
+
 
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
@@ -149,23 +138,6 @@ const UploadReceipt = () => {
                     sx: { borderRadius: 2, input: { px: 1 } },
                     endAdornment: (
                       <Tooltip title="Generate Reference ID" placement="top">
-                        {/* <span>
-                          <Button
-                            size="small"
-                            sx={{
-                              px: 1.5,
-                              whiteSpace: "nowrap",
-                              textTransform: "unset",
-                              height: "40px",
-                              borderRadius: 0,
-                            }}
-                            // endIcon={<SendIcon />}
-                            variant="contained"
-                            onClick={handleGenerateReferenceId}
-                          >
-                            {loading.generateCode ? "Generating..." : "Generate Reference ID"}
-                          </Button>
-                        </span> */}
                         <IconButton
                           size="small"
                           onClick={handleGenerateReferenceId}>
@@ -181,6 +153,7 @@ const UploadReceipt = () => {
               />
             </FormControl>
           </Grid>
+
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
@@ -193,6 +166,23 @@ const UploadReceipt = () => {
               </Select>
             </FormControl>
           </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <FormControl fullWidth>
+              <TextField
+                sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
+                slotProps={{
+                  input: {
+                    sx: { borderRadius: 2, input: { px: 1 } },
+                  },
+                }}
+                label="Reference Number"
+                onChange={(e) => setReferenceNumber(e.target.value)}
+                value={referenceNumber}
+              />
+            </FormControl>
+          </Grid>
+
           <Grid size={{ xs: 12 }} sx={{ display: "none" }}>
             <FormControl fullWidth>
               <TextField
@@ -208,6 +198,20 @@ const UploadReceipt = () => {
                 onChange={(e) => setRemarks(e.target.value)}
               />
             </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              fullWidth
+              type="file"
+              onChange={handleChangeFile}
+              inputRef={fileInputRef}
+              slotProps={{
+                htmlInput: { accept: "image/*" },
+                input: {
+                  sx: { borderRadius: 2 },
+                },
+              }}
+            />
           </Grid>
           <Grid size={{ xs: 12 }}>
             <Button sx={{ borderRadius: 2 }} variant="contained" startIcon={<UploadFileIcon />} disabled={!image || loading.upload} type="submit" fullWidth size="large">
