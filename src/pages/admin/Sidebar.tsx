@@ -57,15 +57,16 @@ const Sidebar = () => {
         sx={{
           padding: 2,
           paddingRight: { md: "0", xs: "2" },
-          height: "calc(100dvh - 72px)",
+          height: { sm: "calc(100dvh - 72px)", xs: "calc(100dvh - 64px)" },
           width: "100%",
           maxWidth: 300,
           flexShrink: 0,
           marginLeft: { md: sidebarOpen ? "0" : "-300px", xs: sidebarOpen ? "-300px" : "0" },
           transition: "margin 300ms",
-          position: { md: "relative", xs: "fixed" },
+          position: { md: "sticky", xs: "fixed" },
+          top: { md: "72px", xs: "unset" },
           zIndex: "999",
-          bgcolor: "#f0f0f0",
+          bgcolor: { md: "#f0f0f0", xs: "transparent" },
         }}
       >
         <nav style={{ display: "flex", height: "100%" }} aria-label="main mailbox folders">
