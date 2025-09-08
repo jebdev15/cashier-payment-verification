@@ -1,7 +1,7 @@
 import React from "react";
 import { AccountCircle, ExitToApp as ExitToAppIcon } from "@mui/icons-material";
 import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, useMediaQuery } from "@mui/material";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { sideNav } from "./sideNav";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode";
@@ -10,10 +10,23 @@ import { theme } from "@/theme/theme";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const { sidebarOpen } = React.useContext(AdminLayoutContext);
   const [{ accessToken }, , removeCookie] = useCookies(["accessToken"]);
-  const [currentTab, setCurrentTab] = React.useState<string>("sao");
+
+  const getCurrentTab = () => {
+    const path = location.pathname.replace("/admin", "");
+    const currentNavItem = sideNav.find((item) => path === item.path || path.startsWith(`${item.path}/`));
+    return currentNavItem?.abbreviation || "";
+  };
+
+  const [currentTab, setCurrentTab] = React.useState<string>(getCurrentTab());
+
+  React.useEffect(() => {
+    setCurrentTab(getCurrentTab());
+  }, [location.pathname]);
+
   const handleChange = (path: string, selectedTab: string) => {
     navigate(`/admin${path}`);
     setCurrentTab(selectedTab);
