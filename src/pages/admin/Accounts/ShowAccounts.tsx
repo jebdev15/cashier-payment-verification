@@ -17,8 +17,8 @@ const ShowAccounts = () => {
   const columns = [
     { field: "id", headerName: "No.", width: 100 },
     // { field: 'student_id', headerName: 'Student ID', width: 130 },
-    // { field: 'email', headerName: 'Email Address', width: 200 },
     { field: "fullName", headerName: "Full Name", minWidth: 250, flex: 1 },
+    { field: "email", headerName: "Email Address", minWidth: 225, flex: 1 },
     // { field: 'college', headerName: 'College', width: 200 },
     { field: "program", headerName: "Program", minWidth: 300, flex: 1 },
     { field: "yearLevel", headerName: "Year Level", width: 155 },
