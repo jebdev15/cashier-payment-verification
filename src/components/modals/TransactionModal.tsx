@@ -193,6 +193,15 @@ const TransactionModal: React.FC<Props> = ({
                                 disabled
                             />
                             <TextField
+                                label="Reference Number"
+                                name="reference_number"
+                                value={formData?.reference_number || ""}
+                                onChange={handleChange}
+                                fullWidth
+                                margin="dense"
+                                disabled
+                            />
+                            <TextField
                                 label="Student ID"
                                 value={formData?.student_id || ""}
                                 fullWidth
@@ -250,8 +259,8 @@ const TransactionModal: React.FC<Props> = ({
                                     disabled={!editable}
                                 >
                                     <MenuItem value="pending">Pending</MenuItem>
-                                    <MenuItem value="approved">Approve</MenuItem>
-                                    <MenuItem value="rejected">Reject</MenuItem>
+                                    <MenuItem value="approved">{formData?.status === "approved" ? "Approved" : "Approve"}</MenuItem>
+                                    <MenuItem value="rejected">{formData?.status === "rejected" ? "Rejected" : "Reject"}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -442,71 +451,50 @@ const TransactionModal: React.FC<Props> = ({
                 )}
                 {formData?.userType === "External" && (
                     <Grid container spacing={2}>
-                        <Grid size={12}>
+                        {/* 1. Account Details */}
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                Account Details
+                            </Typography>
+                            <Divider sx={{ mb: 2 }} />
                             <TextField
-                                label="Payor Name"
+                                label="Name of Institution/Agency"
                                 name="name_of_payor"
                                 value={formData?.name_of_payor || ""}
                                 onChange={handleChange}
                                 fullWidth
                                 disabled={!editable}
+                                margin="dense"
                             />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
                             <TextField
                                 label="Reference ID"
                                 name="reference_id"
                                 value={formData?.reference_id || ""}
                                 onChange={handleChange}
                                 fullWidth
-                                disabled={!editable}
+                                disabled
+                                margin="dense"
                             />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
                             <TextField
-                                label="Amount"
-                                name="amount"
-                                value={formData?.amount || ""}
+                                label="Reference Number"
+                                name="reference_number"
+                                value={formData?.reference_number || ""}
                                 onChange={handleChange}
                                 fullWidth
-                                disabled={!editable}
-                                type="number"
+                                disabled
+                                margin="dense"
                             />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
+
                             <TextField
-                                label="Balance"
-                                name="balance"
-                                value={formData?.balance || ""}
-                                onChange={handleChange}
+                                label="Created At"
+                                value={formData?.created_at ? new Date(formData.created_at).toLocaleString() : ""}
                                 fullWidth
-                                disabled={!editable}
+                                disabled
+                                margin="dense"
                             />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                label="Amount Paid"
-                                name="amount_paid"
-                                value={formData?.amount_paid || ""}
-                                onChange={handleChange}
-                                fullWidth
-                                disabled={!editable}
-                                type="number"
-                            />
-                        </Grid>
-                        <Grid size={12}>
-                            <TextField
-                                label="Particulars"
-                                name="particulars"
-                                value={formData?.particulars || ""}
-                                onChange={handleChange}
-                                fullWidth
-                                disabled={!editable}
-                            />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <FormControl fullWidth>
-                                <InputLabel htmlFor="purpose-select">Purpose</InputLabel>
+
+                            <FormControl fullWidth margin="dense">
+                                <InputLabel htmlFor="purpose-select">Status</InputLabel>
                                 <Select
                                     label="Status"
                                     name="status"
@@ -519,13 +507,95 @@ const TransactionModal: React.FC<Props> = ({
                                 </Select>
                             </FormControl>
                         </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                            <TextField
-                                label="Created At"
-                                value={formData?.created_at ? new Date(formData.created_at).toLocaleString() : ""}
-                                fullWidth
-                                disabled
-                            />
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                                Payment Details
+                            </Typography>
+                            <Divider sx={{ mb: 2 }} />
+                            <FormControl fullWidth margin="dense">
+                                <TextField
+                                    fullWidth
+                                    type="text"
+                                    name="mode_of_payment"
+                                    label="Mode of Payment"
+                                    value={formData?.mode_of_payment || ""}
+                                    disabled
+                                />
+                            </FormControl>
+                            <FormControl fullWidth margin="dense">
+                                <InputLabel id="account-select">Account Title</InputLabel>
+                                <Select
+                                    labelId="account-select"
+                                    value={selectedAccount}
+                                    onChange={(e) => {
+                                        setSelectedAccount(e.target.value);
+                                    }}
+                                    label="Account Type"
+                                    margin="dense"
+                                    disabled={!editable || formData?.status !== 'approved'}
+                                >
+                                    <MenuItem value="REG">REG</MenuItem>
+                                    <MenuItem value="IGP">IGP</MenuItem>
+                                    <MenuItem value="GS">GS</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth disabled={!selectedAccount} margin="dense">
+                                <InputLabel id="particular-select">Particulars</InputLabel>
+                                <Select
+                                    labelId="particular-select"
+                                    value={formData.particulars}
+                                    onChange={(e) =>
+                                        setFormData((prev) => ({ ...prev, particulars: e.target.value }))
+                                    }
+                                    label="Particulars"
+                                    margin="dense"
+                                    disabled={!editable || !selectedAccount || formData?.status !== 'approved'}
+                                    inputProps={{
+                                        sx: {
+                                            whiteSpace: "normal !important",
+                                        },
+                                    }}
+                                >
+                                    {filteredParticulars.map((name, index) => (
+                                        <MenuItem key={index} value={name} sx={{ whiteSpace: "normal !important" }}>
+                                            {name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl fullWidth margin="dense" >
+                                <TextField
+                                    fullWidth
+                                    type="text"
+                                    name="remarks"
+                                    label="Remarks"
+                                    value={remarks}
+                                    onChange={(e) => setRemarks(e.target.value)}
+                                    disabled={!editable || formData?.status !== 'approved'}
+                                />
+                            </FormControl>
+                            <FormControl fullWidth margin="dense">
+                                <TextField
+                                    fullWidth
+                                    type="text"
+                                    name="details"
+                                    label="Details"
+                                    value={details}
+                                    onChange={(e) => setDetails(e.target.value)}
+                                    disabled={!editable || formData?.status !== 'approved'}
+                                />
+                            </FormControl>
+                            <FormControl fullWidth margin="dense">
+                                <TextField
+                                    label="Amount Paid"
+                                    name="amount_paid"
+                                    type="number"
+                                    value={formData?.amount_paid || ""}
+                                    onChange={handleChange}
+                                    fullWidth
+                                    disabled={!editable || formData?.status !== 'approved'}
+                                />
+                            </FormControl>
                         </Grid>
                     </Grid>
                 )}

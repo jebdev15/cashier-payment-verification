@@ -30,10 +30,15 @@ const UploadReceipt = () => {
   const handleGenerateReferenceId = async () => {
     setLoading((prevState) => ({ ...prevState, generateCode: true }));
     try {
-      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/External`);
+      const formData = new FormData();
+      formData.append("referenceNumber", referenceNumber);
+      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/External`, formData);
       setReferenceId(data2.reference_id);
     } catch (error) {
       console.error(error);
+      if (isAxiosError(error)) {
+        alert("An error occurred while generating the reference ID.");
+      }
     } finally {
       setLoading((prevState) => ({ ...prevState, generateCode: false }));
     }

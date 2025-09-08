@@ -2,6 +2,7 @@ export type TransactionDataType = {
     id?: string;
     student_account_id?: string;
     reference_id?: string;
+    reference_number?: string;
     student_id?: string;
     name_of_payor?: string;
     email?: string;

@@ -83,6 +83,7 @@ const ShowTransactions = () => {
         const handleClick = () => {
           setOpen(true);
           setSelectedRow(row);
+          setEditable(row.status === "pending");
         };
         return (
           <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
