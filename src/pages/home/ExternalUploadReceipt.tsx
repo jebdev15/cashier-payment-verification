@@ -131,6 +131,7 @@ const UploadReceipt = () => {
       <Typography variant="h6" color="textSecondary" letterSpacing={3} textTransform={"uppercase"} mb={1}>
         Upload Receipt
       </Typography>
+<<<<<<< Updated upstream
       <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, flexGrow: 1 }}>
         <Box sx={{ display: "flex", flexDirection: { xs: "column", lg: "row" }, gap: 2, height: "100%", width: "100%" }}>
           <Box
@@ -159,6 +160,98 @@ const UploadReceipt = () => {
                 height: "fit-content",
                 gap: 2,
                 width: "100%",
+=======
+      <Grid container spacing={4} sx={{ height: "100%" }} component="form" onSubmit={handleSubmit}>
+        <Grid container spacing={2} direction="column" size={{ xs: 12, lg: 4 }}>
+
+
+          <Grid size={{ xs: 12 }}>
+            <FormControl fullWidth>
+              <TextField
+                sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
+                slotProps={{
+                  input: {
+                    sx: { borderRadius: 2, input: { px: 1 } },
+                    endAdornment: (
+                      <Tooltip title="Generate Reference ID" placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={handleGenerateReferenceId}
+                          disabled={referenceId !== ""}
+                        >
+                          <GeneratingTokensIcon />
+                        </IconButton>
+                      </Tooltip>
+                    ),
+                  },
+                }}
+                label="Reference ID"
+                value={referenceId}
+                disabled
+              />
+            </FormControl>
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
+              <Select sx={{ borderRadius: 2 }} labelId="demo-simple-select-label" id="demo-simple-select" value={modeOfPayment} label="Mode of Payment" onChange={(e) => setModeOfPayment(e.target.value)}>
+                <MenuItem disabled value="">
+                  <em>Select Mode of Payment</em>
+                </MenuItem>
+                {modeOfPaymentOptions.map((option, index) => (
+                  <MenuItem key={++index} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid size={{ xs: 12 }}>
+            <FormControl fullWidth>
+              <TextField
+                sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
+                slotProps={{
+                  input: {
+                    sx: { borderRadius: 2, input: { px: 1 } },
+                  },
+                }}
+                label="Reference Number"
+                onChange={(e) => setReferenceNumber(e.target.value)}
+                value={referenceNumber}
+              />
+            </FormControl>
+          </Grid>
+
+          <Grid size={{ xs: 12 }} sx={{ display: "none" }}>
+            <FormControl fullWidth>
+              <TextField
+                slotProps={{
+                  input: {
+                    sx: { borderRadius: 2 },
+                  },
+                }}
+                label="Remarks"
+                value={remarks}
+                multiline
+                rows={4}
+                onChange={(e) => setRemarks(e.target.value)}
+              />
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              fullWidth
+              type="file"
+              onChange={handleChangeFile}
+              inputRef={fileInputRef}
+              slotProps={{
+                htmlInput: { accept: "image/*" },
+                input: {
+                  sx: { borderRadius: 2 },
+                },
+>>>>>>> Stashed changes
               }}
             >
               <FormControl fullWidth>
