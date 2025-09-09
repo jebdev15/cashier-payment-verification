@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography, useMediaQuery } from "@mui/material";
 import SpanningTable from "./SpanningTable";
 import { useAxios } from "../../hooks/useAxios";
+import { theme } from "@/theme/theme";
 
 type StatementOfAccountDataType = {
   id: number;
@@ -91,60 +92,89 @@ const StatementOfAccount = () => {
       </Typography>
     );
   return (
-    <Box sx={{ flexGrow: 1, height: "100%" }}>
-      <Typography variant={isMediumScreen ? "h5" : "h4"} color="initial" sx={{ mb: 4 }}>
+    <>
+      <Typography variant="h6" color="textSecondary" letterSpacing={3} textTransform={"uppercase"} mb={1}>
         Statement of Account
       </Typography>
-      <Box sx={{ display: "flex", flexDirection: { xs: "column", lg: "row" }, gap: 4, height: "100%", width: "100%" }}>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-            width: { xs: "100%", lg: "30%" },
-            minWidth: { xs: "100%", lg: "275px" },
-          }}
-          component={"form"}
-          onSubmit={handleSubmit}
-        >
-          <FormControl fullWidth>
-            <InputLabel id="select-school-year-label">School Year</InputLabel>
-            <Select sx={{ borderRadius: 2 }} labelId="select-school-year-label" id="select-school-year" label="School Year" name="school_year" onChange={handleChange}>
-              {schoolYears.length > 0 && schoolYears.map((item, index) => <MenuItem key={index} value={item}>{`${item} - ${item + 1}`}</MenuItem>)}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id="select-school-semester-label">Semester</InputLabel>
-            <Select sx={{ borderRadius: 2 }} labelId="select-school-semester-label" id="select-school-semester" name="semester" label="Semester" onChange={handleChange}>
-              {semesters.length > 0 &&
-                semesters.map((item, index) => (
-                  <MenuItem key={index} value={item}>
-                    {item}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-          <Button sx={{ borderRadius: 2 }} fullWidth size="large" type="submit" variant="contained">
-            FILTER
-          </Button>
-        </Box>
-        <Box
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            bgcolor: "#f0f0f0",
-            borderRadius: 4,
-            padding: 2,
-          }}
-        >
-          <SpanningTable rows={filteredData} loadingSoaTable={loading.soaTable} loadingGrid={loading.grid} setLoading={setLoading} />
+      <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, flexGrow: 1 }}>
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", lg: "row" }, gap: 2, height: "100%", width: "100%" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
+              height: "fit-content",
+              columnGap: 2,
+              width: { xs: "100%", lg: "30%" },
+              minWidth: { xs: "100%", lg: "275px" },
+              position: { xs: "relative", lg: "sticky" },
+              top: { xs: "0", lg: "calc(72px + 1rem)" },
+            }}
+            component={"form"}
+            onSubmit={handleSubmit}
+          >
+            <Typography variant="h6" mb={2}>
+              Generate Statement of Account
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "start",
+                height: "fit-content",
+                gap: 2,
+                width: "100%",
+              }}
+            >
+              <FormControl fullWidth>
+                <InputLabel id="select-school-year-label">School Year</InputLabel>
+                <Select sx={{ borderRadius: 3 }} labelId="select-school-year-label" id="select-school-year" label="School Year" name="school_year" onChange={handleChange}>
+                  {schoolYears.length > 0 && schoolYears.map((item, index) => <MenuItem key={index} value={item}>{`${item} - ${item + 1}`}</MenuItem>)}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-school-semester-label">Semester</InputLabel>
+                <Select sx={{ borderRadius: 3 }} labelId="select-school-semester-label" id="select-school-semester" name="semester" label="Semester" onChange={handleChange}>
+                  {semesters.length > 0 &&
+                    semesters.map((item, index) => (
+                      <MenuItem key={index} value={item}>
+                        {item}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+              <Button
+                sx={{
+                  borderRadius: 3,
+                  bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                }}
+                fullWidth
+                size="large"
+                type="submit"
+                variant="contained"
+              >
+                Filter
+              </Button>
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              bgcolor: "#f0f0f0",
+              borderRadius: 3,
+              padding: 2,
+              minHeight: 150,
+            }}
+          >
+            <SpanningTable rows={filteredData} loadingSoaTable={loading.soaTable} loadingGrid={loading.grid} setLoading={setLoading} />
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 

@@ -6,6 +6,7 @@ import { sideNav } from "./sideNav";
 import { useCookies } from "react-cookie";
 import { HomeLayoutContext } from "../../context/HomeLayoutContext";
 import { jwtDecode } from "jwt-decode";
+import { theme } from "@/theme/theme";
 
 const Sidebar = () => {
   const { sidebarOpen } = React.useContext(HomeLayoutContext);
@@ -80,40 +81,29 @@ const Sidebar = () => {
         sx={{
           padding: 2,
           paddingRight: { md: "0", xs: "2" },
-          height: "calc(100dvh - 64px)",
+          height: { sm: "calc(100dvh - 72px)", xs: "calc(100dvh - 64px)" },
           width: "100%",
           maxWidth: 300,
-          marginLeft: {
-            md: sidebarOpen ? "0" : "-300px",
-            xs: sidebarOpen ? "-300px" : "0",
-          },
+          flexShrink: 0,
+          marginLeft: { md: sidebarOpen ? "0" : "-300px", xs: sidebarOpen ? "-300px" : "0" },
           transition: "margin 300ms",
-          position: { md: "relative", xs: "fixed" },
+          position: { md: "sticky", xs: "fixed" },
+          top: { md: "72px", xs: "unset" },
           zIndex: "999",
-          bgcolor: "#f0f0f0",
+          bgcolor: { md: "#f0f0f0", xs: "transparent" },
         }}
       >
         <nav style={{ display: "flex", height: "100%" }} aria-label="main mailbox folders">
-          <List
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 1,
-              flexGrow: 1,
-            }}
-            disablePadding
-          >
+          <List sx={{ display: "flex", flexDirection: "column", gap: 1, flexGrow: 1, backgroundColor: "background.paper", borderRadius: 4, boxShadow: 2, overflow: "hidden" }} disablePadding>
             <ListItem
               sx={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 bgcolor: "background.paper",
-                borderRadius: 4,
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-                p: 2,
                 py: 1,
-                mb: 2,
+                px: 2,
+                borderBottom: "1px solid rgba(0, 0, 0, 0.1)",
               }}
               disablePadding
             >
@@ -142,53 +132,60 @@ const Sidebar = () => {
               )}
             </ListItem>
 
-            {/* <Divider /> */}
-            {sideNav.map((item, index) => {
-              if (userData.isExternal && ["sao", "ur"].includes(item.abbreviation)) return null;
-              if (userData.isStudent && item.abbreviation === "ur-ex") return null;
-              return (
-                <ListItem disablePadding key={index}>
-                  <ListItemButton
-                    sx={{
-                      borderRadius: 4,
-                      "&.Mui-selected": {
-                        bgcolor: "background.paper",
-                        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-                        "& *": {
-                          color: "primary.main",
+            <Box sx={{ px: 1, display: "grid", gap: 1 }}>
+              {sideNav.map((item, index) => {
+                if (userData.isExternal && ["sao", "ur"].includes(item.abbreviation)) return null;
+                if (userData.isStudent && item.abbreviation === "ur-ex") return null;
+                return (
+                  <ListItem disablePadding key={index}>
+                    <ListItemButton
+                      sx={{
+                        borderRadius: 3,
+                        "&.Mui-selected": {
+                          bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                          "& *": {
+                            color: "white",
+                          },
+                          "&:hover": {
+                            bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                          },
                         },
-                      },
-                    }}
-                    selected={currentTab === item.abbreviation}
-                    onClick={() => handleChange(item.path, item.abbreviation)}
-                  >
-                    <ListItemIcon sx={{ minWidth: 32 }}>
-                      <item.icon />
-                    </ListItemIcon>
-                    <ListItemText primary={item.label} />
-                  </ListItemButton>
-                </ListItem>
-              );
-            })}
+                      }}
+                      selected={currentTab === item.abbreviation}
+                      onClick={() => handleChange(item.path, item.abbreviation)}
+                    >
+                      <ListItemIcon sx={{ minWidth: 32 }}>
+                        <item.icon />
+                      </ListItemIcon>
+                      <ListItemText primary={item.label} />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </Box>
             <ListItem sx={{ flexGrow: 1, alignItems: "end" }} disablePadding>
-              <ListItemButton
-                sx={{
-                  borderRadius: 4,
-                  "&.Mui-selected": {
-                    bgcolor: "background.paper",
-                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
-                    "& *": {
-                      color: "primary.main",
+              <Box sx={{ width: "100%", p: 1, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+                <ListItemButton
+                  sx={{
+                    borderRadius: 3,
+                    "&.Mui-selected": {
+                      bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                      "& *": {
+                        color: "white",
+                      },
+                      "&:hover": {
+                        bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                      },
                     },
-                  },
-                }}
-                onClick={handleLogout}
-              >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  <ExitToAppIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Logout"} />
-              </ListItemButton>
+                  }}
+                  onClick={handleLogout}
+                >
+                  <ListItemIcon sx={{ minWidth: 32 }}>
+                    <ExitToAppIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={"Logout"} />
+                </ListItemButton>
+              </Box>
             </ListItem>
           </List>
         </nav>

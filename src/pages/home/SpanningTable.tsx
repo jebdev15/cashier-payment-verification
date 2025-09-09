@@ -2,6 +2,7 @@ import React from "react";
 import { Alert, Box, Button, FormControl, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import { axiosInstanceWithAuthorization } from "../../api/app";
 import { useCookies } from "react-cookie";
+import { theme } from "@/theme/theme";
 
 function ccyFormat(num: number) {
   return `${num.toFixed(2)}`;
@@ -68,81 +69,173 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
   if (loadingSoaTable) return <div>Loading...</div>;
   if (rows.length === 0) return <div>No data</div>;
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", gap: 2 }}>
-      <TableContainer component={Paper} sx={{ width: "100%" }}>
-        <Table sx={{ width: "100%", overflow: "clip", scrollbarGutter: "auto" }} aria-label="spanning table">
-          <TableHead sx={{ position: "sticky", top: 1, backgroundColor: "background.paper", zIndex: 1 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", gap: 3, bgcolor: "background.paper", borderRadius: 2 }}>
+      <TableContainer
+        component={Paper}
+        elevation={0}
+        sx={{
+          width: "100%",
+          overflow: "hidden",
+        }}
+      >
+        <Table sx={{ width: "100%" }} size="small" aria-label="assessment table">
+          <TableHead>
             <TableRow>
-              <TableCell align="center" colSpan={4} sx={{ position: "sticky", top: 0, backgroundColor: "background.paper", zIndex: 1 }}>
+              <TableCell
+                align="center"
+                colSpan={4}
+                sx={{
+                  fontSize: "1.25rem",
+                  fontWeight: "semi-bold",
+                  textTransform: "uppercase",
+                  letterSpacing: "3px",
+                  px: 4,
+                  py: 3,
+                }}
+              >
                 Assessment
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell>Description</TableCell>
-              <TableCell>Amount</TableCell>
+              <TableCell sx={{ fontWeight: "bold", pl: 4, pr: 2, py: 1.5 }}>Description</TableCell>
+              <TableCell sx={{ fontWeight: "bold", pr: 4, pl: 2, py: 1.5 }}>Amount</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {data.map((item, index) => (
               <TableRow key={index}>
-                <TableCell>{item.item_title}</TableCell>
-                <TableCell>{ccyFormat(Number(item.amount))}</TableCell>
+                <TableCell sx={{ pl: 4, pr: 2, textTransform: "Capitalize" }}>{item.item_title.toLowerCase()}</TableCell>
+                <TableCell sx={{ pr: 4, pl: 2 }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 0.5 }}>
+                    ₱<Typography fontFamily="monospace">{ccyFormat(Number(item.amount))}</Typography>
+                  </Box>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
-          <TableFooter sx={{ position: "sticky", bottom: 0 }}>
+          <TableFooter sx={{ borderTop: "4px double rgba(224, 224, 224, 1)" }}>
             <TableRow>
-              <TableCell align="right" sx={{ backgroundColor: "background.paper", zIndex: 1 }}>
-                Total
+              <TableCell sx={{ color: "text.primary", fontWeight: "bold", pl: 4, pr: 2, py: 1.5, fontSize: "0.875rem", textTransform: "uppercase" }}>Total</TableCell>
+              <TableCell sx={{ pl: 2, pr: 4, fontWeight: "bold", fontSize: "0.875rem" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  ₱
+                  <Typography fontFamily="monospace" fontWeight={"bold"} sx={{ color: "info.main" }}>
+                    {ccyFormat(Number(totalAmount))}
+                  </Typography>
+                </Box>
               </TableCell>
-              <TableCell sx={{ backgroundColor: "background.paper", zIndex: 1 }}>{ccyFormat(Number(totalAmount))}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell align="right" sx={{ backgroundColor: "background.paper", zIndex: 1 }}>
-                Balance
+              <TableCell sx={{ color: "text.primary", fontWeight: "bold", pl: 4, pr: 2, py: 1.5, fontSize: "0.875rem", textTransform: "uppercase" }}>Balance</TableCell>
+              <TableCell sx={{ pl: 2, pr: 4, fontWeight: "bold", fontSize: "0.875rem" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  ₱
+                  <Typography fontFamily="monospace" fontWeight={"bold"} sx={{ color: balance > 0 ? "error.main" : "success.main" }}>
+                    {ccyFormat(Number(balance))}
+                  </Typography>
+                </Box>
               </TableCell>
-              <TableCell sx={{ backgroundColor: "background.paper", zIndex: 1 }}>{ccyFormat(Number(balance))}</TableCell>
             </TableRow>
             <TableRow>
-              <TableCell align="right" sx={{ backgroundColor: "background.paper", zIndex: 1 }}>
-                Amount Paid
+              <TableCell sx={{ color: "text.primary", fontWeight: "bold", pl: 4, pr: 2, py: 1.5, fontSize: "0.875rem", textTransform: "uppercase" }}>Amount Paid</TableCell>
+              <TableCell sx={{ pl: 2, pr: 4, fontWeight: "bold", fontSize: "0.875rem" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  ₱
+                  <Typography fontFamily="monospace" fontWeight={"bold"} sx={{ color: "success.main" }}>
+                    {ccyFormat(Number(amountPaid))}
+                  </Typography>
+                </Box>
               </TableCell>
-              <TableCell sx={{ backgroundColor: "background.paper", zIndex: 1 }}>{ccyFormat(Number(amountPaid))}</TableCell>
             </TableRow>
           </TableFooter>
         </Table>
       </TableContainer>
       {rows.length > 0 && (
-        <>
-          <FormControl fullWidth>
-            <InputLabel id="demo-simple-select-label">Particulars</InputLabel>
+        <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+          <FormControl fullWidth variant="outlined" sx={{ mt: 1 }}>
+            <InputLabel id="particulars-select-label">Particulars</InputLabel>
             <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
+              labelId="particulars-select-label"
+              id="particulars-select"
               value={particulars}
               label="Particulars"
               onChange={(e) => setParticulars(e.target.value)}
+              sx={{
+                borderRadius: 1,
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(0, 0, 0, 0.23)",
+                },
+              }}
               inputProps={{
                 sx: {
                   whiteSpace: "normal !important",
                 },
               }}
             >
-              <MenuItem sx={{ whiteSpace: "normal !important" }} value={"TUITION AND MISCELLANEOUS FEES"}>TUITION AND MISCELLANEOUS FEES</MenuItem>
+              <MenuItem sx={{ whiteSpace: "normal !important" }} value={"TUITION AND MISCELLANEOUS FEES"}>
+                TUITION AND MISCELLANEOUS FEES
+              </MenuItem>
             </Select>
           </FormControl>
-          <Button size="large" variant="contained" onClick={handleGenerateReferenceId} disabled={loadingGrid} sx={{ borderRadius: 2 }}>
-            {loadingGrid ? "Generating..." : "Generate Reference Id"}
+          <Button
+            variant="contained"
+            onClick={handleGenerateReferenceId}
+            disabled={loadingGrid}
+            sx={{
+              borderRadius: 3,
+              py: 1.5,
+              fontWeight: "bold",
+              textTransform: "none",
+              fontSize: "1rem",
+              boxShadow: 2,
+              bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+              "&:hover": {
+                bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 100%, transparent)`,
+              },
+            }}
+          >
+            {loadingGrid ? "Generating..." : "Generate Reference ID"}
           </Button>
-        </>
+        </Box>
       )}
       {referenceId && !loadingGrid && (
-        <Box component={Paper} sx={{ padding: 2, bgcolor: "background.paper", display: "flex", flexDirection: "column", gap: 1 }}>
-          <Typography variant="h6" color="initial">
-            Reference ID: {referenceId}
-          </Typography>
-          <Alert severity="info">Please be informed that your reference ID will expire in 24 hours, after which you may generate a new one. Kindly copy the reference ID and paste it into the Reference ID field on the Upload Receipt page.</Alert>
-        </Box>
+        <Paper
+          elevation={0}
+          sx={{
+            padding: 3,
+            borderTop: "1px solid rgba(0, 0, 0, 0.1)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Typography variant="subtitle2" color="text.secondary">
+              Reference ID
+            </Typography>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              sx={{
+                color: "primary.main",
+                letterSpacing: "0.5px",
+              }}
+            >
+              {referenceId}
+            </Typography>
+          </Box>
+          <Alert
+            severity="info"
+            sx={{
+              borderRadius: 2,
+              "& .MuiAlert-message": {
+                fontSize: "0.875rem",
+              },
+            }}
+          >
+            Please be informed that your reference ID will expire in 24 hours, after which you may generate a new one. Kindly copy the reference ID and paste it into the Reference ID field on the Upload Receipt page.
+          </Alert>
+        </Paper>
       )}
     </Box>
   );
