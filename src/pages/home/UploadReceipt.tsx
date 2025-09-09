@@ -19,7 +19,8 @@ const UploadReceipt = () => {
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean }>({ upload: false, log: false });
   const [referenceId, setReferenceId] = React.useState<string>("");
-  const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
+  const [referenceNumber, setReferenceNumber] = React.useState<string>("");
+  const [modeOfPayment, setModeOfPayment] = React.useState<string>("");
   const [remarks, setRemarks] = React.useState<string>("");
   const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: "error" | "warning" | "info" | "success" }>({ open: false, message: "", severity: "info" });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -75,6 +76,7 @@ const UploadReceipt = () => {
       formData.append("receipt", blob || image, imageName); // Use the file object directly if available
       formData.append("remarks", remarks); // Use the file object directly if available
       formData.append("referenceId", referenceId);
+      formData.append("referenceNumber", referenceNumber);
       formData.append("mode_of_payment", modeOfPayment);
     } else {
       alert("No image to upload. Please select a file before proceeding.");
@@ -87,6 +89,8 @@ const UploadReceipt = () => {
       setSnackbar((prev) => ({ ...prev, message: data.message, severity: "success" }));
       if (status === 200) {
         setReferenceId("");
+        setReferenceNumber("");
+        setModeOfPayment("");
         setRemarks("");
         setImage("");
         setImageName("");
@@ -113,160 +117,143 @@ const UploadReceipt = () => {
       <Typography variant="h6" color="textSecondary" letterSpacing={3} textTransform={"uppercase"} mb={1}>
         Upload Receipt
       </Typography>
-      <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, flexGrow: 1 }}>
-        <Box sx={{ display: "flex", flexDirection: { xs: "column", lg: "row" }, gap: 2, height: "100%", width: "100%" }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "start",
-              height: "fit-content",
-              columnGap: 2,
-              width: { xs: "100%", lg: "30%" },
-              minWidth: { xs: "100%", lg: "275px" },
-              position: { xs: "relative", lg: "sticky" },
-              top: { xs: "0", lg: "calc(72px + 1rem)" },
-            }}
-            component={"form"}
-            onSubmit={handleSubmit}
-          >
-            <Typography variant="h6" mb={2}>
-              Upload Receipt Form
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "start",
-                height: "fit-content",
-                gap: 2,
-                width: "100%",
+      <Grid container spacing={4} sx={{ height: "100%" }} component="form" onSubmit={handleSubmit}>
+        <Grid container spacing={2} direction="column" size={{ xs: 12, lg: 4 }}>
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              fullWidth
+              type="file"
+              onChange={handleChangeFile}
+              inputRef={fileInputRef}
+              slotProps={{
+                htmlInput: { accept: "image/*" },
+                input: {
+                  sx: { borderRadius: 2 },
+                },
               }}
-            >
-              <FormControl fullWidth>
-                <TextField
-                  fullWidth
-                  type="file"
-                  onChange={handleChangeFile}
-                  inputRef={fileInputRef}
-                  slotProps={{
-                    htmlInput: { accept: "image/*" },
-                    input: {
-                      sx: { borderRadius: 3 },
-                    },
-                  }}
-                />
-              </FormControl>
-              <FormControl fullWidth>
-                <TextField
-                  slotProps={{
-                    input: {
-                      sx: { borderRadius: 3 },
-                    },
-                  }}
-                  label="Reference ID"
-                  value={referenceId}
-                  disabled
-                />
-                {referenceId === "" && (
-                  <FormLabel>
-                    <Alert severity="info">Please generate a reference ID first before uploading a receipt.</Alert>
-                  </FormLabel>
-                )}
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
-                <Select sx={{ borderRadius: 3 }} labelId="demo-simple-select-label" id="demo-simple-select" value={modeOfPayment} label="Mode of Payment" onChange={(e) => setModeOfPayment(e.target.value)}>
-                  {modeOfPaymentOptions.map((option, index) => (
-                    <MenuItem key={++index} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl fullWidth>
-                <TextField
-                  slotProps={{
-                    input: {
-                      sx: { borderRadius: 3 },
-                    },
-                  }}
-                  label="Remarks"
-                  value={remarks}
-                  multiline
-                  rows={4}
-                  onChange={(e) => setRemarks(e.target.value)}
-                />
-              </FormControl>
-              <Button
-                sx={{
-                  borderRadius: 3,
-                  bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
-                  "&:hover": {
-                    bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 100%, transparent)`,
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <FormControl fullWidth>
+              <TextField
+                slotProps={{
+                  input: {
+                    sx: { borderRadius: 2 },
                   },
                 }}
-                fullWidth
-                size="large"
-                type="submit"
-                variant="contained"
-                disabled={!image || loading.upload || !referenceId}
-              >
-                {loading.upload ? "Uploading..." : "Upload File"}
-              </Button>
-              {error && (
-                <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
-                  {error}
-                </Alert>
-              )}
-            </Box>
-          </Box>
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              bgcolor: "#f0f0f0",
-              borderRadius: 3,
-              padding: 2,
-              minHeight: 150,
-            }}
-          >
-            {image ? (
-              <img
-                src={image}
-                alt="Preview"
-                height={400}
-                width={400}
-                loading="lazy"
-                style={{
-                  objectFit: "contain",
-                  objectPosition: "center",
-                  width: "100%",
-                  height: "100%",
-                  padding: "8px",
-                }}
+                label="Reference ID"
+                value={referenceId}
+                required
+                disabled
               />
-            ) : (
-              <Typography
-                variant="h6"
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "text.secondary",
-                }}
+              {referenceId === "" && (
+                <FormLabel>
+                  <Alert severity="info">Please generate a reference ID first before uploading a receipt.</Alert>
+                </FormLabel>
+              )}
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
+              <Select
+                sx={{ borderRadius: 2 }}
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={modeOfPayment}
+                label="Mode of Payment"
+                onChange={(e) => setModeOfPayment(e.target.value)}
+                required
               >
-                Image Preview
-              </Typography>
+                {modeOfPaymentOptions.map((option, index) => (
+                  <MenuItem key={++index} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <FormControl fullWidth>
+              <TextField
+                slotProps={{
+                  input: {
+                    sx: { borderRadius: 2 },
+                  },
+                }}
+                onChange={(e) => setReferenceNumber(e.target.value)}
+                required
+                label="Reference Number"
+                value={referenceNumber}
+              />
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12 }} sx={{ display: "none" }}>
+            <FormControl fullWidth>
+              <TextField
+                slotProps={{
+                  input: {
+                    sx: { borderRadius: 2 },
+                  },
+                }}
+                label="Remarks"
+                value={remarks}
+                multiline
+                rows={4}
+                onChange={(e) => setRemarks(e.target.value)}
+              />
+            </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <Button sx={{ borderRadius: 2 }} variant="contained" startIcon={<UploadFileIcon />} disabled={!image || loading.upload || !referenceId} type="submit" fullWidth size="large">
+              {loading.upload ? "Uploading..." : "Upload File"}
+            </Button>
+            {error && (
+              <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
+                {error}
+              </Alert>
             )}
-          </Box>
-        </Box>
-      </Box>
-      <SnackbarProvider open={snackbar.open} message={snackbar.message} severity={snackbar.severity} onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))} />
+          </Grid>
+        </Grid>
+        <Grid size={{ xs: 12, lg: 8 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
+          {image ? (
+            <img
+              src={image}
+              alt="Preview"
+              height={400}
+              width={400}
+              loading="lazy"
+              style={{
+                objectFit: "contain",
+                objectPosition: "center",
+                width: "100%",
+                height: "100%",
+                padding: "8px",
+              }}
+            />
+          ) : (
+            <Typography
+              variant="h6"
+              sx={{
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "text.secondary",
+              }}
+            >
+              Image Preview
+            </Typography>
+          )}
+        </Grid>
+      </Grid>
+      <SnackbarProvider
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      />
     </>
   );
 };

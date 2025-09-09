@@ -25,7 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { axiosInstance } from "@/api/app";
 import { fees } from "@/pages/admin/Transactions/fees"; // Assuming fees is an array of fee objects
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import SnackbarProvider from "../Snackbar";
+// import SnackbarProvider from "../Snackbar";
 
 
 type Props = {
@@ -50,7 +50,7 @@ const TransactionModal: React.FC<Props> = ({
     open,
     data,
     entryModes,
-    snackbar,
+    // snackbar,
     onClose,
     onSave,
     editable = false,
@@ -68,6 +68,13 @@ const TransactionModal: React.FC<Props> = ({
     const [remarks, setRemarks] = React.useState<string>('');
     const [entryMode, setEntryMode] = React.useState<string>('1');
     const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
+    const [distribution, setDistribution] = React.useState({
+        miscellaneous: 0,
+        tuition: 0,
+        totalPayable: 0,
+        accountsPayable: 0,
+    });
+
     const handleCheckedItems = (
         event: React.ChangeEvent<HTMLInputElement>,
         checked: boolean
@@ -96,7 +103,7 @@ const TransactionModal: React.FC<Props> = ({
         if (editable) {
             if (formData && onSave) {
 
-                onSave({ ...formData, checkedItems, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount, miscellaneousFees });
+                onSave({ ...formData, checkedItems, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount, miscellaneousFees, distribution });
             }
         }
     };
@@ -146,6 +153,52 @@ const TransactionModal: React.FC<Props> = ({
             setFilteredParticulars([]);
         }
     }, [selectedAccount]);
+    React.useEffect(() => {
+        if (!amountTendered) {
+            setDistribution({ miscellaneous: 0, tuition: 0, totalPayable: 0, accountsPayable: 0 });
+            return;
+        }
+
+        let remaining = amountTendered;
+        let miscTotal = 0;
+        let totalMiscBalance = 0;
+
+        if (checkedItems.length > 0) {
+            // ✅ If misc are checked, handle them
+            for (const fee of miscellaneousFees) {
+                if (checkedItems.includes(fee.nature_of_collection_id.toString())) {
+                    totalMiscBalance += Number(fee.balance);
+                }
+            }
+
+            for (const fee of miscellaneousFees) {
+                if (checkedItems.includes(fee.nature_of_collection_id.toString())) {
+                    const payAmount = Math.min(remaining, Number(fee.balance));
+                    miscTotal += payAmount;
+                    remaining -= payAmount;
+                }
+            }
+        }
+
+        // ✅ Always apply excess (or full tendered if no misc checked) to tuition
+        const tuitionApplied = Math.min(remaining, Number(tuitionFee));
+        remaining -= tuitionApplied;
+
+        // ✅ Totals
+        const totalPayable = (checkedItems.length > 0 ? totalMiscBalance : 0) + Number(tuitionFee);
+        const accountsPayable = Math.max(totalPayable - amountTendered, 0);
+
+        setDistribution({
+            miscellaneous: miscTotal,
+            tuition: tuitionApplied,
+            totalPayable,
+            accountsPayable,
+        });
+
+    }, [amountTendered, checkedItems, miscellaneousFees, tuitionFee]);
+
+
+
     return (
         <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
             {/* Header with Close Button */}
@@ -309,7 +362,7 @@ const TransactionModal: React.FC<Props> = ({
                                 <InputLabel id="particular-select">Particulars</InputLabel>
                                 <Select
                                     labelId="particular-select"
-                                    value={formData.particulars}
+                                    value={formData?.particulars}
                                     onChange={(e) =>
                                         setFormData((prev) => ({ ...prev, particulars: e.target.value }))
                                     }
@@ -427,7 +480,7 @@ const TransactionModal: React.FC<Props> = ({
                             <Grid container spacing={2}>
                                 <Grid size={{ xs: 12, md: 4 }}>
                                     <Typography variant="body1" fontWeight="bold">
-                                        Payable
+                                        Balance
                                     </Typography>
                                     <Typography>Miscellaneous: {miscellaneousFeesBalance}</Typography>
                                     <Typography>Tuition: {tuitionFee}</Typography>
@@ -436,14 +489,15 @@ const TransactionModal: React.FC<Props> = ({
                                     <Typography variant="body1" fontWeight="bold">
                                         Distribution
                                     </Typography>
-                                    <Typography>For Miscellaneous: 0.00</Typography>
-                                    <Typography>For Tuition: 0.00</Typography>
+                                    <Typography>For Miscellaneous: {distribution.miscellaneous.toFixed(2)}</Typography>
+                                    <Typography>For Tuition: {distribution.tuition.toFixed(2)}</Typography>
                                 </Grid>
                                 <Grid size={{ xs: 12, md: 4 }}>
                                     <Typography variant="body1" fontWeight="bold">
                                         Accounts Payable
                                     </Typography>
-                                    <Typography>Amount: 0.00</Typography>
+                                    <Typography>Accounts Payable: {distribution.accountsPayable.toFixed(2)}</Typography>
+                                    <Typography>Total Payable: {distribution.totalPayable.toFixed(2)}</Typography>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -486,6 +540,14 @@ const TransactionModal: React.FC<Props> = ({
                             />
 
                             <TextField
+                                label="eOR Number"
+                                name="e_or"
+                                value={formData?.e_or || ""}
+                                fullWidth
+                                disabled
+                                margin="dense"
+                            />
+                            <TextField
                                 label="Created At"
                                 value={formData?.created_at ? new Date(formData.created_at).toLocaleString() : ""}
                                 fullWidth
@@ -503,7 +565,9 @@ const TransactionModal: React.FC<Props> = ({
                                     fullWidth
                                     disabled={!editable}
                                 >
-                                    {["pending", "approved", "rejected"].map((status) => <MenuItem key={status} selected={status === formData?.status} value={status}>{status}</MenuItem>)}
+                                    <MenuItem value="pending">Pending</MenuItem>
+                                    <MenuItem value="approved">{formData?.status === "approved" ? "Approved" : "Approve"}</MenuItem>
+                                    <MenuItem value="rejected">{formData?.status === "rejected" ? "Rejected" : "Reject"}</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -543,7 +607,7 @@ const TransactionModal: React.FC<Props> = ({
                                 <InputLabel id="particular-select">Particulars</InputLabel>
                                 <Select
                                     labelId="particular-select"
-                                    value={formData.particulars}
+                                    value={formData?.particulars}
                                     onChange={(e) =>
                                         setFormData((prev) => ({ ...prev, particulars: e.target.value }))
                                     }
@@ -587,11 +651,11 @@ const TransactionModal: React.FC<Props> = ({
                             </FormControl>
                             <FormControl fullWidth margin="dense">
                                 <TextField
-                                    label="Amount Paid"
-                                    name="amount_paid"
+                                    label="Amount Received"
+                                    name="amountTendered"
                                     type="number"
-                                    value={formData?.amount_paid || ""}
-                                    onChange={handleChange}
+                                    value={amountTendered}
+                                    onChange={(e) => setAmountTendered(parseFloat(Number(e.target.value).toFixed(2)))}
                                     fullWidth
                                     disabled={!editable || formData?.status !== 'approved'}
                                 />
@@ -643,13 +707,13 @@ const TransactionModal: React.FC<Props> = ({
                     </Button>
                 </DialogActions>
             )}
-            {(snackbar && snackbar.open) &&
+            {/* {(snackbar && snackbar.open) &&
                 <SnackbarProvider
                     open={snackbar?.open}
                     message={snackbar?.message}
                     severity={snackbar?.severity}
                 />
-            }
+            } */}
 
         </Dialog>
     );

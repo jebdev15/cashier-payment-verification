@@ -3,6 +3,7 @@ export type TransactionDataType = {
     student_account_id?: string;
     reference_id?: string;
     reference_number?: string;
+    e_or: string;
     student_id?: string;
     name_of_payor?: string;
     email?: string;
@@ -30,10 +31,19 @@ export type TransactionDataType = {
     amountTendered?: number;
     selectedAccount?: string;
     miscellaneousFees?: any[];
+    distribution?: { miscellaneous: number; tuition: number; total: number; accountsPayable: number; };
 };
 
 export type SnackbarState = {
   open: boolean;
   message: string;
   severity: "success" | "error" | "warning" | "info" | undefined;
+}
+
+export type TransactionModalEntryModeType = {
+    entry_mode_id: number;
+    entry_mode_title: string;
+    entry_mode_desc: string;
+    credit: string;
+    debit: string;
 }

@@ -1,8 +1,8 @@
 import React from "react";
-import { Alert, Box, IconButton, Paper, Tooltip, Typography, Divider } from "@mui/material";
+import { Alert, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { SnackbarState, TransactionDataType } from "./type";
+import { SnackbarState, TransactionDataType, TransactionModalEntryModeType } from "./type";
 // import { useNavigate } from 'react-router'
 import { useAxios } from "@/hooks/useAxios";
 import TransactionModal from "@/components/modals/TransactionModal";
@@ -18,12 +18,14 @@ const ShowTransactions = () => {
   // const navigate = useNavigate();
   const [cookie] = useCookies(["accessToken"]);
   const [open, setOpen] = React.useState(false);
+  const [data, setData] = React.useState<TransactionDataType[]>([]);
   const [selectedRow, setSelectedRow] = React.useState<TransactionDataType | null>(null);
   const [editable, setEditable] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: undefined });
-  const [entryModes, setEntryModes] = React.useState<string[]>([]);
+  const [entryModes, setEntryModes] = React.useState<TransactionModalEntryModeType[]>([]);
+  const [refresh, setRefresh] = React.useState(false);
 
-  const { data, loading, error } = useAxios({
+  const { data: transactionData, loading, error } = useAxios({
     url: "/api/transactions",
     authorized: true,
   });
@@ -102,6 +104,7 @@ const ShowTransactions = () => {
     formData.append("id", updatedData.id || "");
     formData.append("studentAccountID", updatedData.student_account_id || "");
     formData.append("referenceID", updatedData.reference_id || "");
+    formData.append("referenceNumber", updatedData.reference_number || "");
     formData.append("studentID", updatedData.student_id || "");
     formData.append("nameOfPayor", updatedData.name_of_payor || "");
     formData.append("email", updatedData.email || "");
@@ -120,20 +123,48 @@ const ShowTransactions = () => {
     formData.append("amountTendered", updatedData.amountTendered ? updatedData.amountTendered.toString() : "0");
     formData.append("checkedItems", JSON.stringify(updatedData.checkedItems || []));
     formData.append("miscellaneousFees", JSON.stringify(miscFee || []));
+    formData.append("userType", updatedData.userType || "");
+    formData.append("distribution", JSON.stringify(updatedData.distribution || {}));
 
     // for(const [index, fee] of miscFee.entries()) {
     //   console.log(`Miscellaneous Fee ${index + 1}:`, fee.item_title, fee.amount);
     // }
     const response = await axiosInstanceWithAuthorization(cookie.accessToken).put(`/api/transactions/${updatedData.id}`, formData);
-    console.log({
-      message: response.data.message,
-    });
+    if (response.status === 200) {
+      // setSnackbar({ open: true, message: "Transaction updated successfully", severity: "success" });
+      alert("Transaction updated successfully");
+      setOpen(false);
+      setRefresh(true)
+    }
   };
+  React.useEffect(() => {
+    if (transactionData && transactionData.length > 0) {
+      setData(transactionData);
+    }
+  }, [transactionData]);
   React.useEffect(() => {
     if (entryModeData && entryModeData.length > 0) {
       setEntryModes(entryModeData);
     }
   }, [entryModeData]);
+  React.useEffect(() => {
+    const refetchData = async () => {
+      try {
+        const response = await axiosInstanceWithAuthorization(cookie.accessToken).get("/api/transactions");
+        if (response.status === 200) {
+          setData(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        // Refetch or update your data here
+        setRefresh(false);
+      }
+    };
+    if (refresh) {
+      refetchData();
+    }
+  }, [refresh]);
   if (error) return <Alert severity="error">{error}</Alert>;
 
   const studentTransactions = data?.filter((item: TransactionDataType) => item.userType === "Student").map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];

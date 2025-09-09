@@ -17,7 +17,7 @@ const UploadReceipt = () => {
   const [loading, setLoading] = React.useState<{ upload: boolean; generateCode: boolean }>({ upload: false, generateCode: false });
   const [referenceId, setReferenceId] = React.useState<string>("");
   const [referenceNumber, setReferenceNumber] = React.useState<string>("");
-  const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
+  const [modeOfPayment, setModeOfPayment] = React.useState<string>("");
   const [remarks, setRemarks] = React.useState<string>("");
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -30,15 +30,10 @@ const UploadReceipt = () => {
   const handleGenerateReferenceId = async () => {
     setLoading((prevState) => ({ ...prevState, generateCode: true }));
     try {
-      const formData = new FormData();
-      formData.append("referenceNumber", referenceNumber);
-      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/External`, formData);
+      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/External`);
       setReferenceId(data2.reference_id);
     } catch (error) {
       console.error(error);
-      if (isAxiosError(error)) {
-        alert("An error occurred while generating the reference ID.");
-      }
     } finally {
       setLoading((prevState) => ({ ...prevState, generateCode: false }));
     }
@@ -103,6 +98,8 @@ const UploadReceipt = () => {
       alert(data.message);
       if (status === 200) {
         setReferenceId("");
+        setReferenceNumber("");
+        setModeOfPayment("");
         setRemarks("");
         setImage("");
         setImageName("");
@@ -145,7 +142,9 @@ const UploadReceipt = () => {
                       <Tooltip title="Generate Reference ID" placement="top">
                         <IconButton
                           size="small"
-                          onClick={handleGenerateReferenceId}>
+                          onClick={handleGenerateReferenceId}
+                          // disabled={referenceId !== ""}
+                        >
                           <GeneratingTokensIcon />
                         </IconButton>
                       </Tooltip>
@@ -163,6 +162,9 @@ const UploadReceipt = () => {
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
               <Select sx={{ borderRadius: 2 }} labelId="demo-simple-select-label" id="demo-simple-select" value={modeOfPayment} label="Mode of Payment" onChange={(e) => setModeOfPayment(e.target.value)}>
+                <MenuItem disabled value="">
+                  <em>Select Mode of Payment</em>
+                </MenuItem>
                 {modeOfPaymentOptions.map((option, index) => (
                   <MenuItem key={++index} value={option}>
                     {option}
