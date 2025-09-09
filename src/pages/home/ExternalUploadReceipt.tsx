@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from "@mui/material";
+import { Alert, Box, Button, FormControl, FormLabel, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import { GeneratingTokens as GeneratingTokensIcon, UploadFile as UploadFileIcon } from "@mui/icons-material";
 import imageCompression from "browser-image-compression";
 import { axiosInstanceWithAuthorization } from "@/api/app";
@@ -7,9 +7,12 @@ import { base64ToBlob } from "@/utils/base64ToBlog";
 import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
 import { useAxios } from "@/hooks/useAxios";
+import SnackbarProvider from "@/components/Snackbar";
+import { theme } from "@/theme/theme";
 
 const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
 const UploadReceipt = () => {
+  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const [{ accessToken }] = useCookies(["accessToken"]);
   const [image, setImage] = React.useState<string | null>(null);
   const [imageName, setImageName] = React.useState<string | undefined>(undefined);
@@ -19,13 +22,14 @@ const UploadReceipt = () => {
   const [referenceNumber, setReferenceNumber] = React.useState<string>("");
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("GCash");
   const [remarks, setRemarks] = React.useState<string>("");
+  const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: "error" | "warning" | "info" | "success" }>({ open: false, message: "", severity: "info" });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const { data: referenceData } = useAxios({
     url: "/api/transactions/valid-reference-id",
     method: "GET",
-    authorized: true
-  })
+    authorized: true,
+  });
 
   const handleGenerateReferenceId = async () => {
     setLoading((prevState) => ({ ...prevState, generateCode: true }));
@@ -100,7 +104,7 @@ const UploadReceipt = () => {
 
     try {
       const { data, status } = await axiosInstanceWithAuthorization(accessToken).post("/api/upload/receipts", formData, { headers: { "Content-Type": "multipart/form-data" } });
-      alert(data.message);
+      setSnackbar((prev) => ({ ...prev, message: data.message, severity: "success" }));
       if (status === 200) {
         setReferenceId("");
         setRemarks("");
@@ -115,122 +119,163 @@ const UploadReceipt = () => {
     } catch (error) {
       console.error("Error uploading file:", error);
       if (isAxiosError(error)) {
-        if (error.request) return alert(error.request.response);
-        if (error.response) return alert(error.response.data.message);
+        setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: "error" }));
       }
     } finally {
+      setSnackbar((prev) => ({ ...prev, open: true }));
       setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
     }
   };
   React.useEffect(() => {
-    setReferenceId(referenceData?.reference_id)
-  }, [referenceData])
+    setReferenceId(referenceData?.reference_id);
+  }, [referenceData]);
   return (
-    <Box sx={{ height: "100%", flexGrow: 1 }}>
-      <Typography variant="h4" color="initial" sx={{ marginBottom: 4 }}>
+    <>
+      <Typography variant="h6" color="textSecondary" letterSpacing={3} textTransform={"uppercase"} mb={1}>
         Upload Receipt
       </Typography>
-      <Grid container spacing={4} sx={{ height: "100%" }} component="form" onSubmit={handleSubmit}>
-        <Grid container spacing={2} direction="column" size={{ xs: 12, lg: 4 }}>
-
-
-          <Grid size={{ xs: 12 }}>
-            <FormControl fullWidth>
-              <TextField
-                sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
-                slotProps={{
-                  input: {
-                    sx: { borderRadius: 2, input: { px: 1 } },
-                    endAdornment: (
-                      <Tooltip title="Generate Reference ID" placement="top">
-                        <IconButton
-                          size="small"
-                          onClick={handleGenerateReferenceId}>
-                          <GeneratingTokensIcon />
-                        </IconButton>
-                      </Tooltip>
-                    ),
-                  },
-                }}
-                label="Reference ID"
-                value={referenceId}
-                disabled
-              />
-            </FormControl>
-          </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
-              <Select sx={{ borderRadius: 2 }} labelId="demo-simple-select-label" id="demo-simple-select" value={modeOfPayment} label="Mode of Payment" onChange={(e) => setModeOfPayment(e.target.value)}>
-                {modeOfPaymentOptions.map((option, index) => (
-                  <MenuItem key={++index} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid size={{ xs: 12 }}>
-            <FormControl fullWidth>
-              <TextField
-                sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
-                slotProps={{
-                  input: {
-                    sx: { borderRadius: 2, input: { px: 1 } },
-                  },
-                }}
-                label="Reference Number"
-                onChange={(e) => setReferenceNumber(e.target.value)}
-                value={referenceNumber}
-              />
-            </FormControl>
-          </Grid>
-
-          <Grid size={{ xs: 12 }} sx={{ display: "none" }}>
-            <FormControl fullWidth>
-              <TextField
-                slotProps={{
-                  input: {
-                    sx: { borderRadius: 2 },
-                  },
-                }}
-                label="Remarks"
-                value={remarks}
-                multiline
-                rows={4}
-                onChange={(e) => setRemarks(e.target.value)}
-              />
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              type="file"
-              onChange={handleChangeFile}
-              inputRef={fileInputRef}
-              slotProps={{
-                htmlInput: { accept: "image/*" },
-                input: {
-                  sx: { borderRadius: 2 },
-                },
+      <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, flexGrow: 1 }}>
+        <Box sx={{ display: "flex", flexDirection: { xs: "column", lg: "row" }, gap: 2, height: "100%", width: "100%" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
+              height: "fit-content",
+              columnGap: 2,
+              width: { xs: "100%", lg: "30%" },
+              minWidth: { xs: "100%", lg: "275px" },
+              position: { xs: "relative", lg: "sticky" },
+              top: { xs: "0", lg: "calc(72px + 1rem)" },
+            }}
+            component={"form"}
+            onSubmit={handleSubmit}
+          >
+            <Typography variant="h6" mb={2}>
+              Upload Receipt Form
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "start",
+                height: "fit-content",
+                gap: 2,
+                width: "100%",
               }}
-            />
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <Button sx={{ borderRadius: 2 }} variant="contained" startIcon={<UploadFileIcon />} disabled={!image || loading.upload} type="submit" fullWidth size="large">
-              {loading.upload ? "Uploading..." : "Upload File"}
-            </Button>
-            {error && (
-              <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
-                {error}
-              </Alert>
-            )}
-          </Grid>
-        </Grid>
-        <Grid size={{ xs: 12, lg: 8 }}>
-          <Grid size={{ xs: 12 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
+            >
+              <FormControl fullWidth>
+                <TextField
+                  fullWidth
+                  type="file"
+                  onChange={handleChangeFile}
+                  inputRef={fileInputRef}
+                  slotProps={{
+                    htmlInput: { accept: "image/*" },
+                    input: {
+                      sx: { borderRadius: 3 },
+                    },
+                  }}
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <TextField
+                  sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
+                  slotProps={{
+                    input: {
+                      sx: { borderRadius: 3, input: { px: 1 } },
+                      endAdornment: (
+                        <Tooltip title="Generate Reference ID" placement="top">
+                          <IconButton size="small" onClick={handleGenerateReferenceId}>
+                            <GeneratingTokensIcon />
+                          </IconButton>
+                        </Tooltip>
+                      ),
+                    },
+                  }}
+                  label="Reference ID"
+                  value={referenceId}
+                  disabled
+                />
+                {referenceId === "" && (
+                  <FormLabel>
+                    <Alert severity="info">Please generate a reference ID first before uploading a receipt.</Alert>
+                  </FormLabel>
+                )}
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
+                <Select sx={{ borderRadius: 3 }} labelId="demo-simple-select-label" id="demo-simple-select" value={modeOfPayment} label="Mode of Payment" onChange={(e) => setModeOfPayment(e.target.value)}>
+                  {modeOfPaymentOptions.map((option, index) => (
+                    <MenuItem key={++index} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <TextField
+                  sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
+                  slotProps={{
+                    input: {
+                      sx: { borderRadius: 3, input: { px: 1 } },
+                    },
+                  }}
+                  label="Reference Number"
+                  onChange={(e) => setReferenceNumber(e.target.value)}
+                  value={referenceNumber}
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <TextField
+                  slotProps={{
+                    input: {
+                      sx: { borderRadius: 3 },
+                    },
+                  }}
+                  label="Remarks"
+                  value={remarks}
+                  multiline
+                  rows={4}
+                  onChange={(e) => setRemarks(e.target.value)}
+                />
+              </FormControl>
+              <Button
+                sx={{
+                  borderRadius: 3,
+                  bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                  "&:hover": {
+                    bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 100%, transparent)`,
+                  },
+                }}
+                fullWidth
+                size="large"
+                type="submit"
+                variant="contained"
+                disabled={!image || loading.upload || !referenceId}
+              >
+                {loading.upload ? "Uploading..." : "Upload File"}
+              </Button>
+              {error && (
+                <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
+                  {error}
+                </Alert>
+              )}
+            </Box>
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              bgcolor: "#f0f0f0",
+              borderRadius: 3,
+              padding: 2,
+              minHeight: 150,
+            }}
+          >
             {image ? (
               <img
                 src={image}
@@ -260,10 +305,11 @@ const UploadReceipt = () => {
                 Image Preview
               </Typography>
             )}
-          </Grid>
-        </Grid>
-      </Grid>
-    </Box>
+          </Box>
+        </Box>
+      </Box>
+      <SnackbarProvider open={snackbar.open} message={snackbar.message} severity={snackbar.severity} onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))} />
+    </>
   );
 };
 
