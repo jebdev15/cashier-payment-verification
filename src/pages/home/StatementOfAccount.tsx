@@ -147,6 +147,9 @@ const StatementOfAccount = () => {
                 sx={{
                   borderRadius: 3,
                   bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                  "&:hover": {
+                    bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 100%, transparent)`,
+                  },
                 }}
                 fullWidth
                 size="large"

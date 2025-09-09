@@ -69,7 +69,7 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
   if (loadingSoaTable) return <div>Loading...</div>;
   if (rows.length === 0) return <div>No data</div>;
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", gap: 3, bgcolor: "background.paper", borderRadius: 2 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", width: "100%", gap: 3, bgcolor: "background.paper", borderRadius: 2, overflow: "hidden" }}>
       <TableContainer
         component={Paper}
         elevation={0}
@@ -161,10 +161,7 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
               label="Particulars"
               onChange={(e) => setParticulars(e.target.value)}
               sx={{
-                borderRadius: 1,
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "rgba(0, 0, 0, 0.23)",
-                },
+                borderRadius: 3,
               }}
               inputProps={{
                 sx: {
@@ -173,21 +170,17 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
               }}
             >
               <MenuItem sx={{ whiteSpace: "normal !important" }} value={"TUITION AND MISCELLANEOUS FEES"}>
-                TUITION AND MISCELLANEOUS FEES
+                Tuition and Miscellaneous Fees
               </MenuItem>
             </Select>
           </FormControl>
           <Button
+            size="large"
             variant="contained"
             onClick={handleGenerateReferenceId}
             disabled={loadingGrid}
             sx={{
               borderRadius: 3,
-              py: 1.5,
-              fontWeight: "bold",
-              textTransform: "none",
-              fontSize: "1rem",
-              boxShadow: 2,
               bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
               "&:hover": {
                 bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 100%, transparent)`,
