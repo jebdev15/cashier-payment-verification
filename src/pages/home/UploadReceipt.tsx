@@ -119,9 +119,7 @@ const UploadReceipt = () => {
       </Typography>
       <Grid container spacing={4} sx={{ height: "100%" }} component="form" onSubmit={handleSubmit}>
         <Grid container spacing={2} direction="column" size={{ xs: 12, lg: 4 }}>
-
           <Grid size={{ xs: 12 }}>
-<<<<<<< Updated upstream
             <TextField
               fullWidth
               type="file"
@@ -135,21 +133,6 @@ const UploadReceipt = () => {
               }}
               required
             />
-=======
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
-              <Select sx={{ borderRadius: 2 }} labelId="demo-simple-select-label" id="demo-simple-select" value={modeOfPayment} label="Mode of Payment" onChange={(e) => setModeOfPayment(e.target.value)}>
-                <MenuItem disabled value="">
-                  <em>Select Mode of Payment</em>
-                </MenuItem>
-                {modeOfPaymentOptions.map((option, index) => (
-                  <MenuItem key={++index} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
->>>>>>> Stashed changes
           </Grid>
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
@@ -173,7 +156,6 @@ const UploadReceipt = () => {
           </Grid>
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
-<<<<<<< Updated upstream
               <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
               <Select
                 sx={{ borderRadius: 2 }}
@@ -206,33 +188,6 @@ const UploadReceipt = () => {
                 value={referenceNumber}
               />
             </FormControl>
-=======
-              <TextField
-                slotProps={{
-                  input: {
-                    sx: { borderRadius: 2 },
-                  },
-                }}
-                label="Reference Number"
-                onChange={(e) => setReferenceNumber(e.target.value)}
-                value={referenceNumber}
-              />
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              type="file"
-              onChange={handleChangeFile}
-              inputRef={fileInputRef}
-              slotProps={{
-                htmlInput: { accept: "image/*" },
-                input: {
-                  sx: { borderRadius: 2 },
-                },
-              }}
-            />
->>>>>>> Stashed changes
           </Grid>
           <Grid size={{ xs: 12 }} sx={{ display: "none" }}>
             <FormControl fullWidth>
