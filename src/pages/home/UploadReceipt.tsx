@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, FormLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography, useMediaQuery } from "@mui/material";
+import { Alert, Button, FormControl, FormLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 import imageCompression from "browser-image-compression";
 import { axiosInstanceWithAuthorization } from "../../api/app";
@@ -8,11 +8,9 @@ import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
 import { useAxios } from "@/hooks/useAxios";
 import SnackbarProvider from "@/components/Snackbar";
-import { theme } from "@/theme/theme";
 
 const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
 const UploadReceipt = () => {
-  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const [{ accessToken }] = useCookies(["accessToken"]);
   const [image, setImage] = React.useState<string | null>(null);
   const [imageName, setImageName] = React.useState<string | undefined>(undefined);
@@ -119,21 +117,7 @@ const UploadReceipt = () => {
       </Typography>
       <Grid container spacing={4} sx={{ height: "100%" }} component="form" onSubmit={handleSubmit}>
         <Grid container spacing={2} direction="column" size={{ xs: 12, lg: 4 }}>
-          <Grid size={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              type="file"
-              onChange={handleChangeFile}
-              inputRef={fileInputRef}
-              slotProps={{
-                htmlInput: { accept: "image/*" },
-                input: {
-                  sx: { borderRadius: 2 },
-                },
-              }}
-              required
-            />
-          </Grid>
+
           <Grid size={{ xs: 12 }}>
             <FormControl fullWidth>
               <TextField
@@ -188,6 +172,21 @@ const UploadReceipt = () => {
                 value={referenceNumber}
               />
             </FormControl>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <TextField
+              fullWidth
+              type="file"
+              onChange={handleChangeFile}
+              inputRef={fileInputRef}
+              slotProps={{
+                htmlInput: { accept: "image/*" },
+                input: {
+                  sx: { borderRadius: 2 },
+                },
+              }}
+              required
+            />
           </Grid>
           <Grid size={{ xs: 12 }} sx={{ display: "none" }}>
             <FormControl fullWidth>

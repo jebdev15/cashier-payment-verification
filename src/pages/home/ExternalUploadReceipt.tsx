@@ -1,6 +1,6 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, FormLabel, Grid, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography, useMediaQuery } from "@mui/material";
-import { GeneratingTokens as GeneratingTokensIcon, UploadFile as UploadFileIcon } from "@mui/icons-material";
+import { Alert, Box, Button, FormControl, FormLabel, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from "@mui/material";
+import { GeneratingTokens as GeneratingTokensIcon } from "@mui/icons-material";
 import imageCompression from "browser-image-compression";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { base64ToBlob } from "@/utils/base64ToBlog";
@@ -12,7 +12,6 @@ import { theme } from "@/theme/theme";
 
 const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
 const UploadReceipt = () => {
-  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const [{ accessToken }] = useCookies(["accessToken"]);
   const [image, setImage] = React.useState<string | null>(null);
   const [imageName, setImageName] = React.useState<string | undefined>(undefined);
@@ -161,20 +160,7 @@ const UploadReceipt = () => {
                 width: "100%",
               }}
             >
-              <FormControl fullWidth>
-                <TextField
-                  fullWidth
-                  type="file"
-                  onChange={handleChangeFile}
-                  inputRef={fileInputRef}
-                  slotProps={{
-                    htmlInput: { accept: "image/*" },
-                    input: {
-                      sx: { borderRadius: 3 },
-                    },
-                  }}
-                />
-              </FormControl>
+              
               <FormControl fullWidth>
                 <TextField
                   sx={{ "& .MuiInputBase-root": { paddingRight: 0, overflow: "hidden" } }}
@@ -225,16 +211,16 @@ const UploadReceipt = () => {
               </FormControl>
               <FormControl fullWidth>
                 <TextField
+                  fullWidth
+                  type="file"
+                  onChange={handleChangeFile}
+                  inputRef={fileInputRef}
                   slotProps={{
+                    htmlInput: { accept: "image/*" },
                     input: {
                       sx: { borderRadius: 3 },
                     },
                   }}
-                  label="Remarks"
-                  value={remarks}
-                  multiline
-                  rows={4}
-                  onChange={(e) => setRemarks(e.target.value)}
                 />
               </FormControl>
               <Button

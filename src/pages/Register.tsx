@@ -7,6 +7,7 @@ import { axiosInstance } from "../api/app";
 import { isAxiosError } from "axios";
 import campusesJson from "./campuses.json";
 import SnackbarProvider from "../components/Snackbar";
+import { formatTime } from "@/utils/timeFormatter";
 
 type RegisterDataType = {
   userType: string;
@@ -59,6 +60,7 @@ const Register = () => {
   const [programOptions, setProgramOptions] = React.useState<{ course_code: string; course_description: string }[]>([]);
   const [loading, setLoading] = React.useState({ registrationForm: false, sendCode: false });
   const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: undefined });
+  const [countdown, setCountdown] = React.useState<number>(0);
 
   const recaptcha = React.useRef<ReCAPTCHA>(null);
   const talisayCollegeOptions = React.useMemo(() => getTalisayColleges(campusesJson), []);
@@ -91,6 +93,7 @@ const Register = () => {
 
       const { data, status } = await axiosInstance.post("/api/auth/generate-code", formData);
       setSnackbar((prev) => ({ ...prev, message: data.message, severity: status === 201 ? "success" : 'info' }));
+      if (status === 201) setCountdown(300); // 5 minutes
     } catch (error) {
       if (isAxiosError(error)) {
         setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: 'error' }));
@@ -136,6 +139,13 @@ const Register = () => {
   const { middleName, ...requiredFields } = registerData;
   // const disableButton = Object.values(requiredFields).some((val) => val === "") || loading.registrationForm;
   const disableButton = loading.registrationForm;
+  React.useEffect(() => {
+    if (countdown <= 0) return;
+    const interval = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [countdown]);
   return (
     <Box
       sx={{
@@ -396,9 +406,13 @@ const Register = () => {
                         endIcon={<SendIcon />}
                         variant="contained"
                         onClick={handleSendEmail}
-                        disabled={!registerData.email || loading.sendCode}
+                        disabled={!registerData.email || loading.sendCode || countdown > 0}
                       >
-                        {loading.sendCode ? "Sending..." : "Send Code"}
+                        {loading.sendCode
+                          ? "Please wait..."
+                          : countdown > 0
+                            ? `Resend in ${formatTime(countdown)}`
+                            : "Send Code"}
                       </Button>
                     </span>
                   </Tooltip>

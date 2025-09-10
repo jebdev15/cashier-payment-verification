@@ -8,6 +8,7 @@ import { axiosInstance } from "../api/app";
 import { useCookies } from "react-cookie";
 import SnackbarProvider from "../components/Snackbar";
 import { jwtDecode } from "jwt-decode";
+import { formatTime } from "@/utils/timeFormatter";
 type LoginData = {
   email: string;
   code: string;
@@ -32,6 +33,7 @@ const Login = () => {
   const [loginData, setLoginData] = React.useState<LoginData>(initialLoginData);
   const [loading, setLoading] = React.useState<{ loginForm: boolean; sendCode: boolean }>({ loginForm: false, sendCode: false });
   const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: undefined });
+  const [countdown, setCountdown] = React.useState<number>(0);
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setLoginData((prevData) => ({
@@ -47,8 +49,9 @@ const Login = () => {
     formData.append("code", loginData.code);
     formData.append("purpose", "login");
     try {
-      const { data } = await axiosInstance.post("/api/auth/generate-code", formData);
+      const { data, status } = await axiosInstance.post("/api/auth/generate-code", formData);
       setSnackbar((prev) => ({ ...prev, message: data.message, severity: 'success' }));
+      if (status === 201) setCountdown(300); // 5 minutes
     } catch (error) {
       if (isAxiosError(error)) {
         setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: 'error' }));
@@ -91,11 +94,18 @@ const Login = () => {
         setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: 'error' }));
       }
     } finally {
-      setSnackbar((prev) => ({ ...prev, open: true })); 
+      setSnackbar((prev) => ({ ...prev, open: true }));
       setLoading((prevState) => ({ ...prevState, loginForm: false, sendCode: false }));
     }
   };
   const disableLoginButton = !loginData.email || !loginData.code || !loginData.recaptchaToken || loading.loginForm;
+  React.useEffect(() => {
+    if (countdown <= 0) return;
+    const interval = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [countdown]);
   return (
     <React.Suspense fallback={<CircularProgress />}>
       <Box
@@ -163,9 +173,13 @@ const Login = () => {
                         endIcon={<SendIcon />}
                         variant="contained"
                         onClick={handleSendEmail}
-                        disabled={loginData.email === "" || loading.sendCode}
+                        disabled={loginData.email === "" || loading.sendCode || countdown > 0}
                       >
-                        {loading.sendCode ? "Please wait..." : "Send Code"}
+                        {loading.sendCode
+                          ? "Please wait..."
+                          : countdown > 0
+                            ? `Resend in ${formatTime(countdown)}`
+                            : "Send Code"} 
                       </Button>
                     </span>
                   </Tooltip>
