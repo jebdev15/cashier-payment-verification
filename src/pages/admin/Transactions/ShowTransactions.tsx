@@ -124,7 +124,12 @@ const ShowTransactions = () => {
     formData.append("checkedItems", JSON.stringify(updatedData.checkedItems || []));
     formData.append("miscellaneousFees", JSON.stringify(miscFee || []));
     formData.append("userType", updatedData.userType || "");
-    formData.append("distribution", JSON.stringify(updatedData.distribution || {}));
+    formData.append("distribution", JSON.stringify(updatedData.distribution || {
+      miscellaneous: 0,
+      tuition: 0,
+      totalPayable: 0,
+      accountsPayable: 0,
+    }));
 
     // for(const [index, fee] of miscFee.entries()) {
     //   console.log(`Miscellaneous Fee ${index + 1}:`, fee.item_title, fee.amount);
