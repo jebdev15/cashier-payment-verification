@@ -3,7 +3,7 @@ export type TransactionDataType = {
     student_account_id?: string;
     reference_id?: string;
     reference_number?: string;
-    e_or: string;
+    e_or?: string;
     student_id?: string;
     name_of_payor?: string;
     email?: string;
@@ -31,7 +31,7 @@ export type TransactionDataType = {
     amountTendered?: number;
     selectedAccount?: string;
     miscellaneousFees?: any[];
-    distribution?: { miscellaneous: number; tuition: number; total: number; accountsPayable: number; };
+    distribution?: { miscellaneous: number; tuition: number; totalPayable: number; accountsPayable: number; };
 };
 
 export type SnackbarState = {

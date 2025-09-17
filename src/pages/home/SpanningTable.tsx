@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, Button, FormControl, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, FormControl, InputLabel, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material";
 import { axiosInstanceWithAuthorization } from "../../api/app";
 import { useCookies } from "react-cookie";
 import { theme } from "@/theme/theme";
@@ -9,6 +9,7 @@ function ccyFormat(num: number) {
 }
 
 interface Row {
+  id: number;
   student_account_id: number;
   item_title: string;
   fullName: string;

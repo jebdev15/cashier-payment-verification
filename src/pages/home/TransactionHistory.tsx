@@ -1,13 +1,12 @@
 import React from "react";
-import { Alert, Box, IconButton, Tooltip, Typography, useMediaQuery } from "@mui/material";
+import { Alert, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useAxios } from "../../hooks/useAxios";
 import TransactionModal from "@/components/modals/TransactionModal";
 
 const TransactionHistory = () => {
-  const isMediumScreen = useMediaQuery("(max-width: 900px)");
-  const [rows, setRows] = React.useState([]);
+  const [rows, setRows] = React.useState<any[]>([]);
   const [open, setOpen] = React.useState(false);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const { data, loading, error } = useAxios({

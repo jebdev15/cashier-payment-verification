@@ -21,7 +21,6 @@ const Dashboard = React.lazy(() => import("../pages/admin/Dashboard"));
 const ShowAccounts = React.lazy(() => import("../pages/admin/Accounts/ShowAccounts"));
 const EditAccount = React.lazy(() => import("../pages/admin/Accounts/EditAccount"));
 const ShowTransactions = React.lazy(() => import("../pages/admin/Transactions/ShowTransactions"));
-const EditTransaction = React.lazy(() => import("../pages/admin/Transactions/EditTransaction"));
 
 export const routes = createBrowserRouter([
     {
@@ -109,10 +108,6 @@ export const routes = createBrowserRouter([
                     {
                         index: true,
                         element: <ShowTransactions />,
-                    },
-                    {
-                        path: ":transactionId",
-                        element: <EditTransaction />,
                     },
                 ]
             },

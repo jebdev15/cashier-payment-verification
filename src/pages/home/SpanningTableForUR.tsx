@@ -1,7 +1,6 @@
-import { Paper, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import React from "react";
 import { FileUploadLogType } from "../../types/fileUpload";
-import { PanToolOutlined } from "@mui/icons-material";
 
 const SpanningTable = ({ data, loading }: { data: FileUploadLogType[]; loading: boolean }) => {
   const [rows, setRows] = React.useState<FileUploadLogType[]>([]);

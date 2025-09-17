@@ -136,7 +136,7 @@ const Register = () => {
     }
   };
 
-  const { middleName, ...requiredFields } = registerData;
+  // const { middleName, ...requiredFields } = registerData;
   // const disableButton = Object.values(requiredFields).some((val) => val === "") || loading.registrationForm;
   const disableButton = loading.registrationForm;
   React.useEffect(() => {

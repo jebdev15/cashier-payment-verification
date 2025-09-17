@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { Box } from "@mui/material";
 import { Outlet, useNavigate } from "react-router";
 import Header from "./Header";
 import Sidebar from "./Sidebar";

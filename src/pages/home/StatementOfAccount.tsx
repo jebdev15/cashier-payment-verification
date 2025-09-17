@@ -1,11 +1,12 @@
 import React from "react";
-import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography, useMediaQuery } from "@mui/material";
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
 import SpanningTable from "./SpanningTable";
 import { useAxios } from "../../hooks/useAxios";
 import { theme } from "@/theme/theme";
 
 type StatementOfAccountDataType = {
   id: number;
+  student_account_id: number;
   student_id: string;
   fullName: string;
   program_code: string;
@@ -14,12 +15,12 @@ type StatementOfAccountDataType = {
   semester: string;
   item_title: string;
   amount: string;
+  amount_paid: string;
   total: string;
   balance: string;
 };
 
 const StatementOfAccount = () => {
-  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const [statementOfAccountData, setStatementOfAccountData] = React.useState<StatementOfAccountDataType[]>([]);
   const [filteredData, setFilteredData] = React.useState<StatementOfAccountDataType[]>([]);
   const [dataToFilter, setDataToFilter] = React.useState<{ school_year: number; semester: string }>({ school_year: new Date().getFullYear(), semester: "" });

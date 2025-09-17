@@ -1,6 +1,6 @@
 import React from "react";
 import { AccountCircle, ExitToApp as ExitToAppIcon } from "@mui/icons-material";
-import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, useMediaQuery } from "@mui/material";
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
 import { useNavigate, useLocation } from "react-router";
 import { sideNav } from "./sideNav";
 import { useCookies } from "react-cookie";
@@ -11,7 +11,6 @@ import { theme } from "@/theme/theme";
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const { sidebarOpen } = React.useContext(AdminLayoutContext);
   const [{ accessToken }, , removeCookie] = useCookies(["accessToken"]);
 

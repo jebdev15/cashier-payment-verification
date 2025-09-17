@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, IconButton, Paper, Typography, Divider, useMediaQuery, Tooltip } from "@mui/material";
+import { Alert, Box, IconButton, Typography, Tooltip } from "@mui/material";
 import { Edit as EditIcon, Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
@@ -8,7 +8,6 @@ import { useAxios } from "../../../hooks/useAxios";
 
 const ShowAccounts = () => {
   const navigate = useNavigate();
-  const isMediumScreen = useMediaQuery("(max-width: 900px)");
   const { data, loading, error } = useAxios({
     url: "/api/users",
     authorized: true,

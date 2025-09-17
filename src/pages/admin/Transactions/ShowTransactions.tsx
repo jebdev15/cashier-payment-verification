@@ -2,7 +2,7 @@ import React from "react";
 import { Alert, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { SnackbarState, TransactionDataType, TransactionModalEntryModeType } from "./type";
+import { TransactionDataType, TransactionModalEntryModeType } from "./type";
 // import { useNavigate } from 'react-router'
 import { useAxios } from "@/hooks/useAxios";
 import TransactionModal from "@/components/modals/TransactionModal";
@@ -21,7 +21,7 @@ const ShowTransactions = () => {
   const [data, setData] = React.useState<TransactionDataType[]>([]);
   const [selectedRow, setSelectedRow] = React.useState<TransactionDataType | null>(null);
   const [editable, setEditable] = React.useState(false);
-  const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: undefined });
+  // const [snackbar, setSnackbar] = React.useState<SnackbarState>({ open: false, message: "", severity: undefined });
   const [entryModes, setEntryModes] = React.useState<TransactionModalEntryModeType[]>([]);
   const [refresh, setRefresh] = React.useState(false);
 
@@ -217,7 +217,7 @@ const ShowTransactions = () => {
           </Box>
         </Box>
       </Box>
-      {open && <TransactionModal open={open} onClose={() => setOpen(false)} data={selectedRow} entryModes={entryModes} snackbar={snackbar} onSave={handleUpdateTransaction} editable={editable} />}
+      {open && <TransactionModal open={open} onClose={() => setOpen(false)} data={selectedRow} entryModes={entryModes} onSave={handleUpdateTransaction} editable={editable} />}
     </React.Suspense>
   );
 };

@@ -25,8 +25,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { axiosInstance } from "@/api/app";
 import { fees } from "@/pages/admin/Transactions/fees"; // Assuming fees is an array of fee objects
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-// import SnackbarProvider from "../Snackbar";
-
 
 type Props = {
     open: boolean;
