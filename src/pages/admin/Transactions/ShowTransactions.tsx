@@ -99,47 +99,49 @@ const ShowTransactions = () => {
   ];
 
   const handleUpdateTransaction = async (updatedData: TransactionDataType) => {
-    const miscFee = filterMiscellaneousFeeAsPayload(updatedData.checkedItems || [], updatedData.miscellaneousFees || []);
-    const formData = new FormData();
-    formData.append("id", updatedData.id || "");
-    formData.append("studentAccountID", updatedData.student_account_id || "");
-    formData.append("referenceID", updatedData.reference_id || "");
-    formData.append("referenceNumber", updatedData.reference_number || "");
-    formData.append("studentID", updatedData.student_id || "");
-    formData.append("nameOfPayor", updatedData.name_of_payor || "");
-    formData.append("email", updatedData.email || "");
-    formData.append("programCode", updatedData.program_code || "");
-    formData.append("yearLevelRoman", updatedData.year_level_roman || "");
-    formData.append("schoolYear", updatedData.school_year || "");
-    formData.append("semester", updatedData.semester || "");
-    formData.append("modeOfPayment", updatedData.mode_of_payment || "");
-    formData.append("status", updatedData.status || "");
-    formData.append("entryMode", updatedData.entryMode || "");
-    formData.append("accountType", updatedData.selectedAccount || "");
-    formData.append("particulars", updatedData.particulars || "");
-    formData.append("details", updatedData.details || "");
-    formData.append("remarks", updatedData.remarks || "");
-    formData.append("amountToPay", updatedData.amountToPay ? updatedData.amountToPay.toString() : "0");
-    formData.append("amountTendered", updatedData.amountTendered ? updatedData.amountTendered.toString() : "0");
-    formData.append("checkedItems", JSON.stringify(updatedData.checkedItems || []));
-    formData.append("miscellaneousFees", JSON.stringify(miscFee || []));
-    formData.append("userType", updatedData.userType || "");
-    formData.append("distribution", JSON.stringify(updatedData.distribution || {
-      miscellaneous: 0,
-      tuition: 0,
-      totalPayable: 0,
-      accountsPayable: 0,
-    }));
-
-    // for(const [index, fee] of miscFee.entries()) {
-    //   console.log(`Miscellaneous Fee ${index + 1}:`, fee.item_title, fee.amount);
-    // }
-    const response = await axiosInstanceWithAuthorization(cookie.accessToken).put(`/api/transactions/${updatedData.id}`, formData);
-    if (response.status === 200) {
-      // setSnackbar({ open: true, message: "Transaction updated successfully", severity: "success" });
-      alert("Transaction updated successfully");
-      setOpen(false);
-      setRefresh(true)
+    try {
+      
+      const miscFee = filterMiscellaneousFeeAsPayload(updatedData.checkedItems || [], updatedData.miscellaneousFees || []);
+      const formData = new FormData();
+      formData.append("id", updatedData.id || "");
+      formData.append("studentAccountID", updatedData.student_account_id || "");
+      formData.append("referenceID", updatedData.reference_id || "");
+      formData.append("referenceNumber", updatedData.reference_number || "");
+      formData.append("studentID", updatedData.student_id || "");
+      formData.append("nameOfPayor", updatedData.name_of_payor || "");
+      formData.append("email", updatedData.email || "");
+      formData.append("programCode", updatedData.program_code || "");
+      formData.append("yearLevelRoman", updatedData.year_level_roman || "");
+      formData.append("schoolYear", updatedData.school_year || "");
+      formData.append("semester", updatedData.semester || "");
+      formData.append("modeOfPayment", updatedData.mode_of_payment || "");
+      formData.append("status", updatedData.status || "");
+      formData.append("entryMode", updatedData.entryMode || "");
+      formData.append("accountType", updatedData.selectedAccount || "");
+      formData.append("particulars", updatedData.particulars || "");
+      formData.append("details", updatedData.details || "");
+      formData.append("remarks", updatedData.remarks || "");
+      formData.append("amountToPay", updatedData.amountToPay ? updatedData.amountToPay.toString() : "0");
+      formData.append("amountTendered", updatedData.amountTendered ? updatedData.amountTendered.toString() : "0");
+      formData.append("checkedItems", JSON.stringify(updatedData.checkedItems || []));
+      formData.append("miscellaneousFees", JSON.stringify(miscFee || []));
+      formData.append("userType", updatedData.userType || "");
+      formData.append("distribution", JSON.stringify(updatedData.distribution || {
+        miscellaneous: 0,
+        tuition: 0,
+        totalPayable: 0,
+        accountsPayable: 0,
+      }));
+  
+      const response = await axiosInstanceWithAuthorization(cookie.accessToken).put(`/api/transactions/${updatedData.id}`, formData);
+      if (response.status === 200) {
+        alert("Transaction updated successfully");
+        setOpen(false);
+        setRefresh(true);
+      }
+    } catch (error) {
+      console.error("Error updating transaction:", error);
+      alert("Failed to update transaction. Please try again.");
     }
   };
   React.useEffect(() => {
