@@ -4,6 +4,7 @@ import { Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useAxios } from "../../hooks/useAxios";
 import TransactionModal from "@/components/modals/TransactionModal";
+import CustomCircularProgress from "@/components/CustomCircularProgress";
 
 const TransactionHistory = () => {
   const [rows, setRows] = React.useState<any[]>([]);
@@ -46,11 +47,11 @@ const TransactionHistory = () => {
     }
   }, [data, loading]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <CustomCircularProgress />;
   if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
-    <React.Suspense fallback={<p>Loading...</p>}>
+    <React.Suspense fallback={<CustomCircularProgress />}>
       <Typography variant="h6" color="textSecondary" letterSpacing={3} textTransform={"uppercase"} mb={1}>
         Transaction History
       </Typography>

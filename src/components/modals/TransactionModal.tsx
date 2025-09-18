@@ -195,8 +195,6 @@ const TransactionModal: React.FC<Props> = ({
 
     }, [amountTendered, checkedItems, miscellaneousFees, tuitionFee]);
 
-
-
     return (
         <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
             {/* Header with Close Button */}
@@ -576,11 +574,11 @@ const TransactionModal: React.FC<Props> = ({
                             <Divider sx={{ mb: 2 }} />
                             <FormControl fullWidth margin="dense">
                                 <TextField
-                                    fullWidth
+                                    label="Mode of Payment"
                                     type="text"
                                     name="mode_of_payment"
-                                    label="Mode of Payment"
                                     value={formData?.mode_of_payment || ""}
+                                    fullWidth
                                     disabled
                                 />
                             </FormControl>
@@ -627,24 +625,24 @@ const TransactionModal: React.FC<Props> = ({
                             </FormControl>
                             <FormControl fullWidth margin="dense" >
                                 <TextField
-                                    fullWidth
+                                    label="Remarks"
                                     type="text"
                                     name="remarks"
-                                    label="Remarks"
                                     value={remarks}
                                     onChange={(e) => setRemarks(e.target.value)}
                                     disabled={!editable || formData?.status !== 'approved'}
+                                    fullWidth
                                 />
                             </FormControl>
                             <FormControl fullWidth margin="dense">
                                 <TextField
-                                    fullWidth
+                                    label="Details"
                                     type="text"
                                     name="details"
-                                    label="Details"
                                     value={details}
                                     onChange={(e) => setDetails(e.target.value)}
                                     disabled={!editable || formData?.status !== 'approved'}
+                                    fullWidth
                                 />
                             </FormControl>
                             <FormControl fullWidth margin="dense">

@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, FormControl, TextField, Button, Typography, Tooltip, Select, SelectChangeEvent, MenuItem, InputLabel } from "@mui/material";
-import { HowToReg as RegisterIcon, Send as SendIcon, Person as PersonIcon, Badge as BadgeIcon, Email as EmailIcon, Password as PasswordIcon, AccountCircle as AccountCircleIcon, Business as BusinessIcon, MenuBook as MenuBookIcon, Stairs as StairsIcon } from "@mui/icons-material";
+import { HowToReg as RegisterIcon, Send as SendIcon, Person as PersonIcon, Badge as BadgeIcon, Email as EmailIcon, Password as PasswordIcon, AccountCircle as AccountCircleIcon, Business as BusinessIcon, MenuBook as MenuBookIcon, Stairs as StairsIcon, Work as WorkIcon } from "@mui/icons-material";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router";
 import { axiosInstance } from "../api/app";
@@ -15,6 +15,8 @@ type RegisterDataType = {
   program: string;
   yearLevel: string;
   studentId: string;
+  idNumber: string;
+  employeeType: string;
   payor_name: string;
   firstName: string;
   middleName: string;
@@ -30,6 +32,8 @@ const initialRegisterData: RegisterDataType = {
   program: "",
   yearLevel: "1",
   studentId: "",
+  idNumber: "",
+  employeeType: "",
   payor_name: "",
   firstName: "",
   middleName: "",
@@ -39,7 +43,8 @@ const initialRegisterData: RegisterDataType = {
   recaptchaToken: "",
 };
 
-const userTypeOptions = ["Student", "External"];
+const userTypeOptions = ["Student", "External", "Employee"];
+const employeeTypeOptions = ["Faculty", "Staff"];
 
 const getTalisayColleges = (data: typeof campusesJson) => {
   return data["Talisay"].colleges.map((college) => ({
@@ -110,12 +115,15 @@ const Register = () => {
 
     try {
       const formData = new FormData();
+      const payorName = registerData.userType === "External" ? registerData.payor_name : `${registerData.lastName.toUpperCase()}, ${registerData.firstName.toUpperCase()} ${registerData?.middleName?.toLowerCase() || ""}`;
       formData.append("userType", registerData.userType);
       formData.append("college", registerData.college);
       formData.append("program", registerData.program);
       formData.append("yearLevel", registerData.yearLevel);
-      formData.append("payorName", registerData.payor_name);
+      formData.append("payorName", payorName);
       formData.append("studentId", registerData.studentId);
+      formData.append("idNumber", registerData.idNumber);
+      formData.append("employeeType", registerData.employeeType);
       formData.append("firstName", registerData.firstName);
       formData.append("middleName", registerData.middleName);
       formData.append("lastName", registerData.lastName);
@@ -138,7 +146,7 @@ const Register = () => {
 
   // const { middleName, ...requiredFields } = registerData;
   // const disableButton = Object.values(requiredFields).some((val) => val === "") || loading.registrationForm;
-  const disableButton = loading.registrationForm;
+  const disableButton = loading.registrationForm || loading.sendCode || !registerData.recaptchaToken;
   React.useEffect(() => {
     if (countdown <= 0) return;
     const interval = setInterval(() => {
@@ -357,6 +365,102 @@ const Register = () => {
             required
           />
         </FormControl>
+      )}
+
+      {registerData.userType === "Employee" && (
+        <>
+          {/* Employee Type */}
+          <FormControl fullWidth size="small">
+            <InputLabel id="employee-type-label">Employee Type</InputLabel>
+            <Select
+              label="Employee Type"
+              labelId="employee-type-label"
+              name="employeeType"
+              value={registerData.employeeType}
+              onChange={handleChangeSelect}
+              startAdornment={<WorkIcon color="primary" sx={{ mr: 1 }} />}
+              inputProps={{
+                sx: {
+                  whiteSpace: "normal !important",
+                },
+              }}
+              required={registerData.userType === "Employee"}
+            >
+              <MenuItem value="" disabled><em>Please Select</em></MenuItem>
+              {employeeTypeOptions.map((option) => (
+                <MenuItem sx={{ whiteSpace: "normal !important" }} key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          {/* ID Number */}
+          <FormControl fullWidth>
+            <TextField
+              size="small"
+              label="ID Number"
+              name="idNumber"
+              value={registerData.idNumber}
+              onChange={handleChange}
+              slotProps={{
+                htmlInput: { maxLength: 12 },
+                input: {
+                  sx: { input: { px: 1 } },
+                  startAdornment: <BadgeIcon color="primary" />,
+                },
+              }}
+              required={registerData.userType === "Employee"}
+            />
+          </FormControl>
+          {/* First, Middle, Last Names */}
+          <FormControl fullWidth>
+            <TextField
+              size="small"
+              label="First Name"
+              name="firstName"
+              value={registerData.firstName}
+              onChange={handleChange}
+              slotProps={{
+                input: {
+                  sx: { input: { px: 1 } },
+                  startAdornment: <PersonIcon color="primary" />,
+                },
+              }}
+              required={registerData.userType === "Employee"}
+            />
+          </FormControl>
+          <FormControl fullWidth>
+            <TextField
+              size="small"
+              label="Middle Name"
+              name="middleName"
+              value={registerData.middleName}
+              onChange={handleChange}
+              slotProps={{
+                input: {
+                  sx: { input: { px: 1 } },
+                  startAdornment: <PersonIcon color="primary" />,
+                },
+              }}
+            />
+          </FormControl>
+          <FormControl fullWidth>
+            <TextField
+              size="small"
+              label="Last Name"
+              name="lastName"
+              value={registerData.lastName}
+              onChange={handleChange}
+              slotProps={{
+                input: {
+                  sx: { input: { px: 1 } },
+                  startAdornment: <PersonIcon color="primary" />,
+                },
+              }}
+              required={registerData.userType === "Employee"}
+            />
+          </FormControl>
+        </>
       )}
       {/* Email */}
       <FormControl fullWidth>

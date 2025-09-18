@@ -98,6 +98,37 @@ const ShowTransactions = () => {
     },
   ];
 
+  const employeeColumns = [
+    { field: "_id", headerName: "No.", width: 100 },
+    { field: "name_of_payor", headerName: "Name of Employee", minWidth: 250, flex: 1 },
+    { field: "reference_id", headerName: "Reference ID", minWidth: 160, flex: 1 },
+    { field: "status", headerName: "Status", width: 125 },
+    {
+      field: "created_at",
+      headerName: "Created At",
+      width: 200,
+      valueGetter: (value: string) => new Date(value).toLocaleString(),
+    },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 125,
+      renderCell: ({ row }: { row: TransactionDataType }) => {
+        const handleClick = () => {
+          setOpen(true);
+          setSelectedRow(row);
+          setEditable(row.status === "pending");
+        };
+        return (
+          <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
+            <IconButton color="primary" onClick={handleClick}>
+              <SubjectIcon />
+            </IconButton>
+          </Tooltip>
+        );
+      },
+    },
+  ];
   const handleUpdateTransaction = async (updatedData: TransactionDataType) => {
     try {
       
@@ -176,6 +207,7 @@ const ShowTransactions = () => {
 
   const studentTransactions = data?.filter((item: TransactionDataType) => item.userType === "Student").map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
   const externalTransactions = data?.filter((item: TransactionDataType) => item.userType === "External").map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
+  const employeeTransactions = data?.filter((item: TransactionDataType) => item.userType === "Employee").map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
 
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
@@ -183,6 +215,23 @@ const ShowTransactions = () => {
         Transactions
       </Typography>
       <Box sx={{ display: "grid", gap: 2 }}>
+        <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
+          <Typography variant="h6" mb={2}>
+            Student Transactions
+          </Typography>
+          <Box sx={{ maxHeight: 400, overflow: "auto" }}>
+            <DataGrid
+              rows={studentTransactions}
+              columns={columns}
+              loading={loading}
+              disableRowSelectionOnClick
+              sx={{
+                borderRadius: 2,
+              }}
+            />
+          </Box>
+        </Box>
+
         <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
           <Typography variant="h6" mb={2}>
             External Transactions
@@ -202,12 +251,12 @@ const ShowTransactions = () => {
 
         <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
           <Typography variant="h6" mb={2}>
-            Student Transactions
+            Employee Transactions
           </Typography>
           <Box sx={{ maxHeight: 400, overflow: "auto" }}>
             <DataGrid
-              rows={studentTransactions}
-              columns={columns}
+              rows={employeeTransactions}
+              columns={externalColumns}
               loading={loading}
               disableRowSelectionOnClick
               sx={{
