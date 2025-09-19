@@ -24,6 +24,12 @@ export const sideNav = [
         icon: FileUploadIcon
     },
     {
+        path: "/employee/upload-receipt",
+        label: "Upload Receipt",
+        abbreviation: "ur-emp",
+        icon: FileUploadIcon
+    },
+    {
         path: "/transaction-history",
         label: "Transaction History",
         abbreviation: "th",

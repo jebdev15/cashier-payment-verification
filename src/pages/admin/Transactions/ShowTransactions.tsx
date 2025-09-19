@@ -131,7 +131,7 @@ const ShowTransactions = () => {
   ];
   const handleUpdateTransaction = async (updatedData: TransactionDataType) => {
     try {
-      
+
       const miscFee = filterMiscellaneousFeeAsPayload(updatedData.checkedItems || [], updatedData.miscellaneousFees || []);
       const formData = new FormData();
       formData.append("id", updatedData.id || "");
@@ -163,7 +163,7 @@ const ShowTransactions = () => {
         totalPayable: 0,
         accountsPayable: 0,
       }));
-  
+
       const response = await axiosInstanceWithAuthorization(cookie.accessToken).put(`/api/transactions/${updatedData.id}`, formData);
       if (response.status === 200) {
         alert("Transaction updated successfully");
@@ -228,6 +228,14 @@ const ShowTransactions = () => {
               sx={{
                 borderRadius: 2,
               }}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 5,
+                  },
+                },
+              }}
+              pageSizeOptions={[5]}
             />
           </Box>
         </Box>

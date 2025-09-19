@@ -116,17 +116,6 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
           </TableBody>
           <TableFooter sx={{ borderTop: "4px double rgba(224, 224, 224, 1)" }}>
             <TableRow>
-              <TableCell sx={{ color: "text.primary", fontWeight: "bold", pl: 4, pr: 2, py: 1.5, fontSize: "0.875rem", textTransform: "uppercase" }}>Total</TableCell>
-              <TableCell sx={{ pl: 2, pr: 4, fontWeight: "bold", fontSize: "0.875rem" }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  ₱
-                  <Typography fontFamily="monospace" fontWeight={"bold"} sx={{ color: "info.main" }}>
-                    {ccyFormat(Number(totalAmount))}
-                  </Typography>
-                </Box>
-              </TableCell>
-            </TableRow>
-            <TableRow>
               <TableCell sx={{ color: "text.primary", fontWeight: "bold", pl: 4, pr: 2, py: 1.5, fontSize: "0.875rem", textTransform: "uppercase" }}>Balance</TableCell>
               <TableCell sx={{ pl: 2, pr: 4, fontWeight: "bold", fontSize: "0.875rem" }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -144,6 +133,17 @@ const SpanningTable = ({ rows, loadingSoaTable, loadingGrid, setLoading }: { row
                   ₱
                   <Typography fontFamily="monospace" fontWeight={"bold"} sx={{ color: "success.main" }}>
                     {ccyFormat(Number(amountPaid))}
+                  </Typography>
+                </Box>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell sx={{ color: "text.primary", fontWeight: "bold", pl: 4, pr: 2, py: 1.5, fontSize: "0.875rem", textTransform: "uppercase" }}>Total</TableCell>
+              <TableCell sx={{ pl: 2, pr: 4, fontWeight: "bold", fontSize: "0.875rem" }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  ₱
+                  <Typography fontFamily="monospace" fontWeight={"bold"} sx={{ color: "info.main" }}>
+                    {ccyFormat(Number(totalAmount))}
                   </Typography>
                 </Box>
               </TableCell>

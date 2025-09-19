@@ -2,15 +2,24 @@ import React from "react";
 import { Box, Typography, Grid, Card, CardContent, CardActions, Button } from "@mui/material";
 import { CloudUpload, History } from "@mui/icons-material";
 import { useNavigate } from "react-router";
+import { useCookies } from "react-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const ExternalHomePage = () => {
+  const [cookie] = useCookies(['accessToken']);
   const navigate = useNavigate();
-
+  const [payorName, setPayorName] = React.useState<string>("Employee");
+  React.useEffect(() => {
+    if(cookie) {
+      const { payor_name } = jwtDecode<{ payor_name: string }>(cookie.accessToken);
+      setPayorName(payor_name);
+    }
+  },[cookie]);
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
       <Box sx={{ p: 2 }}>
         <Typography variant="h4" gutterBottom>
-          Welcome, External User!
+          Welcome, {payorName}!
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" mb={3}>
           Submit your receipts and monitor your transaction verification.

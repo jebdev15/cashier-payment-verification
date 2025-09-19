@@ -8,6 +8,27 @@ import { HomeLayoutContext } from "../../context/HomeLayoutContext";
 import { jwtDecode } from "jwt-decode";
 import { theme } from "@/theme/theme";
 
+const SidebarListItems = ({ userType, item: { abbreviation, path, label, icon }, handleChange }: any) => {
+  const isDisabled = (userType: string) => {
+    if (userType === "student" && abbreviation === "ur-emp") return true;
+    if (userType === "external" && abbreviation === "ur-emp") return true;
+    if (userType === "employee" && abbreviation === "ur-ex") return true;
+    return false;
+  };
+
+  return (
+    <ListItem disablePadding>
+      <ListItemButton
+        onClick={() => handleChange(path, abbreviation)}
+        disabled={isDisabled(userType)}
+      >
+        <ListItemIcon>{icon}</ListItemIcon>
+        <ListItemText primary={label} />
+      </ListItemButton>
+    </ListItem>
+  );
+};
+
 const Sidebar = () => {
   const { sidebarOpen } = React.useContext(HomeLayoutContext);
   const navigate = useNavigate();
@@ -32,6 +53,7 @@ const Sidebar = () => {
     student_id: "",
     isStudent: false,
     isExternal: false,
+    isEmployee: false,
   });
   React.useEffect(() => {
     const decodeToken = () => {
@@ -42,6 +64,7 @@ const Sidebar = () => {
         student_id,
         isStudent,
         isExternal,
+        isEmployee,
       }: {
         payor_name: string;
         fullName: string;
@@ -49,6 +72,7 @@ const Sidebar = () => {
         student_id: string;
         isStudent: boolean;
         isExternal: boolean;
+        isEmployee: boolean;
       } = jwtDecode(accessToken);
       setUserData((prev) => ({
         ...prev,
@@ -58,6 +82,7 @@ const Sidebar = () => {
         student_id,
         isStudent,
         isExternal,
+        isEmployee
       }));
     };
     decodeToken();
@@ -135,7 +160,11 @@ const Sidebar = () => {
             <Box sx={{ px: 1, display: "grid", gap: 1 }}>
               {sideNav.map((item, index) => {
                 if (userData.isExternal && ["sao", "ur"].includes(item.abbreviation)) return null;
+                if (userData.isEmployee && ["sao", "ur"].includes(item.abbreviation)) return null;
                 if (userData.isStudent && item.abbreviation === "ur-ex") return null;
+                if (userData.isStudent && item.abbreviation === "ur-emp") return null;
+                if (userData.isExternal && item.abbreviation === "ur-emp") return null;
+                if (userData.isEmployee && item.abbreviation === "ur-ex") return null;
                 return (
                   <ListItem disablePadding key={index}>
                     <ListItemButton

@@ -66,13 +66,14 @@ const Login = () => {
   };
   const handleRedirectToHome = (token: string) => {
     return new Promise<void>((resolve) => {
-      const { isExternal } = jwtDecode<{ isExternal: boolean }>(token);
+      const { redirectTo } = jwtDecode<{ redirectTo: string }>(token);
+      console.log({ redirectTo });
       setTimeout(() => {
         setCookie("accessToken", token, {
           path: "/",
           expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1), // 1 day
         });
-        navigate(isExternal ? "/home/external" : "/home", { replace: true });
+        navigate(redirectTo, { replace: true });
         resolve();
       }, 1000);
     });

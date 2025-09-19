@@ -369,12 +369,12 @@ const Register = () => {
 
       {registerData.userType === "Employee" && (
         <>
-          {/* Employee Type */}
+          {/* Designation */}
           <FormControl fullWidth size="small">
-            <InputLabel id="employee-type-label">Employee Type</InputLabel>
+            <InputLabel id="employee-type-label">Designation</InputLabel>
             <Select
-              label="Employee Type"
-              labelId="employee-type-label"
+              label="Designation"
+              labelId="designation-label"
               name="employeeType"
               value={registerData.employeeType}
               onChange={handleChangeSelect}

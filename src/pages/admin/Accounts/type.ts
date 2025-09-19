@@ -12,4 +12,6 @@ export type AccountDataType = {
     lastName: string;
     status: string;
     userType: string;
+    employee_type?: string;
+    id_number?: string;
 }

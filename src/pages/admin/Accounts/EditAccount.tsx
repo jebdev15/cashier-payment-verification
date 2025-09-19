@@ -28,6 +28,8 @@ const EditAccount = () => {
         lastName: "",
         status: "pending",
         userType: "",
+        employee_type: "",
+        id_number: "",
     });
     const [snackbar, setSnackbar] = useFeatureStateSnackbar();
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -121,7 +123,18 @@ const EditAccount = () => {
                                         <Typography component="dd">{data?.payor_name}</Typography>
                                     </>
                                 )}
+                                {data?.userType === "Employee" && (
+                                    <>
+                                        <Typography component="dt" fontWeight={600}>Name of Employee</Typography>
+                                        <Typography component="dd">{data?.payor_name}</Typography>
 
+                                        <Typography component="dt" fontWeight={600}>Email Address</Typography>
+                                        <Typography component="dd">{data?.email}</Typography>
+
+                                        <Typography component="dt" fontWeight={600}>Designation</Typography>
+                                        <Typography component="dd">{data?.employee_type}</Typography>
+                                    </>
+                                )}
 
                                 <Typography component="dt" fontWeight={600}>User Type</Typography>
                                 <Typography component="dd">{data?.userType}</Typography>
@@ -251,6 +264,87 @@ const EditAccount = () => {
                                             name="email"
                                             value={dataToUpdate.email}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
+                                        />
+                                        <FormControl fullWidth>
+                                            <InputLabel>Status</InputLabel>
+                                            <Select
+                                                value={dataToUpdate.status}
+                                                label="Status"
+                                                name="status"
+                                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, status: e.target.value }))}
+                                                disabled={data && data?.status === "approved"}
+                                            >
+                                                <MenuItem value="pending">Pending</MenuItem>
+                                                <MenuItem value="approved">Approve</MenuItem>
+                                                <MenuItem value="rejected">Reject</MenuItem>
+                                            </Select>
+                                        </FormControl>
+
+                                        <Button
+                                            type="submit"
+                                            variant="contained"
+                                            color="success"
+                                            disabled={loading.form || dataToUpdate.status === "pending"}
+                                            sx={{ mt: 2, py: 1.5, fontWeight: 600 }}
+                                        >
+                                            {loading.form ? "Updating..." : "Update"}
+                                        </Button>
+                                    </Box>
+                                )}
+                                {data?.userType === "Employee" && (
+                                    <Box display="flex" flexDirection="column" gap={2}>
+                                        <TextField
+                                            fullWidth
+                                            label="Last Name"
+                                            variant="outlined"
+                                            name="lastName"
+                                            value={dataToUpdate.lastName}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, lastName: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="First Name"
+                                            variant="outlined"
+                                            name="firstName"
+                                            value={dataToUpdate.firstName}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, firstName: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Middle Name"
+                                            variant="outlined"
+                                            name="middleName"
+                                            value={dataToUpdate.middleName}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, middleName: e.target.value }))}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            label="Email Address"
+                                            variant="outlined"
+                                            name="email"
+                                            value={dataToUpdate.email}
+                                            onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
+                                        />
+                                        <FormControl fullWidth>
+                                            <InputLabel>Employee Type</InputLabel>
+                                            <Select
+                                                value={dataToUpdate.employee_type}
+                                                label="Employee Type"
+                                                name="employeeType"
+                                                onChange={(e) => setDataToUpdate((prev) => ({ ...prev, employee_type: e.target.value }))}
+                                                disabled={data && data?.status === "approved"}
+                                            >
+                                                <MenuItem selected={dataToUpdate.employee_type === "Staff"} value="Staff">Staff</MenuItem>
+                                                <MenuItem selected={dataToUpdate.employee_type === "Faculty"} value="Faculty">Faculty</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                        <TextField
+                                            fullWidth
+                                            label="ID Number"
+                                            variant="outlined"
+                                            name="idNumber"
+                                            value={dataToUpdate.id_number}
+                                            disabled
                                         />
                                         <FormControl fullWidth>
                                             <InputLabel>Status</InputLabel>

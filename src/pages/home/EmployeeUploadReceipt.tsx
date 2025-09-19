@@ -33,10 +33,13 @@ const UploadReceipt = () => {
   const handleGenerateReferenceId = async () => {
     setLoading((prevState) => ({ ...prevState, generateCode: true }));
     try {
-      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/External`);
+      const { data: data2 } = await axiosInstanceWithAuthorization(accessToken).post(`/api/transactions/save-reference-id/Employee`);
       setReferenceId(data2.reference_id);
     } catch (error) {
       console.error(error);
+      if (isAxiosError(error)) {
+        setSnackbar((prev) => ({ ...prev, open: true, message: error.request?.statusText || "Unable to generate reference ID", severity: "error" }));
+      }
     } finally {
       setLoading((prevState) => ({ ...prevState, generateCode: false }));
     }
@@ -123,7 +126,11 @@ const UploadReceipt = () => {
     }
   };
   React.useEffect(() => {
-    setReferenceId(referenceData?.reference_id);
+    const fetchReferenceId = () => {
+      setReferenceId(referenceData?.reference_id || "");
+      console.log(referenceData);
+    };
+    fetchReferenceId();
   }, [referenceData]);
   return (
     <>
@@ -178,11 +185,11 @@ const UploadReceipt = () => {
                   }}
                   label="Reference ID"
                   value={referenceId}
-                  disabled
+                  disabled={loading.generateCode || referenceId !== "" || Boolean(referenceData?.reference_id)}
                 />
                 {referenceId === "" && (
                   <FormLabel>
-                    <Alert severity="info">Please generate a reference ID first before uploading a receipt.</Alert>
+                    <Alert severity="info">Please click the icon to generate a reference ID first before uploading a receipt.</Alert>
                   </FormLabel>
                 )}
               </FormControl>
