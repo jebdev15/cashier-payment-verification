@@ -3,13 +3,16 @@ import { Alert, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useAxios } from "../../hooks/useAxios";
-import TransactionModal from "@/components/modals/TransactionModal";
+// import TransactionModal from "@/components/modals/TransactionModal";
+import TransactionModalForStudent from "@/components/modals/TransactionDialogForStudent";
+import TransactionModalForEmployee from "@/components/modals/TransactionDialogForEmployee";
+import TransactionModalForExternal from "@/components/modals/TransactionDialogForExternal";
 import CustomCircularProgress from "@/components/CustomCircularProgress";
-
+import { TransactionDataType } from "../admin/Transactions/type";
 const TransactionHistory = () => {
   const [rows, setRows] = React.useState<any[]>([]);
   const [open, setOpen] = React.useState(false);
-  const [selectedRow, setSelectedRow] = React.useState(null);
+  const [selectedRow, setSelectedRow] = React.useState<TransactionDataType | null>(null);
   const { data, loading, error } = useAxios({
     url: "/api/transactions/student-id",
     authorized: true,
@@ -40,6 +43,18 @@ const TransactionHistory = () => {
     },
   ];
 
+  const renderTransactionDialog = () => {
+    switch (selectedRow?.userType) {
+      case "Student":
+        return <TransactionModalForStudent open={open} data={selectedRow} onClose={() => setOpen(false)} />;
+      case "Employee":
+        return <TransactionModalForEmployee open={open} data={selectedRow} onClose={() => setOpen(false)} />;
+      case "External":
+        return <TransactionModalForExternal open={open} data={selectedRow} onClose={() => setOpen(false)} />;
+      default:
+        return null;
+    }
+  }
   React.useEffect(() => {
     if (!loading && Array.isArray(data)) {
       const filteredData = data.map((item: any, index: number) => ({ ...item, _id: ++index }));
@@ -73,7 +88,7 @@ const TransactionHistory = () => {
           </Box>
         </Box>
       </Box>
-      <TransactionModal open={open} data={selectedRow} onClose={() => setOpen(false)} />
+      {open && renderTransactionDialog()}
     </React.Suspense>
   );
 };
