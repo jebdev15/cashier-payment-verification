@@ -8,6 +8,9 @@ import { useAxios } from "@/hooks/useAxios";
 import TransactionModal from "@/components/modals/TransactionModal";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
+import TransactionDialogForStudent from "@/components/modals/TransactionDialogForStudent";
+import TransactionDialogForExternal from "@/components/modals/TransactionDialogForExternal";
+import TransactionDialogForEmployee from "@/components/modals/TransactionDialogForEmployee";
 
 const filterMiscellaneousFeeAsPayload = (checkedItems: string[], miscellaneousFees: any[]) => {
   const filteredMiscellaneousFee = miscellaneousFees.filter((fee) => Number(fee.balance) > 0 && checkedItems.includes(fee.nature_of_collection_id.toString()));
@@ -175,6 +178,19 @@ const ShowTransactions = () => {
       alert("Failed to update transaction. Please try again.");
     }
   };
+
+  const renderTransactionDialog = () => {
+    switch(selectedRow?.userType) {
+      case "Student":
+        return <TransactionDialogForStudent open={open} onClose={() => setOpen(false)} data={selectedRow} entryModes={entryModes} onSave={handleUpdateTransaction} editable={editable} />;
+      case "External":
+        return <TransactionDialogForExternal open={open} onClose={() => setOpen(false)} data={selectedRow} entryModes={entryModes} onSave={handleUpdateTransaction} editable={editable} />;
+      case "Employee":
+        return <TransactionDialogForEmployee open={open} onClose={() => setOpen(false)} data={selectedRow} entryModes={entryModes} onSave={handleUpdateTransaction} editable={editable} />;
+      default:
+        return null;
+    }
+  }
   React.useEffect(() => {
     if (transactionData && transactionData.length > 0) {
       setData(transactionData);
@@ -264,7 +280,7 @@ const ShowTransactions = () => {
           <Box sx={{ maxHeight: 400, overflow: "auto" }}>
             <DataGrid
               rows={employeeTransactions}
-              columns={externalColumns}
+              columns={employeeColumns}
               loading={loading}
               disableRowSelectionOnClick
               sx={{
@@ -274,7 +290,7 @@ const ShowTransactions = () => {
           </Box>
         </Box>
       </Box>
-      {open && <TransactionModal open={open} onClose={() => setOpen(false)} data={selectedRow} entryModes={entryModes} onSave={handleUpdateTransaction} editable={editable} />}
+      {open && renderTransactionDialog() }
     </React.Suspense>
   );
 };

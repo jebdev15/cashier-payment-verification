@@ -38,7 +38,7 @@ const UploadReceipt = () => {
     } catch (error) {
       console.error(error);
       if (isAxiosError(error)) {
-        setSnackbar((prev) => ({ ...prev, open: true, message: error.request?.statusText || "Unable to generate reference ID", severity: "error" }));
+        setSnackbar((prev) => ({ ...prev, open: true, message: "Unable to generate reference ID", severity: "error" }));
       }
     } finally {
       setLoading((prevState) => ({ ...prevState, generateCode: false }));

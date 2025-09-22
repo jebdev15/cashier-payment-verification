@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
     Button, Grid, Typography, Select, MenuItem, IconButton,
@@ -39,21 +39,21 @@ const TransactionModal: React.FC<Props> = ({
     editable = false,
 }) => {
     const [cookie] = useCookies(["accessToken"]);
-    const [formData, setFormData] = useState<TransactionDataType | null>(data);
-    const [image, setImage] = useState<string | null>(null);
+    const [formData, setFormData] = React.useState<TransactionDataType | null>(data);
+    const [image, setImage] = React.useState<string | null>(null);
 
     // 🔹 FORM STATES
-    const [amountToPay, setAmountToPay] = useState<number>(0);
-    const [amountTendered, setAmountTendered] = useState<number>(0);
-    const [remarks, setRemarks] = useState<string>("");
-    const [details, setDetails] = useState<string>("");
-    const [entryMode, setEntryMode] = useState<string>("1");
-    const [selectedAccount, setSelectedAccount] = useState("");
-    const [filteredParticulars, setFilteredParticulars] = useState<string[]>([]);
-    const [checkedItems, setCheckedItems] = useState<string[]>([]);
-    const [miscellaneousFees, setMiscellaneousFees] = useState<any[]>([]);
-    const [tuitionFee, setTuitionFee] = useState<string>("0.00");
-    const [miscellaneousFeesBalance, setMiscellaneousFeesBalance] = useState<string>("0.00");
+    const [amountToPay, setAmountToPay] = React.useState<number>(0);
+    const [amountTendered, setAmountTendered] = React.useState<number>(0);
+    const [remarks, setRemarks] = React.useState<string>("");
+    const [details, setDetails] = React.useState<string>("");
+    const [entryMode, setEntryMode] = React.useState<string>("1");
+    const [selectedAccount, setSelectedAccount] = React.useState("");
+    const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
+    const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
+    const [miscellaneousFees, setMiscellaneousFees] = React.useState<any[]>([]);
+    const [tuitionFee, setTuitionFee] = React.useState<string>("0.00");
+    const [miscellaneousFeesBalance, setMiscellaneousFeesBalance] = React.useState<string>("0.00");
     const [distribution, setDistribution] = React.useState({
         miscellaneous: 0,
         tuition: 0,
@@ -83,39 +83,97 @@ const TransactionModal: React.FC<Props> = ({
     };
 
     // 🔹 Load student fees if applicable
-    useEffect(() => {
-        if (formData?.userType === "Student") {
-            const fetchFees = async () => {
-                try {
-                    const { data: res } = await axiosInstance.get(`/api/transactions/miscellaneous-fees/${formData?.student_account_id}`);
-                    setMiscellaneousFees(res?.miscellaneous_fee || []);
-                    setMiscellaneousFeesBalance(res?.unpaid_miscellaneous_fees || "0.00");
-                    setTuitionFee(res?.tuition_fee.total || "0.00");
-                } catch (err) {
-                    console.error("Error fetching fees", err);
-                }
-            };
-            fetchFees();
-        }
-    }, [formData]);
-
-    // 🔹 Load receipt image preview
-    useEffect(() => {
-        if (data?.filePath) {
-            const url = `${import.meta.env.VITE_API_URL}/${data.filePath}`;
-            if (/\.(jpg|jpeg|png)$/i.test(data.filePath)) setImage(url);
+    React.useEffect(() => {
+        if (data) {
+            const filePath = data?.filePath;
+            const imageUrl = `${import.meta.env.VITE_API_URL}/${filePath}`;
+            console.log(filePath, imageUrl)
+            // Optional: only display image if it's .jpg, .jpeg, .png
+            const validImage = typeof filePath === "string" && /\.(jpg|jpeg|png)$/i.test(filePath);
+            if (validImage) setImage(imageUrl);
         }
     }, [data]);
+    React.useEffect(() => {
+        const fetchStudentMiscellaneousFees = async () => {
+            try {
+                const response = await axiosInstance.get(`/api/transactions/miscellaneous-fees/${data?.student_account_id}`);
+                if (response.data) {
+                    // Process the fees data as needed
+                    console.log("Fees data:", response.data);
 
-    // 🔹 Update particulars when account changes
-    useEffect(() => {
+                    const implementMiscellaneousFeesId = response.data?.miscellaneous_fee.map((fee: any, index: number) => ({
+                        ...fee,
+                        id: ++index, // Ensure each fee has a unique id
+                    }));
+                    console.log({ implementMiscellaneousFeesId });
+                    setMiscellaneousFees(implementMiscellaneousFeesId);
+
+                    // Log the balances to the console
+                    console.log("Balances:", response.data?.unpaid_miscellaneous_fees);
+                    setMiscellaneousFeesBalance(response.data?.unpaid_miscellaneous_fees || "0.00");
+                    setTuitionFee(response.data?.tuition_fee.total || "0.00");
+                }
+            } catch (error) {
+                console.error("Error fetching fees:", error);
+            }
+        };
+        if (formData?.userType === "Student") {
+            fetchStudentMiscellaneousFees();
+        }
+    }, [])
+    React.useEffect(() => {
         if (selectedAccount) {
-            const filtered = fees.filter((item) => item.categories.includes(selectedAccount)).map((i) => i.name);
+            const filtered = fees
+                .filter((item) => item.categories.includes(selectedAccount))
+                .map((item) => item.name);
             setFilteredParticulars(filtered);
         } else {
             setFilteredParticulars([]);
         }
     }, [selectedAccount]);
+    React.useEffect(() => {
+        if (!amountTendered) {
+            setDistribution({ miscellaneous: 0, tuition: 0, totalPayable: 0, accountsPayable: 0 });
+            return;
+        }
+
+        let remaining = amountTendered;
+        let miscTotal = 0;
+        let totalMiscBalance = 0;
+
+        if (checkedItems.length > 0) {
+            // ✅ If misc are checked, handle them
+            for (const fee of miscellaneousFees) {
+                if (checkedItems.includes(fee.nature_of_collection_id.toString())) {
+                    totalMiscBalance += Number(fee.balance);
+                }
+            }
+
+            for (const fee of miscellaneousFees) {
+                if (checkedItems.includes(fee.nature_of_collection_id.toString())) {
+                    const payAmount = Math.min(remaining, Number(fee.balance));
+                    miscTotal += payAmount;
+                    remaining -= payAmount;
+                }
+            }
+        }
+
+        // ✅ Always apply excess (or full tendered if no misc checked) to tuition
+        const tuitionApplied = Math.min(remaining, Number(tuitionFee));
+        remaining -= tuitionApplied;
+
+        // ✅ Totals
+        const totalPayable = (checkedItems.length > 0 ? totalMiscBalance : 0) + Number(tuitionFee);
+        const accountsPayable = Math.max(totalPayable - amountTendered, 0);
+
+        setDistribution({
+            miscellaneous: miscTotal,
+            tuition: tuitionApplied,
+            totalPayable,
+            accountsPayable,
+        });
+
+    }, [amountTendered, checkedItems, miscellaneousFees, tuitionFee]);
 
     /**
      * 🟢 SECTION RENDERERS
@@ -405,340 +463,10 @@ const TransactionModal: React.FC<Props> = ({
         </Grid>
     );
 
-    const renderExternalForm = () => (
-        <Grid container spacing={2}>
-            {/* 1. Account Details */}
-            <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                    Account Details
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <TextField
-                    label="Name of Institution/Agency"
-                    name="name_of_payor"
-                    value={formData?.name_of_payor || ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!editable}
-                    margin="dense"
-                />
-                <TextField
-                    label="Reference ID"
-                    name="reference_id"
-                    value={formData?.reference_id || ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-                <TextField
-                    label="Reference Number"
-                    name="reference_number"
-                    value={formData?.reference_number || ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-
-                <TextField
-                    label="eOR Number"
-                    name="e_or"
-                    value={formData?.e_or || ""}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-                <TextField
-                    label="Created At"
-                    value={formData?.created_at ? new Date(formData.created_at).toLocaleString() : ""}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-
-                <FormControl fullWidth margin="dense">
-                    <InputLabel htmlFor="purpose-select">Status</InputLabel>
-                    <Select
-                        label="Status"
-                        name="status"
-                        value={formData?.status || ""}
-                        onChange={(e) => setFormData((prev) => ({ ...prev!, status: e.target.value }))}
-                        fullWidth
-                        disabled={!editable}
-                    >
-                        <MenuItem value="pending">Pending</MenuItem>
-                        <MenuItem value="approved">{formData?.status === "approved" ? "Approved" : "Approve"}</MenuItem>
-                        <MenuItem value="rejected">{formData?.status === "rejected" ? "Rejected" : "Reject"}</MenuItem>
-                    </Select>
-                </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                    Payment Details
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <FormControl fullWidth margin="dense">
-                    <TextField
-                        label="Mode of Payment"
-                        type="text"
-                        name="mode_of_payment"
-                        value={formData?.mode_of_payment || ""}
-                        fullWidth
-                        disabled
-                    />
-                </FormControl>
-                <FormControl fullWidth margin="dense">
-                    <InputLabel id="account-select">Account Title</InputLabel>
-                    <Select
-                        labelId="account-select"
-                        value={selectedAccount}
-                        onChange={(e) => {
-                            setSelectedAccount(e.target.value);
-                        }}
-                        label="Account Type"
-                        margin="dense"
-                        disabled={!editable || formData?.status !== 'approved'}
-                    >
-                        <MenuItem value="REG">REG</MenuItem>
-                        <MenuItem value="IGP">IGP</MenuItem>
-                        <MenuItem value="GS">GS</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl fullWidth disabled={!selectedAccount} margin="dense">
-                    <InputLabel id="particular-select">Particulars</InputLabel>
-                    <Select
-                        labelId="particular-select"
-                        value={formData?.particulars}
-                        onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, particulars: e.target.value }))
-                        }
-                        label="Particulars"
-                        margin="dense"
-                        disabled={!editable || !selectedAccount || formData?.status !== 'approved'}
-                        inputProps={{
-                            sx: {
-                                whiteSpace: "normal !important",
-                            },
-                        }}
-                    >
-                        {filteredParticulars.map((name, index) => (
-                            <MenuItem key={index} value={name} sx={{ whiteSpace: "normal !important" }}>
-                                {name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                <FormControl fullWidth margin="dense" >
-                    <TextField
-                        label="Remarks"
-                        type="text"
-                        name="remarks"
-                        value={remarks}
-                        onChange={(e) => setRemarks(e.target.value)}
-                        disabled={!editable || formData?.status !== 'approved'}
-                        fullWidth
-                    />
-                </FormControl>
-                <FormControl fullWidth margin="dense">
-                    <TextField
-                        label="Details"
-                        type="text"
-                        name="details"
-                        value={details}
-                        onChange={(e) => setDetails(e.target.value)}
-                        disabled={!editable || formData?.status !== 'approved'}
-                        fullWidth
-                    />
-                </FormControl>
-                <FormControl fullWidth margin="dense">
-                    <TextField
-                        label="Amount Received"
-                        name="amountTendered"
-                        type="number"
-                        value={amountTendered}
-                        onChange={(e) => setAmountTendered(parseFloat(Number(e.target.value).toFixed(2)))}
-                        fullWidth
-                        disabled={!editable || formData?.status !== 'approved'}
-                    />
-                </FormControl>
-            </Grid>
-        </Grid>
-    );
-
-    const renderEmployeeForm = () => (
-        <Grid container spacing={2}>
-            {/* 1. Account Details */}
-            <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                    Account Details
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <TextField
-                    label="Name of Institution/Agency"
-                    name="name_of_payor"
-                    value={formData?.name_of_payor || ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!editable}
-                    margin="dense"
-                />
-                <TextField
-                    label="Reference ID"
-                    name="reference_id"
-                    value={formData?.reference_id || ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-                <TextField
-                    label="Reference Number"
-                    name="reference_number"
-                    value={formData?.reference_number || ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-
-                <TextField
-                    label="eOR Number"
-                    name="e_or"
-                    value={formData?.e_or || ""}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-                <TextField
-                    label="Created At"
-                    value={formData?.created_at ? new Date(formData.created_at).toLocaleString() : ""}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-
-                <FormControl fullWidth margin="dense">
-                    <InputLabel htmlFor="purpose-select">Status</InputLabel>
-                    <Select
-                        label="Status"
-                        name="status"
-                        value={formData?.status || ""}
-                        onChange={(e) => setFormData((prev) => ({ ...prev!, status: e.target.value }))}
-                        fullWidth
-                        disabled={!editable}
-                    >
-                        <MenuItem value="pending">Pending</MenuItem>
-                        <MenuItem value="approved">{formData?.status === "approved" ? "Approved" : "Approve"}</MenuItem>
-                        <MenuItem value="rejected">{formData?.status === "rejected" ? "Rejected" : "Reject"}</MenuItem>
-                    </Select>
-                </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                    Payment Details
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <FormControl fullWidth margin="dense">
-                    <TextField
-                        label="Mode of Payment"
-                        type="text"
-                        name="mode_of_payment"
-                        value={formData?.mode_of_payment || ""}
-                        fullWidth
-                        disabled
-                    />
-                </FormControl>
-                <FormControl fullWidth margin="dense">
-                    <InputLabel id="account-select">Account Title</InputLabel>
-                    <Select
-                        labelId="account-select"
-                        value={selectedAccount}
-                        onChange={(e) => {
-                            setSelectedAccount(e.target.value);
-                        }}
-                        label="Account Type"
-                        margin="dense"
-                        disabled={!editable || formData?.status !== 'approved'}
-                    >
-                        <MenuItem value="REG">REG</MenuItem>
-                        <MenuItem value="IGP">IGP</MenuItem>
-                        <MenuItem value="GS">GS</MenuItem>
-                    </Select>
-                </FormControl>
-                <FormControl fullWidth disabled={!selectedAccount} margin="dense">
-                    <InputLabel id="particular-select">Particulars</InputLabel>
-                    <Select
-                        labelId="particular-select"
-                        value={formData?.particulars}
-                        onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, particulars: e.target.value }))
-                        }
-                        label="Particulars"
-                        margin="dense"
-                        disabled={!editable || !selectedAccount || formData?.status !== 'approved'}
-                        inputProps={{
-                            sx: {
-                                whiteSpace: "normal !important",
-                            },
-                        }}
-                    >
-                        {filteredParticulars.map((name, index) => (
-                            <MenuItem key={index} value={name} sx={{ whiteSpace: "normal !important" }}>
-                                {name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-                <FormControl fullWidth margin="dense" >
-                    <TextField
-                        label="Remarks"
-                        type="text"
-                        name="remarks"
-                        value={remarks}
-                        onChange={(e) => setRemarks(e.target.value)}
-                        disabled={!editable || formData?.status !== 'approved'}
-                        fullWidth
-                    />
-                </FormControl>
-                <FormControl fullWidth margin="dense">
-                    <TextField
-                        label="Details"
-                        type="text"
-                        name="details"
-                        value={details}
-                        onChange={(e) => setDetails(e.target.value)}
-                        disabled={!editable || formData?.status !== 'approved'}
-                        fullWidth
-                    />
-                </FormControl>
-                <FormControl fullWidth margin="dense">
-                    <TextField
-                        label="Amount Received"
-                        name="amountTendered"
-                        type="number"
-                        value={amountTendered}
-                        onChange={(e) => setAmountTendered(parseFloat(Number(e.target.value).toFixed(2)))}
-                        fullWidth
-                        disabled={!editable || formData?.status !== 'approved'}
-                    />
-                </FormControl>
-            </Grid>
-        </Grid>
-    )
     const renderContent = () => {
         if (!editable) return <Typography>No changes made</Typography>;
-        if (cookie.accessToken?.isAdministrator) {
-            switch (formData?.userType) {
-                case "Student":
-                    return renderStudentForm();
-                case "External":
-                    return renderExternalForm();
-                case "Employee":
-                    return renderEmployeeForm();
-                default:
-                    return <Typography color="error">Unknown user type</Typography>;
-            }
+        if (cookie.accessToken.isAdministrator) {
+            return renderStudentForm();
         }
         return <Typography color="error">You do not have permission to edit this transaction.</Typography>;
     };
