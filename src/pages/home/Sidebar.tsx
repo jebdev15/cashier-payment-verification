@@ -133,16 +133,16 @@ const Sidebar = () => {
               disablePadding
             >
               <AccountCircle sx={{ height: "100px", width: "100px" }} />
-              {userData.isStudent && (
+              {/* {userData.isStudent && (
                 <Typography gutterBottom variant="body1" component="div">
                   {userData.fullName}
                 </Typography>
-              )}
-              {userData.isExternal && (
+              )} */}
+              {/* {userData.isExternal && ( */}
                 <Typography gutterBottom variant="body1" component="div">
                   {userData.payor_name}
                 </Typography>
-              )}
+              {/* )} */}
               <Typography gutterBottom variant="caption" component="div" color="text.secondary">
                 {userData.email}
               </Typography>

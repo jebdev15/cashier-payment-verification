@@ -185,7 +185,7 @@ const UploadReceipt = () => {
                   }}
                   label="Reference ID"
                   value={referenceId}
-                  disabled={loading.generateCode || referenceId !== "" || Boolean(referenceData?.reference_id)}
+                  disabled={loading.generateCode || referenceId !== ""}
                 />
                 {referenceId === "" && (
                   <FormLabel>

@@ -25,10 +25,13 @@ export type TransactionDataType = {
     userType?: string;
     checkedItems?: string[];
     entryMode?: string;
+    account_type?: string;
     details?: string;
     remarks?: string;
     amountToPay?: number;
     amountTendered?: number;
+    amount_to_pay?: string;
+    amount_tendered?: string;
     selectedAccount?: string;
     miscellaneousFees?: any[];
     distribution?: { miscellaneous: number; tuition: number; totalPayable: number; accountsPayable: number; };

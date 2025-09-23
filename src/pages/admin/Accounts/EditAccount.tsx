@@ -171,6 +171,7 @@ const EditAccount = () => {
                                             name="student_id"
                                             value={dataToUpdate.student_id}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, student_id: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -179,6 +180,7 @@ const EditAccount = () => {
                                             name="email"
                                             value={dataToUpdate.email}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -187,6 +189,7 @@ const EditAccount = () => {
                                             name="firstName"
                                             value={dataToUpdate.firstName}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, firstName: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -195,6 +198,7 @@ const EditAccount = () => {
                                             name="middleName"
                                             value={dataToUpdate.middleName}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, middleName: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -203,6 +207,7 @@ const EditAccount = () => {
                                             name="lastName"
                                             value={dataToUpdate.lastName}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, lastName: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -211,6 +216,7 @@ const EditAccount = () => {
                                             name="college"
                                             value={dataToUpdate.college}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, college: e.target.value }))}
+                                            disabled
                                         />
 
                                         <TextField
@@ -220,6 +226,7 @@ const EditAccount = () => {
                                             name="program"
                                             value={dataToUpdate.program}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, program: e.target.value }))}
+                                            disabled
                                         />
                                         <FormControl fullWidth>
                                             <InputLabel>Status</InputLabel>
@@ -256,6 +263,7 @@ const EditAccount = () => {
                                             name="payor_name"
                                             value={dataToUpdate.payor_name}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, payor_name: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -264,6 +272,7 @@ const EditAccount = () => {
                                             name="email"
                                             value={dataToUpdate.email}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
+                                            disabled
                                         />
                                         <FormControl fullWidth>
                                             <InputLabel>Status</InputLabel>
@@ -300,6 +309,7 @@ const EditAccount = () => {
                                             name="lastName"
                                             value={dataToUpdate.lastName}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, lastName: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -308,6 +318,7 @@ const EditAccount = () => {
                                             name="firstName"
                                             value={dataToUpdate.firstName}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, firstName: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -316,6 +327,7 @@ const EditAccount = () => {
                                             name="middleName"
                                             value={dataToUpdate.middleName}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, middleName: e.target.value }))}
+                                            disabled
                                         />
                                         <TextField
                                             fullWidth
@@ -324,6 +336,7 @@ const EditAccount = () => {
                                             name="email"
                                             value={dataToUpdate.email}
                                             onChange={(e) => setDataToUpdate((prev) => ({ ...prev, email: e.target.value }))}
+                                            disabled
                                         />
                                         <FormControl fullWidth>
                                             <InputLabel>Employee Type</InputLabel>
@@ -332,7 +345,7 @@ const EditAccount = () => {
                                                 label="Employee Type"
                                                 name="employeeType"
                                                 onChange={(e) => setDataToUpdate((prev) => ({ ...prev, employee_type: e.target.value }))}
-                                                disabled={data && data?.status === "approved"}
+                                                disabled
                                             >
                                                 <MenuItem selected={dataToUpdate.employee_type === "Staff"} value="Staff">Staff</MenuItem>
                                                 <MenuItem selected={dataToUpdate.employee_type === "Faculty"} value="Faculty">Faculty</MenuItem>

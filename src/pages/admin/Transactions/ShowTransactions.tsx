@@ -5,7 +5,6 @@ import { DataGrid } from "@mui/x-data-grid";
 import { TransactionDataType, TransactionModalEntryModeType } from "./type";
 // import { useNavigate } from 'react-router'
 import { useAxios } from "@/hooks/useAxios";
-import TransactionModal from "@/components/modals/TransactionModal";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import TransactionDialogForStudent from "@/components/modals/TransactionDialogForStudent";
@@ -133,8 +132,9 @@ const ShowTransactions = () => {
     },
   ];
   const handleUpdateTransaction = async (updatedData: TransactionDataType) => {
+    const confirmation = window.confirm("Are you sure you want to update this transaction?");
+    if (!confirmation) return;
     try {
-
       const miscFee = filterMiscellaneousFeeAsPayload(updatedData.checkedItems || [], updatedData.miscellaneousFees || []);
       const formData = new FormData();
       formData.append("id", updatedData.id || "");

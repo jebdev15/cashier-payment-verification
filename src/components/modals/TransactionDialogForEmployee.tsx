@@ -7,7 +7,6 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import { useCookies } from "react-cookie";
 import ReceiptViewerComponent from "../ReceiptViewerComponent";
 
 type Props = {
@@ -27,7 +26,6 @@ const TransactionModal: React.FC<Props> = ({
     onSave,
     editable = false,
 }) => {
-    const [cookie] = useCookies(["accessToken"]);
     const [formData, setFormData] = React.useState<TransactionDataType | null>(data);
     const [image, setImage] = React.useState<string | null>(null);
 
@@ -74,8 +72,13 @@ const TransactionModal: React.FC<Props> = ({
 
     // Update form data on load
     React.useEffect(() => {
-        setFormData(data);
-    }, [data]);
+        if(!editable && formData?.status === 'approved') {
+            setSelectedAccount(formData.account_type || "");
+            setDetails(formData.details || "");
+            setRemarks(formData.remarks || "");
+            setAmountTendered(parseFloat(formData.amount_tendered || "0"));
+        }
+    }, []);
     /**
      * 🟢 SECTION RENDERERS
      */
@@ -153,7 +156,7 @@ const TransactionModal: React.FC<Props> = ({
                     Payment Details
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
-                <FormControl fullWidth margin="dense">
+                {/* <FormControl fullWidth margin="dense">
                     <TextField
                         label="Mode of Payment"
                         type="text"
@@ -162,7 +165,7 @@ const TransactionModal: React.FC<Props> = ({
                         fullWidth
                         disabled
                     />
-                </FormControl>
+                </FormControl> */}
                 <FormControl fullWidth margin="dense">
                     <InputLabel id="account-select">Account Title</InputLabel>
                     <Select
@@ -241,7 +244,6 @@ const TransactionModal: React.FC<Props> = ({
         </Grid>
     )
     const renderContent = () => {
-        // if (!editable) return <Typography>No changes made</Typography>;
         return renderEmployeeForm();
     };
 

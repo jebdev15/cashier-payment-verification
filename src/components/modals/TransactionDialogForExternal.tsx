@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
     Button, Grid, Typography, Select, MenuItem, IconButton,
-    Checkbox, Table, TableBody, TableCell, TableHead, TableRow,
     Divider, FormControl, InputLabel
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { axiosInstance } from "@/api/app";
 import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import { useCookies } from "react-cookie";
 import ReceiptViewerComponent from "../ReceiptViewerComponent";
 
 type Props = {
@@ -30,43 +27,22 @@ type TransactionModalEntryModeType = {
     debit: string;
 };
 
-const TransactionModal: React.FC<Props> = ({
+const TransactionDialogForExternal: React.FC<Props> = ({
     open,
     data,
-    entryModes,
     onClose,
     onSave,
     editable = false,
 }) => {
-    const [cookie] = useCookies(["accessToken"]);
-    const [formData, setFormData] = useState<TransactionDataType | null>(data);
-    const [image, setImage] = useState<string | null>(null);
+    const [formData, setFormData] = React.useState<TransactionDataType | null>(data);
+    const [image, setImage] = React.useState<string | null>(null);
 
     // 🔹 FORM STATES
-    const [amountToPay, setAmountToPay] = useState<number>(0);
-    const [amountTendered, setAmountTendered] = useState<number>(0);
-    const [remarks, setRemarks] = useState<string>("");
-    const [details, setDetails] = useState<string>("");
-    const [entryMode, setEntryMode] = useState<string>("1");
-    const [selectedAccount, setSelectedAccount] = useState("");
-    const [filteredParticulars, setFilteredParticulars] = useState<string[]>([]);
-    const [checkedItems, setCheckedItems] = useState<string[]>([]);
-    const [miscellaneousFees, setMiscellaneousFees] = useState<any[]>([]);
-    const [tuitionFee, setTuitionFee] = useState<string>("0.00");
-    const [miscellaneousFeesBalance, setMiscellaneousFeesBalance] = useState<string>("0.00");
-    const [distribution, setDistribution] = React.useState({
-        miscellaneous: 0,
-        tuition: 0,
-        totalPayable: 0,
-        accountsPayable: 0,
-    });
-    // 🔹 Handle checkbox toggle for misc fees
-    const handleCheckedItems = (event: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
-        const itemId = event.target.value;
-        setCheckedItems((prev) =>
-            checked ? (prev.includes(itemId) ? prev : [...prev, itemId]) : prev.filter((id) => id !== itemId)
-        );
-    };
+    const [amountTendered, setAmountTendered] = React.useState<number>(0);
+    const [remarks, setRemarks] = React.useState<string>("");
+    const [details, setDetails] = React.useState<string>("");
+    const [selectedAccount, setSelectedAccount] = React.useState("");
+    const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
 
     // 🔹 Handle text inputs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -78,29 +54,12 @@ const TransactionModal: React.FC<Props> = ({
     // 🔹 Handle submit
     const handleSubmit = () => {
         if (editable && formData && onSave) {
-            onSave({ ...formData, checkedItems, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount });
+            onSave({ ...formData, details, remarks, amountTendered, selectedAccount });
         }
     };
 
-    // 🔹 Load student fees if applicable
-    useEffect(() => {
-        if (formData?.userType === "Student") {
-            const fetchFees = async () => {
-                try {
-                    const { data: res } = await axiosInstance.get(`/api/transactions/miscellaneous-fees/${formData?.student_account_id}`);
-                    setMiscellaneousFees(res?.miscellaneous_fee || []);
-                    setMiscellaneousFeesBalance(res?.unpaid_miscellaneous_fees || "0.00");
-                    setTuitionFee(res?.tuition_fee.total || "0.00");
-                } catch (err) {
-                    console.error("Error fetching fees", err);
-                }
-            };
-            fetchFees();
-        }
-    }, [formData]);
-
     // 🔹 Load receipt image preview
-    useEffect(() => {
+    React.useEffect(() => {
         if (data?.filePath) {
             const url = `${import.meta.env.VITE_API_URL}/${data.filePath}`;
             if (/\.(jpg|jpeg|png)$/i.test(data.filePath)) setImage(url);
@@ -108,7 +67,7 @@ const TransactionModal: React.FC<Props> = ({
     }, [data]);
 
     // 🔹 Update particulars when account changes
-    useEffect(() => {
+    React.useEffect(() => {
         if (selectedAccount) {
             const filtered = fees.filter((item) => item.categories.includes(selectedAccount)).map((i) => i.name);
             setFilteredParticulars(filtered);
@@ -117,6 +76,17 @@ const TransactionModal: React.FC<Props> = ({
         }
     }, [selectedAccount]);
 
+    React.useEffect(() => {
+        const updateAllTheDetailsIfApproved = () => {
+            if (!editable && formData?.status === 'approved') {
+                setSelectedAccount(formData.account_type || "");
+                setRemarks(formData.remarks || "");
+                setDetails(formData.details || "");
+                setAmountTendered(parseFloat(formData.amount_tendered || "0"));
+            }
+        }
+        updateAllTheDetailsIfApproved();
+    }, []);
     /**
      * 🟢 SECTION RENDERERS
      */
@@ -194,7 +164,7 @@ const TransactionModal: React.FC<Props> = ({
                     Payment Details
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
-                <FormControl fullWidth margin="dense">
+                {/* <FormControl fullWidth margin="dense">
                     <TextField
                         label="Mode of Payment"
                         type="text"
@@ -203,7 +173,7 @@ const TransactionModal: React.FC<Props> = ({
                         fullWidth
                         disabled
                     />
-                </FormControl>
+                </FormControl> */}
                 <FormControl fullWidth margin="dense">
                     <InputLabel id="account-select">Account Title</InputLabel>
                     <Select
@@ -283,20 +253,7 @@ const TransactionModal: React.FC<Props> = ({
     );
 
     const renderContent = () => {
-        if (!editable) return <Typography>No changes made</Typography>;
-        if (cookie.accessToken?.isAdministrator) {
-            switch (formData?.userType) {
-                case "Student":
-                    return renderStudentForm();
-                case "External":
-                    return renderExternalForm();
-                case "Employee":
-                    return renderEmployeeForm();
-                default:
-                    return <Typography color="error">Unknown user type</Typography>;
-            }
-        }
-        return <Typography color="error">You do not have permission to edit this transaction.</Typography>;
+        return renderExternalForm();
     };
 
     const renderReceiptSection = () => (
@@ -310,11 +267,10 @@ const TransactionModal: React.FC<Props> = ({
                 <IconButton onClick={onClose}><CloseIcon /></IconButton>
             </DialogTitle>
 
-            {/* Content */}
-            <DialogContent dividers>{renderContent()}</DialogContent>
-
             {/* Receipt Preview */}
             <DialogContent>
+                {/* Content */}
+                {renderContent()}
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="subtitle1">Receipt Preview</Typography>
                 {renderReceiptSection()}
@@ -330,4 +286,4 @@ const TransactionModal: React.FC<Props> = ({
     );
 };
 
-export default React.memo(TransactionModal);
+export default React.memo(TransactionDialogForExternal);
