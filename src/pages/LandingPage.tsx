@@ -3,6 +3,7 @@ import React from "react";
 import { LazyImage } from "../components/LazyImage";
 import chmsuLogo from "../assets/chmsu.jpg";
 import { Outlet } from "react-router";
+import { Mail } from "@mui/icons-material";
 
 const LandingPage = () => {
   return (
@@ -51,12 +52,13 @@ const LandingPage = () => {
         </Box>
         <hr />
         <Box sx={{ display: { md: "block", xs: "none" } }}>
-          The CHMSU Payment Verification and E-Receipt Issuance System is a platform developed to facilitate the verification of student and administrative payments at Carlos Hilado Memorial State University. It allows authorized personnel to securely review and validate payment submissions, track transaction statuses, and generate official electronic receipts (e-receipts).
+          The CHMSU Payment Verification and E-Receipt Issuance System is a platform developed to facilitate the verification of student and administrative payments at Carlos Hilado Memorial State University. It allows authorized personnel to securely review and validate online payment submissions, track transaction statuses, and generate official electronic receipts (e-receipts).
           <br />
           <br />
           This system ensures accurate and efficient payment verification across departments while providing users with a convenient and reliable proof of payment through e-receipts.
         </Box>
         {/* <Box sx={{ display: { md: "block", xs: "none" } }}>Get in touch: 09123456789</Box> */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}><Mail /> cpveris@chmsu.edu.ph</Box>
       </Box>
       {/* <Divider orientation={"vertical"} flexItem /> */}
       <Box

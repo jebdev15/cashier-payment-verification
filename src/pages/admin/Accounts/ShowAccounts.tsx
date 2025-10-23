@@ -4,7 +4,7 @@ import { Edit as EditIcon, Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
 import { AccountDataType } from "./type";
-import { useAxios } from "../../../hooks/useAxios";
+import { useAxios } from "@/hooks/useAxios";
 import CustomCircularProgress from "@/components/CustomCircularProgress";
 
 const ShowAccounts = () => {
@@ -17,7 +17,7 @@ const ShowAccounts = () => {
   const columns = [
     { field: "id", headerName: "No.", width: 100 },
     // { field: 'student_id', headerName: 'Student ID', width: 130 },
-    { field: "fullName", headerName: "Full Name", minWidth: 250, flex: 1 },
+    { field: "payorName", headerName: "Full Name", minWidth: 250, flex: 1 },
     { field: "email", headerName: "Email Address", minWidth: 225, flex: 1 },
     // { field: 'college', headerName: 'College', width: 200 },
     { field: "program", headerName: "Program", minWidth: 300, flex: 1 },
@@ -53,7 +53,7 @@ const ShowAccounts = () => {
 
   const externalUserColumns = [
     { field: "id", headerName: "No.", width: 100 },
-    { field: "payor_name", headerName: "Name of Institution/Agency", minWidth: 250, flex: 1 },
+    { field: "payorName", headerName: "Name of Institution/Agency", minWidth: 250, flex: 1 },
     { field: "email", headerName: "Email Address", minWidth: 250, flex: 1.5 },
     {
       field: "status",
@@ -86,7 +86,7 @@ const ShowAccounts = () => {
 
   const employeeColumns = [
     { field: "id", headerName: "No.", width: 100 },
-    { field: "payor_name", headerName: "Name of Employee", minWidth: 250, flex: 1 },
+    { field: "payorName", headerName: "Name of Employee", minWidth: 250, flex: 1 },
     { field: "email", headerName: "Email Address", minWidth: 250, flex: 1.5 },
     {
       field: "status",

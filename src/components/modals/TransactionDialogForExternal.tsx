@@ -175,7 +175,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                     />
                 </FormControl> */}
                 <FormControl fullWidth margin="dense">
-                    <InputLabel id="account-select">Account Title</InputLabel>
+                    <InputLabel id="account-select">Fund Cluster</InputLabel>
                     <Select
                         labelId="account-select"
                         value={selectedAccount}
@@ -215,7 +215,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         ))}
                     </Select>
                 </FormControl>
-                <FormControl fullWidth margin="dense" >
+                {/* <FormControl fullWidth margin="dense" >
                     <TextField
                         label="Remarks"
                         type="text"
@@ -225,7 +225,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         disabled={!editable || formData?.status !== 'approved'}
                         fullWidth
                     />
-                </FormControl>
+                </FormControl> */}
                 <FormControl fullWidth margin="dense">
                     <TextField
                         label="Details"

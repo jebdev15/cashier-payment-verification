@@ -9,8 +9,8 @@ import { isAxiosError } from "axios";
 import { useAxios } from "@/hooks/useAxios";
 import SnackbarProvider from "@/components/Snackbar";
 import { theme } from "@/theme/theme";
+import { modeOfPaymentOptions } from "./modeOfPaymentOptions";
 
-const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
 const UploadReceipt = () => {
   const [{ accessToken }] = useCookies(["accessToken"]);
   const [image, setImage] = React.useState<string | null>(null);
@@ -185,7 +185,7 @@ const UploadReceipt = () => {
                   }}
                   label="Reference ID"
                   value={referenceId}
-                  disabled={loading.generateCode || referenceId !== ""}
+                  disabled
                 />
                 {referenceId === "" && (
                   <FormLabel>

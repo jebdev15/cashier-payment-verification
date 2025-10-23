@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, FormControl, TextField, Button, Typography, Tooltip, Select, SelectChangeEvent, MenuItem, InputLabel } from "@mui/material";
-import { HowToReg as RegisterIcon, Send as SendIcon, Person as PersonIcon, Badge as BadgeIcon, Email as EmailIcon, Password as PasswordIcon, AccountCircle as AccountCircleIcon, Business as BusinessIcon, MenuBook as MenuBookIcon, Stairs as StairsIcon, Work as WorkIcon } from "@mui/icons-material";
+import { HowToReg as RegisterIcon, Send as SendIcon, Person as PersonIcon, Badge as BadgeIcon, Email as EmailIcon, Password as PasswordIcon, AccountCircle as AccountCircleIcon, Business as BusinessIcon, MenuBook as MenuBookIcon, Phone as PhoneIcon, Stairs as StairsIcon, Work as WorkIcon } from "@mui/icons-material";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useNavigate } from "react-router";
 import { axiosInstance } from "../api/app";
@@ -21,6 +21,7 @@ type RegisterDataType = {
   firstName: string;
   middleName: string;
   lastName: string;
+  contactNumber: string;
   email: string;
   code: string;
   recaptchaToken: string;
@@ -38,6 +39,7 @@ const initialRegisterData: RegisterDataType = {
   firstName: "",
   middleName: "",
   lastName: "",
+  contactNumber: "",
   email: "",
   code: "",
   recaptchaToken: "",
@@ -86,6 +88,13 @@ const Register = () => {
     }
   };
 
+  // keep contact number digits-only and enforce maxlength on the value
+  const handleContactChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = event.target.value || "";
+    const digits = raw.replace(/\D/g, "").slice(0, 11); // allow up to 11 digits
+    setRegisterData((prev) => ({ ...prev, contactNumber: digits }));
+  };
+
   const handleSendEmail = async () => {
     if (!registerData.email) return alert("Email is required");
     setLoading((prev) => ({ ...prev, sendCode: true }));
@@ -127,6 +136,7 @@ const Register = () => {
       formData.append("firstName", registerData.firstName);
       formData.append("middleName", registerData.middleName);
       formData.append("lastName", registerData.lastName);
+      formData.append("contactNumber", registerData.contactNumber);
       formData.append("email", registerData.email);
       formData.append("code", registerData.code);
       formData.append("recaptchaToken", registerData.recaptchaToken);
@@ -462,6 +472,30 @@ const Register = () => {
           </FormControl>
         </>
       )}
+      {/* Contact Number */}
+      <FormControl fullWidth>
+        <TextField
+          size="small"
+          label="Contact Number"
+          name="contactNumber"
+          type="tel"
+          placeholder="09XXXXXXXXX"
+          value={registerData.contactNumber}
+          onChange={handleContactChange}
+          slotProps={{
+            htmlInput: { 
+              maxLength: 11,
+              inputMode: 'numeric',
+              pattern: '[0-9]*',
+            },
+            input: {
+              sx: { input: { px: 1 } },
+              startAdornment: <PhoneIcon color="primary" />,
+            },
+          }}
+          required
+        />
+      </FormControl>
       {/* Email */}
       <FormControl fullWidth>
         <TextField
@@ -469,6 +503,7 @@ const Register = () => {
           label="Email Address"
           name="email"
           value={registerData.email}
+          placeholder="johndoe@example.com"
           onChange={handleChange}
           slotProps={{
             input: {

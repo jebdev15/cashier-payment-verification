@@ -8,8 +8,8 @@ import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
 import { useAxios } from "@/hooks/useAxios";
 import SnackbarProvider from "@/components/Snackbar";
+import { modeOfPaymentOptions } from "./modeOfPaymentOptions";
 
-const modeOfPaymentOptions = ["Bank Deposit", "LBP LinkBiz", "LDDAP-ADA", "Bank Transfer", "GCash"];
 const UploadReceipt = () => {
   const [{ accessToken }] = useCookies(["accessToken"]);
   const [image, setImage] = React.useState<string | null>(null);

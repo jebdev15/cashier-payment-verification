@@ -158,49 +158,105 @@ const TransactionDialogForStudent: React.FC<Props> = ({
             setFilteredParticulars([]);
         }
     }, [selectedAccount]);
+    // React.useEffect(() => {
+    //     if (!amountTendered) {
+    //         setDistribution({ miscellaneous: 0, tuition: 0, totalPayable: 0, accountsPayable: 0 });
+    //         return;
+    //     }
+
+    //     let remaining = amountTendered;
+    //     let miscTotal = 0;
+    //     let totalMiscBalance = 0;
+
+    //     if (checkedItems.length > 0) {
+    //         // ✅ If misc are checked, handle them
+    //         for (const fee of miscellaneousFees) {
+    //             if (checkedItems.includes(fee.nature_of_collection_id.toString())) {
+    //                 totalMiscBalance += Number(fee.balance);
+    //             }
+    //         }
+
+    //         for (const fee of miscellaneousFees) {
+    //             if (checkedItems.includes(fee.nature_of_collection_id.toString())) {
+    //                 const payAmount = Math.min(remaining, Number(fee.balance));
+    //                 miscTotal += payAmount;
+    //                 remaining -= payAmount;
+    //             }
+    //         }
+    //     }
+
+    //     // ✅ Always apply excess (or full tendered if no misc checked) to tuition
+    //     const tuitionApplied = Math.min(remaining, Number(tuitionFee));
+    //     remaining -= tuitionApplied;
+
+    //     // ✅ Totals
+    //     const totalPayable = (checkedItems.length > 0 ? totalMiscBalance : 0) + Number(tuitionFee);
+    //     const accountsPayable = Math.max(totalPayable - amountTendered, 0);
+
+    //     setDistribution({
+    //         miscellaneous: miscTotal,
+    //         tuition: tuitionApplied,
+    //         totalPayable,
+    //         accountsPayable,
+    //     });
+
+    // }, [amountTendered, checkedItems, miscellaneousFees, tuitionFee]);
     React.useEffect(() => {
+        // ✅ Reset when there's no tendered amount
         if (!amountTendered) {
-            setDistribution({ miscellaneous: 0, tuition: 0, totalPayable: 0, accountsPayable: 0 });
+            setDistribution({
+                miscellaneous: 0,
+                tuition: 0,
+                totalPayable: 0,
+                accountsPayable: 0,
+            });
             return;
         }
 
         let remaining = amountTendered;
-        let miscTotal = 0;
-        let totalMiscBalance = 0;
 
-        if (checkedItems.length > 0) {
-            // ✅ If misc are checked, handle them
-            for (const fee of miscellaneousFees) {
-                if (checkedItems.includes(fee.nature_of_collection_id.toString())) {
-                    totalMiscBalance += Number(fee.balance);
-                }
-            }
+        // ✅ Step 1: Filter selected miscellaneous fees
+        const selectedMiscFees = miscellaneousFees.filter(fee =>
+            checkedItems.includes(fee.nature_of_collection_id.toString())
+        );
 
-            for (const fee of miscellaneousFees) {
-                if (checkedItems.includes(fee.nature_of_collection_id.toString())) {
-                    const payAmount = Math.min(remaining, Number(fee.balance));
-                    miscTotal += payAmount;
-                    remaining -= payAmount;
-                }
-            }
+        // ✅ Step 2: Compute total miscellaneous balance
+        // const totalMiscBalance = selectedMiscFees.reduce(
+        //     (sum, fee) => sum + Number(fee.balance),
+        //     0
+        // );
+
+        // ✅ Step 3: Apply payment to miscellaneous first
+        let miscPaid = 0;
+        for (const fee of selectedMiscFees) {
+            const balance = Number(fee.balance);
+            const payAmount = Math.min(remaining, balance);
+            miscPaid += payAmount;
+            remaining -= payAmount;
+
+            if (remaining <= 0) break;
         }
 
-        // ✅ Always apply excess (or full tendered if no misc checked) to tuition
-        const tuitionApplied = Math.min(remaining, Number(tuitionFee));
-        remaining -= tuitionApplied;
+        // ✅ Step 4: Apply remaining to tuition
+        const tuitionBalance = Number(tuitionFee);
+        const tuitionPaid = Math.min(remaining, tuitionBalance);
+        remaining -= tuitionPaid;
 
-        // ✅ Totals
-        const totalPayable = (checkedItems.length > 0 ? totalMiscBalance : 0) + Number(tuitionFee);
-        const accountsPayable = Math.max(totalPayable - amountTendered, 0);
+        // ✅ Step 5: Compute totals
+        // const totalPayable = totalMiscBalance + tuitionBalance;
+        // const accountsPayable = Math.max(amountTendered - amountToPay, 0);
+        const accountsPayable = amountTendered - amountToPay;
+
 
         setDistribution({
-            miscellaneous: miscTotal,
-            tuition: tuitionApplied,
-            totalPayable,
+            miscellaneous: miscPaid,
+            tuition: tuitionPaid,
+            totalPayable: 0,
             accountsPayable,
         });
 
     }, [amountTendered, checkedItems, miscellaneousFees, tuitionFee]);
+
     React.useEffect(() => {
         if (data) {
             setFormData(data);
@@ -213,8 +269,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
             setAmountTendered(parseFloat(formData.amount_tendered || "0"));
             setDistribution((prev) => ({
                 ...prev,
-                tuition: Number(formData.distribution?.tuition)|| 0,
-                miscellaneous: Number(formData.distribution?.miscellaneous)|| 0,
+                tuition: Number(formData.distribution?.tuition) || 0,
+                miscellaneous: Number(formData.distribution?.miscellaneous) || 0,
             }))
         }
     }, []);
@@ -501,8 +557,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                 <Typography variant="body1" fontWeight="bold">
                                     Accounts Payable
                                 </Typography>
-                                <Typography>Accounts Payable: {distribution.accountsPayable.toFixed(2)}</Typography>
-                                <Typography>Total Payable: {distribution.totalPayable.toFixed(2)}</Typography>
+                                <Typography>Amount: {distribution.accountsPayable.toFixed(2)}</Typography>
+                                {/* <Typography>Total Payable: {distribution.totalPayable.toFixed(2)}</Typography> */}
                             </Grid>
                         </Grid>
                     </Grid >
