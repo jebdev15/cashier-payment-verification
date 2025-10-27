@@ -19,11 +19,11 @@ const Layout = () => {
   const checkSession = () => {
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        if (!accessToken) return navigate("/sign-in", { replace: true });
+        if (!accessToken) return navigate("/admin/sign-in", { replace: true });
         const { isAuthenticated, isStudent, isAdministrator }: JWTDecodeDataType = jwtDecode(accessToken);
-        if (!isAuthenticated) return navigate("/sign-in", { replace: true });
-        if (!isAdministrator) return navigate("/sign-in", { replace: true });
-        if (isStudent) return navigate("/sign-in", { replace: true });
+        if (!isAuthenticated) return navigate("/admin/sign-in", { replace: true });
+        if (!isAdministrator) return navigate("/admin/sign-in", { replace: true });
+        if (isStudent) return navigate("/admin/sign-in", { replace: true });
         resolve(setLoading(false));
       }, 1000);
     });

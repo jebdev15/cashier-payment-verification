@@ -479,7 +479,6 @@ const Register = () => {
           label="Contact Number"
           name="contactNumber"
           type="tel"
-          placeholder="09XXXXXXXXX"
           value={registerData.contactNumber}
           onChange={handleContactChange}
           slotProps={{
@@ -503,7 +502,6 @@ const Register = () => {
           label="Email Address"
           name="email"
           value={registerData.email}
-          placeholder="johndoe@example.com"
           onChange={handleChange}
           slotProps={{
             input: {

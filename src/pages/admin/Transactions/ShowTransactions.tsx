@@ -38,11 +38,23 @@ const ShowTransactions = () => {
   });
   const columns = [
     { field: "_id", headerName: "No.", width: 100 },
-    { field: "fullName", headerName: "Full name", minWidth: 250, flex: 1 },
-    { field: "reference_id", headerName: "Reference ID", minWidth: 175, flex: 1 },
-    { field: "status", headerName: "Status", width: 125 },
+    { field: "userType", headerName: "User Type", minWidth: 50 },
+    { field: "payorName", headerName: "Payor Name", minWidth: 250, flex: 1 },
+    { field: "referenceId", headerName: "Reference ID", minWidth: 175, flex: 1 },
     {
-      field: "created_at",
+      field: "status", 
+      headerName: "Status", 
+      width: 125, 
+      renderCell: ({ row }: { row: TransactionDataType }) => {
+        return (
+          <Typography variant="caption" sx={{ color: row.status === "approved" ? "green" : row.status === "rejected" ? "red" : "orange" }}>
+            {row.status?.toUpperCase()}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: "createdAt",
       headerName: "Created At",
       width: 200,
       valueGetter: (value: string) => new Date(value).toLocaleString(),
@@ -68,69 +80,6 @@ const ShowTransactions = () => {
     },
   ];
 
-  const externalColumns = [
-    { field: "_id", headerName: "No.", width: 100 },
-    { field: "name_of_payor", headerName: "Name of Institution/Agency", minWidth: 250, flex: 1 },
-    { field: "reference_id", headerName: "Reference ID", minWidth: 160, flex: 1 },
-    { field: "status", headerName: "Status", width: 125 },
-    {
-      field: "created_at",
-      headerName: "Created At",
-      width: 200,
-      valueGetter: (value: string) => new Date(value).toLocaleString(),
-    },
-    {
-      field: "action",
-      headerName: "Action",
-      width: 125,
-      renderCell: ({ row }: { row: TransactionDataType }) => {
-        const handleClick = () => {
-          setOpen(true);
-          setSelectedRow(row);
-          setEditable(row.status === "pending");
-        };
-        return (
-          <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
-            <IconButton color="primary" onClick={handleClick}>
-              <SubjectIcon />
-            </IconButton>
-          </Tooltip>
-        );
-      },
-    },
-  ];
-
-  const employeeColumns = [
-    { field: "_id", headerName: "No.", width: 100 },
-    { field: "name_of_payor", headerName: "Name of Employee", minWidth: 250, flex: 1 },
-    { field: "reference_id", headerName: "Reference ID", minWidth: 160, flex: 1 },
-    { field: "status", headerName: "Status", width: 125 },
-    {
-      field: "created_at",
-      headerName: "Created At",
-      width: 200,
-      valueGetter: (value: string) => new Date(value).toLocaleString(),
-    },
-    {
-      field: "action",
-      headerName: "Action",
-      width: 125,
-      renderCell: ({ row }: { row: TransactionDataType }) => {
-        const handleClick = () => {
-          setOpen(true);
-          setSelectedRow(row);
-          setEditable(row.status === "pending");
-        };
-        return (
-          <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
-            <IconButton color="primary" onClick={handleClick}>
-              <SubjectIcon />
-            </IconButton>
-          </Tooltip>
-        );
-      },
-    },
-  ];
   const handleUpdateTransaction = async (updatedData: TransactionDataType) => {
     const confirmation = window.confirm("Are you sure you want to update this transaction?");
     if (!confirmation) return;
@@ -180,7 +129,7 @@ const ShowTransactions = () => {
   };
 
   const renderTransactionDialog = () => {
-    switch(selectedRow?.userType) {
+    switch (selectedRow?.userType) {
       case "Student":
         return <TransactionDialogForStudent open={open} onClose={() => setOpen(false)} data={selectedRow} entryModes={entryModes} onSave={handleUpdateTransaction} editable={editable} />;
       case "External":
@@ -221,9 +170,7 @@ const ShowTransactions = () => {
   }, [refresh]);
   if (error) return <Alert severity="error">{error}</Alert>;
 
-  const studentTransactions = data?.filter((item: TransactionDataType) => item.userType === "Student").map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
-  const externalTransactions = data?.filter((item: TransactionDataType) => item.userType === "External").map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
-  const employeeTransactions = data?.filter((item: TransactionDataType) => item.userType === "Employee").map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
+  const transactions = data?.map((item: TransactionDataType, index: number) => ({ ...item, _id: index + 1 })) || [];
 
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
@@ -237,7 +184,7 @@ const ShowTransactions = () => {
           </Typography>
           <Box sx={{ maxHeight: 400, overflow: "auto" }}>
             <DataGrid
-              rows={studentTransactions}
+              rows={transactions}
               columns={columns}
               loading={loading}
               disableRowSelectionOnClick
@@ -255,42 +202,8 @@ const ShowTransactions = () => {
             />
           </Box>
         </Box>
-
-        <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
-          <Typography variant="h6" mb={2}>
-            External Transactions
-          </Typography>
-          <Box sx={{ maxHeight: 400, overflow: "auto" }}>
-            <DataGrid
-              rows={externalTransactions}
-              columns={externalColumns}
-              loading={loading}
-              disableRowSelectionOnClick
-              sx={{
-                borderRadius: 2,
-              }}
-            />
-          </Box>
-        </Box>
-
-        <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
-          <Typography variant="h6" mb={2}>
-            Employee Transactions
-          </Typography>
-          <Box sx={{ maxHeight: 400, overflow: "auto" }}>
-            <DataGrid
-              rows={employeeTransactions}
-              columns={employeeColumns}
-              loading={loading}
-              disableRowSelectionOnClick
-              sx={{
-                borderRadius: 2,
-              }}
-            />
-          </Box>
-        </Box>
       </Box>
-      {open && renderTransactionDialog() }
+      {open && renderTransactionDialog()}
     </React.Suspense>
   );
 };

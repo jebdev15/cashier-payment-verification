@@ -88,7 +88,7 @@ export const routes = createBrowserRouter([
         ],
     },
     {
-        path: "/sign-in",
+        path: "/admin/sign-in",
         element: <AdminLogin />,
     },
     {
