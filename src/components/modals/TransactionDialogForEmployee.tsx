@@ -207,17 +207,6 @@ const TransactionModal: React.FC<Props> = ({
                         ))}
                     </Select>
                 </FormControl>
-                {/* <FormControl fullWidth margin="dense" >
-                    <TextField
-                        label="Remarks"
-                        type="text"
-                        name="remarks"
-                        value={remarks}
-                        onChange={(e) => setRemarks(e.target.value)}
-                        disabled={!editable || formData?.status !== 'approved'}
-                        fullWidth
-                    />
-                </FormControl> */}
                 <FormControl fullWidth margin="dense">
                     <TextField
                         label="Details"
