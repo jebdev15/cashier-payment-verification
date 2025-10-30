@@ -107,7 +107,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     React.useEffect(() => {
         const fetchStudentMiscellaneousFees = async () => {
             try {
-                const response = await axiosInstance.get(`/api/transactions/miscellaneous-fees/${data?.student_account_id}`);
+                const response = await axiosInstance.get(`/api/transactions/miscellaneous-fees/${data?.studentAccountId}`);
                 if (response.data) {
                     // Process the fees data as needed
                     console.log("Fees data:", response.data);
@@ -130,7 +130,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
         };
         const updateFormDataIfApproved = () => {
             if (!editable && formData?.status === 'approved') {
-                setSelectedAccount(formData.account_type || "");
+                setSelectedAccount(formData.accountType || "");
                 setDetails(formData.details || "");
                 setRemarks(formData.remarks || "");
                 setAmountTendered(parseFloat(formData.amount_tendered || "0"));
@@ -262,7 +262,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
             setFormData(data);
         }
         if (!editable && formData?.status === 'approved') {
-            setSelectedAccount(formData.account_type || "");
+            setSelectedAccount(formData.accountType || "");
             setDetails(formData.details || "");
             setRemarks(formData.remarks || "");
             setAmountToPay(parseFloat(formData.amount_to_pay || "0"));
@@ -290,7 +290,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         <Divider sx={{ mb: 2 }} />
                         <TextField
                             label="Student Account ID"
-                            value={formData?.student_account_id || ""}
+                            value={formData?.studentAccountId || ""}
                             onChange={handleChange}
                             type="number"
                             fullWidth
@@ -574,7 +574,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         <Divider sx={{ mb: 2 }} />
                         <TextField
                             label="Student Account ID"
-                            value={formData?.student_account_id || ""}
+                            value={formData?.studentAccountId || ""}
                             onChange={handleChange}
                             type="number"
                             fullWidth

@@ -1,6 +1,6 @@
 export type TransactionDataType = {
     id?: string;
-    student_account_id?: string;
+    studentAccountId?: string;
     reference_id?: string;
     reference_number?: string;
     e_or?: string;
@@ -25,7 +25,7 @@ export type TransactionDataType = {
     userType?: string;
     checkedItems?: string[];
     entryMode?: string;
-    account_type?: string;
+    accountType?: string;
     details?: string;
     remarks?: string;
     amountToPay?: number;

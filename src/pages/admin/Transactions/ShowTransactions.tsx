@@ -32,7 +32,7 @@ const ShowTransactions = () => {
 
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  
+
   // const [tabValue, setTabValue] = React.useState(0);
   // const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
   //   setTabValue(newValue);
@@ -93,8 +93,8 @@ const ShowTransactions = () => {
               row.status === "approved"
                 ? "green"
                 : row.status === "rejected"
-                ? "red"
-                : "orange",
+                  ? "red"
+                  : "orange",
           }}
         >
           {row.status?.toUpperCase()}
@@ -256,9 +256,8 @@ const ShowTransactions = () => {
       >
         Transactions
       </Typography>
-      <Box sx={{ display: "grid", gap: 2 }}>
-        <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2 }}>
-          { /* Tabs */ }
+        <Box sx={{ display: "grid", gap: 2, bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2 }}>
+          { /* Tabs */}
           {/* <Tabs
             value={tabValue}  // Current tab value
             onChange={handleTabChange}  // Function to handle tab change
@@ -273,7 +272,7 @@ const ShowTransactions = () => {
           </Tabs> */}
 
           {/* Table */}
-          <Box sx={{ height: 420 }}>
+          <Box sx={{ minHeight: 420, overflow: "auto" }}>
             <DataGrid
               rows={transactions}
               columns={columns}
@@ -296,7 +295,6 @@ const ShowTransactions = () => {
             />
           </Box>
         </Box>
-      </Box>
       {open && renderTransactionDialog()}
     </React.Suspense>
   );
