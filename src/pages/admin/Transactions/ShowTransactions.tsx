@@ -43,7 +43,7 @@ const ShowTransactions = () => {
     setError(null);
     try {
       const response = await axiosInstanceWithAuthorization(cookie.accessToken).get(
-        `/api/transactions?offset=${offset}&limit=${limit}`
+        `/api/admin-transactions?offset=${offset}&limit=${limit}`
       );
 
       if (response.status === 200) {

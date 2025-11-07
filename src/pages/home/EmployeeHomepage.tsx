@@ -36,7 +36,7 @@ const ExternalHomePage = () => {
                 </Typography>
               </CardContent>
               <CardActions sx={{ p: 0, pt: 2 }}>
-                <Button variant="outlined" onClick={() => navigate("/home/external/upload-receipt")}>
+                <Button variant="outlined" onClick={() => navigate("/home/employee/upload-receipt")}>
                   Upload Now
                 </Button>
               </CardActions>
