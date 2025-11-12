@@ -160,6 +160,14 @@ const UploadReceipt = () => {
     }
   };
 
+  // Compute dynamic label for reference field based on mode of payment
+  const referenceLabel = React.useMemo(() => {
+    const m = (modeOfPayment || "").toLowerCase();
+    if (m.includes("lddap") || m.includes("lddap-ada")) return "LDDAP-ADA No.";
+    if (m.includes("check") || m.includes("direct bank deposit - check")) return "Check Number";
+    return "Reference Number";
+  }, [modeOfPayment]);
+
   return (
     <>
       <Typography
@@ -279,12 +287,13 @@ const UploadReceipt = () => {
                   </Select>
                 </FormControl>
 
+                {/* Reference field uses dynamic label but keeps same referenceNumber state */}
                 <TextField
-                  label="Reference Number"
+                  label={referenceLabel}
                   fullWidth
                   value={referenceNumber}
                   onChange={(e) => setReferenceNumber(e.target.value)}
-                  inputProps={{ maxLength: 64 }}
+                  slotProps={{ htmlInput: { maxLength: 64 } }}
                 />
 
                 <TextField
@@ -301,7 +310,12 @@ const UploadReceipt = () => {
                   fullWidth
                   onChange={handleChangeFile}
                   inputRef={fileInputRef}
-                  inputProps={{ accept: "image/*" }}
+                  slotProps={{
+                    htmlInput: {
+                      accept: "image/*"
+                    }
+                  }}
+                  // inputProps={{ accept: "image/*" }}
                 />
 
                 <Button
@@ -329,7 +343,7 @@ const UploadReceipt = () => {
             </Grid>
 
             {/* RIGHT PANEL - Image Preview */}
-            <Grid item xs={12} md={8}>
+            <Grid size={{ xs: 12, md: 8 }}>
               <Box
                 sx={{
                   height: { xs: 220, sm: 320 },
