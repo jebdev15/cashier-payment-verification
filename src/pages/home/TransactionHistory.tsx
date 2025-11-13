@@ -72,9 +72,9 @@ const TransactionHistory = () => {
       </Typography>
       <Box sx={{ display: "grid", gap: 2 }}>
         <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
-          <Typography variant="h6" mb={2}>
+          {/* <Typography variant="h6" mb={2}>
             Transactions
-          </Typography>
+          </Typography> */}
           <Box sx={{ maxHeight: "calc(100dvh - 225px)", overflow: "auto" }}>
             <DataGrid
               rows={rows}

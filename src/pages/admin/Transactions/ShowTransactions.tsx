@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, IconButton, Tooltip, Typography, Pagination } from "@mui/material";
+import { Alert, Box, IconButton, Tooltip, Typography, Pagination, Tabs, Tab } from "@mui/material";
 import { Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { TransactionDataType, TransactionModalEntryModeType } from "./type";
@@ -33,23 +33,27 @@ const ShowTransactions = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // const [tabValue, setTabValue] = React.useState(0);
-  // const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-  //   setTabValue(newValue);
-  // }
+  // ✅ Tabs: default to "pending"
+  const [tabValue, setTabValue] = React.useState<string>("pending");
+  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+    setTabValue(newValue);
+    setPage(1); // reset pagination on tab switch
+  };
+
   // ✅ Fetch transactions (server-side pagination)
   const fetchTransactions = React.useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      const statusParam = `&status=${encodeURIComponent(tabValue)}`;
       const response = await axiosInstanceWithAuthorization(cookie.accessToken).get(
-        `/api/admin-transactions?offset=${offset}&limit=${limit}`
+        `/api/admin-transactions?offset=${offset}&limit=${limit}${statusParam}`
       );
 
       if (response.status === 200) {
         const resData = response.data;
         setData(resData.data || resData); // Handle both array or {data:[]} shapes
-        setTotalCount(resData[0].totalCount || resData.total || resData.length || 0);
+        setTotalCount(resData.length > 0 ? resData[0].totalCount : 0);
       }
     } catch (err: any) {
       console.error("Error fetching transactions:", err);
@@ -57,7 +61,7 @@ const ShowTransactions = () => {
     } finally {
       setLoading(false);
     }
-  }, [cookie.accessToken, offset, limit]);
+  }, [cookie.accessToken, offset, limit, tabValue]);
 
   // ✅ Fetch entry modes
   const fetchEntryModes = React.useCallback(async () => {
@@ -118,7 +122,7 @@ const ShowTransactions = () => {
           setEditable(row.status === "pending");
         };
         return (
-          <Tooltip title={row.status === "approved" ? "View" : "Edit"}>
+          <Tooltip title={row.status === "pending" ? "Edit" : "View"}>
             <IconButton color="primary" onClick={handleClick}>
               <SubjectIcon />
             </IconButton>
@@ -258,7 +262,7 @@ const ShowTransactions = () => {
       </Typography>
         <Box sx={{ display: "grid", gap: 2, bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2 }}>
           { /* Tabs */}
-          {/* <Tabs
+          <Tabs
             value={tabValue}  // Current tab value
             onChange={handleTabChange}  // Function to handle tab change
             indicatorColor="primary"
@@ -269,7 +273,7 @@ const ShowTransactions = () => {
             <Tab label="Pending" value="pending" />
             <Tab label="Approved" value="approved" />
             <Tab label="Rejected" value="rejected" />
-          </Tabs> */}
+          </Tabs>
 
           {/* Table */}
           <Box sx={{ minHeight: 420, overflow: "auto" }}>

@@ -18,13 +18,13 @@ export const sideNav = [
         icon: FileUploadIcon
     },
     {
-        path: "/external/upload-receipt",
+        path: "/upload-receipt",
         label: "Upload Receipt",
         abbreviation: "ur-ex",
         icon: FileUploadIcon
     },
     {
-        path: "/employee/upload-receipt",
+        path: "/upload-receipt",
         label: "Upload Receipt",
         abbreviation: "ur-emp",
         icon: FileUploadIcon

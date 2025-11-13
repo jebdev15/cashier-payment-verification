@@ -8,7 +8,7 @@ import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import CustomCircularProgress from "@/components/CustomCircularProgress";
 
-const ShowAccounts = () => {
+const AdminAccounts = () => {
   const navigate = useNavigate();
   const [cookie] = useCookies(["accessToken"]);
 
@@ -27,7 +27,7 @@ const ShowAccounts = () => {
   const [tabValue, setTabValue] = React.useState<string>("pending");
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setTabValue(newValue);
-    setPage(1); // reset when tab changes
+    setPage(1);
   };
 
   // Fetch accounts using offset, limit, and status (tab)
@@ -37,12 +37,36 @@ const ShowAccounts = () => {
     try {
       const statusParam = `&status=${encodeURIComponent(tabValue)}`;
       const res = await axiosInstanceWithAuthorization(cookie.accessToken).get(
-        `/api/users?offset=${offset}&limit=${limit}${statusParam}`
+        `/api/admin-users?offset=${offset}&limit=${limit}${statusParam}`
       );
+
       if (res.status === 200) {
         const resData = res.data;
-        setData(resData?.data || resData);
-        setTotalCount(resData?.[0]?.totalCount || resData.total || (Array.isArray(resData) ? resData.length : 0) || 0);
+
+        // Normalize response to an array and compute total count robustly
+        let list: AccountDataType[] = [];
+        let total = 0;
+
+        if (Array.isArray(resData)) {
+          list = resData;
+          total = resData.length;
+        } else if (Array.isArray(resData.data)) {
+          list = resData.data;
+          total = Number(resData.total ?? resData.data?.[0]?.totalCount ?? resData.data.length ?? 0);
+        } else if (Array.isArray(resData.data?.rows)) {
+          list = resData.data.rows;
+          total = Number(resData.total ?? resData.data.total ?? resData.data?.rows?.length ?? 0);
+        } else if (Array.isArray(resData.rows)) {
+          list = resData.rows;
+          total = Number(resData.total ?? resData.rows?.length ?? 0);
+        } else {
+          // Fallback: attempt to treat any object with a single result slot as array
+          list = [];
+          total = Number(resData.total ?? 0);
+        }
+
+        setData(list);
+        setTotalCount(total);
       }
     } catch (e: any) {
       setError(e?.message || "Failed to load accounts");
@@ -102,11 +126,10 @@ const ShowAccounts = () => {
   return (
     <React.Suspense fallback={<CustomCircularProgress />}>
       <Typography variant="h6" color="textSecondary" letterSpacing={3} textTransform={"uppercase"} mb={1}>
-        User Account Management
+        Admin User Accounts
       </Typography>
 
       <Box sx={{ display: "grid", gap: 2 }}>
-        {/* Tabs */}
         <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
           <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary" centered>
             <Tab label="All" value="all" />
@@ -115,7 +138,6 @@ const ShowAccounts = () => {
             <Tab label="Rejected" value="rejected" />
           </Tabs>
 
-          {/* Table */}
           <Box sx={{ maxHeight: 400, mt: 2 }}>
             <DataGrid
               columns={columns}
@@ -127,7 +149,6 @@ const ShowAccounts = () => {
             />
           </Box>
 
-          {/* Custom Pagination */}
           <Box display="flex" justifyContent="center" mt={2}>
             <Pagination
               count={totalPages}
@@ -143,4 +164,4 @@ const ShowAccounts = () => {
   );
 };
 
-export default React.memo(ShowAccounts);
+export default React.memo(AdminAccounts);

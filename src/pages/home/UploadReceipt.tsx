@@ -1,252 +1,383 @@
+// ...existing code...
 import React from "react";
-import { Alert, Button, FormControl, FormLabel, Grid, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
-import { UploadFile as UploadFileIcon } from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  OutlinedInput,
+  Chip,
+  SelectChangeEvent,
+  Tooltip,
+  Grid,
+  Stack,
+} from "@mui/material";
 import imageCompression from "browser-image-compression";
-import { axiosInstanceWithAuthorization } from "../../api/app";
-import { base64ToBlob } from "../../utils/base64ToBlog";
+import { axiosInstanceWithAuthorization } from "@/api/app";
+import { base64ToBlob } from "@/utils/base64ToBlog";
 import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
 import { useAxios } from "@/hooks/useAxios";
 import SnackbarProvider from "@/components/Snackbar";
+import { theme } from "@/theme/theme";
 import { modeOfPaymentOptions } from "./modeOfPaymentOptions";
+// ...existing code...
+
+type ParticularType = {
+  account_title: string;
+  collection_type_name: string;
+  implementing_unit_title: string;
+  item_abbreviation: string;
+  item_title: string;
+  nature_of_collection_id: number;
+  nature_of_collection_type: number;
+};
 
 const UploadReceipt = () => {
   const [{ accessToken }] = useCookies(["accessToken"]);
   const [image, setImage] = React.useState<string | null>(null);
   const [imageName, setImageName] = React.useState<string | undefined>(undefined);
   const [error, setError] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState<{ upload: boolean; log: boolean }>({ upload: false, log: false });
+  const [loading, setLoading] = React.useState<{ upload: boolean }>({ upload: false });
   const [referenceId, setReferenceId] = React.useState<string>("");
   const [referenceNumber, setReferenceNumber] = React.useState<string>("");
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("");
   const [remarks, setRemarks] = React.useState<string>("");
-  const [snackbar, setSnackbar] = React.useState<{ open: boolean; message: string; severity: "error" | "warning" | "info" | "success" }>({ open: false, message: "", severity: "info" });
+  const [selectedParticulars, setSelectedParticulars] = React.useState<number[]>([]);
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    message: "",
+    severity: "info" as "error" | "warning" | "info" | "success",
+  });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const { data: referenceData } = useAxios({
-    url: "/api/transactions/valid-reference-id",
-    method: "GET",
+
+  const { data: particularsData } = useAxios<ParticularType[]>({
+    url: "/api/particulars",
     authorized: true,
   });
+
   const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       try {
-        // Validate initial file size
         if (file.size > 2 * 1024 * 1024) {
           setError("File size exceeds 2 MB. Compressing...");
         } else {
           setError(null);
         }
 
-        // Compress image
         const compressedFile = await imageCompression(file, {
-          maxSizeMB: 2, // Maximum size in MB
-          maxWidthOrHeight: 1920, // Optional: maximum width or height
-          useWebWorker: true, // Improves compression speed
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
         });
 
-        // Read compressed image
         const reader = new FileReader();
         reader.onload = () => {
           setImage(reader.result as string);
-          // setImage(URL.createObjectURL(file));
-          setError(null); // Clear errors after successful upload
+          setError(null);
         };
         reader.readAsDataURL(compressedFile);
         setImageName(file.name);
       } catch (err) {
-        console.log(err);
+        console.error(err);
         setError("Failed to process the image. Please try again.");
       }
     }
   };
+
+  const handleParticularsChange = (event: SelectChangeEvent<number[]>) => {
+    const value = event.target.value;
+    setSelectedParticulars(typeof value === "string" ? [] : value);
+  };
+
+  const getParticularLabel = (id: number): string => {
+    const particular = particularsData?.find((p) => p.nature_of_collection_id === id);
+    return particular
+      ? `${particular.item_title} (${particular.item_abbreviation})`
+      : String(id);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading((prevState) => ({ ...prevState, upload: true, log: true }));
+    setLoading({ upload: true });
 
-    const formData = new FormData();
+    if (!image) {
+      alert("No image selected. Please upload a receipt before submitting.");
+      setLoading({ upload: false });
+      return;
+    }
 
-    // Check if image exists and is in base64 format
-    if (image) {
-      // Convert the base64 image to a Blob (if necessary)
-      const blob = base64ToBlob(image);
-      // Append the Blob or File directly (no need to convert if it's already a File)
-      formData.append("receipt", blob || image, imageName); // Use the file object directly if available
-      formData.append("remarks", remarks); // Use the file object directly if available
-      formData.append("referenceId", referenceId);
-      formData.append("referenceNumber", referenceNumber);
-      formData.append("mode_of_payment", modeOfPayment);
-    } else {
-      alert("No image to upload. Please select a file before proceeding.");
-      setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
+    if (selectedParticulars.length === 0) {
+      alert("Please select at least one Particular.");
+      setLoading({ upload: false });
       return;
     }
 
     try {
-      const { data, status } = await axiosInstanceWithAuthorization(accessToken).post("/api/upload/receipts", formData, { headers: { "Content-Type": "multipart/form-data" } });
-      setSnackbar((prev) => ({ ...prev, message: data.message, severity: "success" }));
+      const blob = base64ToBlob(image);
+      const formData = new FormData();
+      formData.append("receipt", blob || image, imageName);
+      formData.append("remarks", remarks);
+      formData.append("referenceId", referenceId);
+      formData.append("referenceNumber", referenceNumber);
+      formData.append("modeOfPayment", modeOfPayment);
+      formData.append("particulars", JSON.stringify(selectedParticulars));
+
+      const { data, status } = await axiosInstanceWithAuthorization(accessToken).post(
+        "/api/upload/receipts",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
       if (status === 200) {
+        setSnackbar({ open: true, message: data.message, severity: "success" });
         setReferenceId("");
         setReferenceNumber("");
         setModeOfPayment("");
         setRemarks("");
-        setImage("");
-        setImageName("");
-        // after successful upload:
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ""; // clears file
-        }
+        setSelectedParticulars([]);
+        setImage(null);
+        setImageName(undefined);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     } catch (error) {
       console.error("Error uploading file:", error);
       if (isAxiosError(error)) {
-        setSnackbar((prev) => ({ ...prev, message: error.response?.data.message || "Something went wrong", severity: "error" }));
+        setSnackbar({
+          open: true,
+          message: error.response?.data.message || "Something went wrong",
+          severity: "error",
+        });
       }
     } finally {
-      setSnackbar((prev) => ({ ...prev, open: true }));
-      setLoading((prevState) => ({ ...prevState, upload: false, log: false }));
+      setLoading({ upload: false });
     }
   };
-  React.useEffect(() => {
-    setReferenceId(referenceData?.reference_id);
-  }, [referenceData]);
+
+  // Compute dynamic label for reference field based on mode of payment
+  const referenceLabel = React.useMemo(() => {
+    const m = (modeOfPayment || "").toLowerCase();
+    if (m.includes("lddap") || m.includes("lddap-ada")) return "LDDAP-ADA No.";
+    if (m.includes("check") || m.includes("direct bank deposit - check")) return "Check Number";
+    return "Reference Number";
+  }, [modeOfPayment]);
+
   return (
     <>
-      <Typography variant="h6" color="textSecondary" letterSpacing={3} textTransform={"uppercase"} mb={1}>
-        Upload Receipt
+      <Typography
+        variant="h6"
+        color="textSecondary"
+        letterSpacing={3}
+        textTransform="uppercase"
+        mb={1}
+      >
+        Upload Receipt Form
       </Typography>
-      <Grid container spacing={4} sx={{ height: "100%" }} component="form" onSubmit={handleSubmit}>
-        <Grid container spacing={2} direction="column" size={{ xs: 12, lg: 4 }}>
 
-          <Grid size={{ xs: 12 }}>
-            <FormControl fullWidth>
-              <TextField
-                slotProps={{
-                  input: {
-                    sx: { borderRadius: 2 },
-                  },
+      <Box
+        sx={{
+          bgcolor: "background.paper",
+          borderRadius: 4,
+          boxShadow: 2,
+          p: 2,
+          flexGrow: 1,
+        }}
+      >
+        {/* Use Grid for responsive layout: stack on xs, columns on md+ */}
+        <Box component="form" onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            {/* LEFT PANEL - Form */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Stack spacing={2}>
+                {/* <Typography variant="h6">Upload Receipt </Typography> */}
+
+                <FormControl fullWidth>
+                  <InputLabel>Particulars</InputLabel>
+                  <Select
+                    multiple
+                    value={selectedParticulars}
+                    onChange={handleParticularsChange}
+                    input={<OutlinedInput label="Particulars" />}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                        {selected.map((id) => {
+                          const label = getParticularLabel(id);
+                          return (
+                            <Tooltip key={id} title={label}>
+                              <Chip
+                                label={label}
+                                size="small"
+                                sx={{
+                                  maxWidth: { xs: 120, sm: 160 },
+                                  "& .MuiChip-label": {
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "normal !important",
+                                  },
+                                }}
+                              />
+                            </Tooltip>
+                          );
+                        })}
+                      </Box>
+                    )}
+                    MenuProps={{
+                      PaperProps: { style: { maxHeight: 320 } },
+                    }}
+                    inputProps={{
+                      sx: {
+                        whiteSpace: "normal !important",
+                      },
+                    }}
+                    sx={{ borderRadius: 3 }}
+                  >
+                    {(particularsData || []).map((particular) => (
+                      <MenuItem
+                        key={particular.nature_of_collection_id}
+                        value={particular.nature_of_collection_id}
+                        sx={{
+                          alignItems: "flex-start",
+                          py: 1,
+                          whiteSpace: "normal !important",
+                        }}
+                      >
+                        <Box sx={{ width: "100%" }}>
+                          <Tooltip title={`${particular.item_title} • ${particular.account_title}`}>
+                            <Typography
+                              variant="body2"
+                              fontWeight="medium"
+                              // noWrap
+                              sx={{ maxWidth: "100%", display: "block" }}
+                            >
+                              {particular.item_title}
+                            </Typography>
+                          </Tooltip>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: "block" }}
+                          >
+                            {particular.collection_type_name} • {particular.account_title}
+                          </Typography>
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth>
+                  <InputLabel>Mode of Payment</InputLabel>
+                  <Select
+                    value={modeOfPayment}
+                    label="Mode of Payment"
+                    onChange={(e) => setModeOfPayment(e.target.value)}
+                    sx={{ borderRadius: 3 }}
+                  >
+                    {modeOfPaymentOptions.map((option, index) => (
+                      <MenuItem key={index} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {/* Reference field uses dynamic label but keeps same referenceNumber state */}
+                <TextField
+                  label={referenceLabel}
+                  fullWidth
+                  value={referenceNumber}
+                  onChange={(e) => setReferenceNumber(e.target.value)}
+                  slotProps={{ htmlInput: { maxLength: 64 } }}
+                />
+
+                <TextField
+                  label="Remarks"
+                  fullWidth
+                  multiline
+                  minRows={2}
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                />
+
+                <TextField
+                  type="file"
+                  fullWidth
+                  onChange={handleChangeFile}
+                  inputRef={fileInputRef}
+                  slotProps={{
+                    htmlInput: {
+                      accept: "image/*"
+                    }
+                  }}
+                  // inputProps={{ accept: "image/*" }}
+                />
+
+                <Button
+                  variant="contained"
+                  type="submit"
+                  fullWidth
+                  disabled={!image || loading.upload}
+                  sx={{
+                    borderRadius: 3,
+                    bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
+                    "&:hover": {
+                      bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 100%, transparent)`,
+                    },
+                  }}
+                >
+                  {loading.upload ? "Uploading..." : "Upload File"}
+                </Button>
+
+                {error && (
+                  <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
+                    {error}
+                  </Alert>
+                )}
+              </Stack>
+            </Grid>
+
+            {/* RIGHT PANEL - Image Preview */}
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Box
+                sx={{
+                  height: { xs: 320, sm: 460 },
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  bgcolor: "#f7f7f7",
+                  borderRadius: 3,
+                  p: 1,
+                  overflow: "hidden",
                 }}
-                label="Reference ID"
-                value={referenceId}
-                required
-                disabled
-              />
-              {referenceId === "" && (
-                <FormLabel>
-                  <Alert severity="info">Please generate a reference ID first before uploading a receipt.</Alert>
-                </FormLabel>
-              )}
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Mode of Payment</InputLabel>
-              <Select
-                sx={{ borderRadius: 2 }}
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={modeOfPayment}
-                label="Mode of Payment"
-                onChange={(e) => setModeOfPayment(e.target.value)}
-                required
               >
-                {modeOfPaymentOptions.map((option, index) => (
-                  <MenuItem key={++index} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                {image ? (
+                  <img
+                    src={image}
+                    alt="Preview"
+                    style={{
+                      objectFit: "contain",
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: 8,
+                    }}
+                  />
+                ) : (
+                  <Typography color="text.secondary" textAlign="center" sx={{ px: 2 }}>
+                    Image Preview
+                  </Typography>
+                )}
+              </Box>
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12 }}>
-            <FormControl fullWidth>
-              <TextField
-                slotProps={{
-                  input: {
-                    sx: { borderRadius: 2 },
-                  },
-                }}
-                onChange={(e) => setReferenceNumber(e.target.value)}
-                required
-                label="Reference Number"
-                value={referenceNumber}
-              />
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <TextField
-              fullWidth
-              type="file"
-              onChange={handleChangeFile}
-              inputRef={fileInputRef}
-              slotProps={{
-                htmlInput: { accept: "image/*" },
-                input: {
-                  sx: { borderRadius: 2 },
-                },
-              }}
-              required
-            />
-          </Grid>
-          <Grid size={{ xs: 12 }} sx={{ display: "none" }}>
-            <FormControl fullWidth>
-              <TextField
-                slotProps={{
-                  input: {
-                    sx: { borderRadius: 2 },
-                  },
-                }}
-                label="Remarks"
-                value={remarks}
-                multiline
-                rows={4}
-                onChange={(e) => setRemarks(e.target.value)}
-              />
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <Button sx={{ borderRadius: 2 }} variant="contained" startIcon={<UploadFileIcon />} disabled={!image || loading.upload || !referenceId} type="submit" fullWidth size="large">
-              {loading.upload ? "Uploading..." : "Upload File"}
-            </Button>
-            {error && (
-              <Alert severity="warning" sx={{ mb: 2, width: "100%" }}>
-                {error}
-              </Alert>
-            )}
-          </Grid>
-        </Grid>
-        <Grid size={{ xs: 12, lg: 8 }} sx={{ backgroundColor: "#f0f0f0", borderRadius: 2, aspectRatio: "1/1", overflow: "hidden", border: "1px dashed rgba(0, 0, 0, 0.23)" }}>
-          {image ? (
-            <img
-              src={image}
-              alt="Preview"
-              height={400}
-              width={400}
-              loading="lazy"
-              style={{
-                objectFit: "contain",
-                objectPosition: "center",
-                width: "100%",
-                height: "100%",
-                padding: "8px",
-              }}
-            />
-          ) : (
-            <Typography
-              variant="h6"
-              sx={{
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "text.secondary",
-              }}
-            >
-              Image Preview
-            </Typography>
-          )}
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
+
       <SnackbarProvider
         open={snackbar.open}
         message={snackbar.message}

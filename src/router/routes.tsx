@@ -22,6 +22,8 @@ const AdminLayout = React.lazy(() => import("../pages/admin/Layout"));
 const Dashboard = React.lazy(() => import("../pages/admin/Dashboard"));
 const ShowAccounts = React.lazy(() => import("../pages/admin/Accounts/ShowAccounts"));
 const EditAccount = React.lazy(() => import("../pages/admin/Accounts/EditAccount"));
+const ShowAdminAccounts = React.lazy(() => import("../pages/admin/Accounts/AdminAccounts"));
+// const EditAdminAccount = React.lazy(() => import("../pages/admin/Accounts/EditAdminAccount"));
 const ShowTransactions = React.lazy(() => import("../pages/admin/Transactions/ShowTransactions"));
 
 export const routes = createBrowserRouter([
@@ -101,6 +103,20 @@ export const routes = createBrowserRouter([
             {
                 path: "dashboard",
                 element: <Dashboard />,
+            },
+            {
+                path: "admin-users",
+                errorElement: <RouteErrorElement />,
+                children: [
+                    {
+                        index: true,
+                        element: <ShowAdminAccounts />,
+                    },
+                    // {
+                    //     path: ":id",
+                    //     element: <EditAccount />,
+                    // },
+                ]
             },
             {
                 path: "accounts",

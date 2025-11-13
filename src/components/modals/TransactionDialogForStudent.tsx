@@ -386,23 +386,6 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         </Typography>
                         <Divider sx={{ mb: 2 }} />
                         <FormControl fullWidth sx={{ mb: 2 }}>
-                            <InputLabel id="entryMode-select">Entry Mode</InputLabel>
-                            <Select
-                                labelId="entryMode-select"
-                                value={entryMode}
-                                onChange={(e) => {
-                                    setEntryMode(e.target.value);
-                                }}
-                                label="Entry Mode"
-                                margin="dense"
-                                disabled={!editable || formData?.status !== 'approved'}
-                            >
-                                {entryModes && entryModes.map((mode) => (
-                                    <MenuItem key={mode.entry_mode_id} value={mode.entry_mode_id}>{mode.entry_mode_title}</MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <FormControl fullWidth sx={{ mb: 2 }}>
                             <InputLabel id="account-select">Account Title</InputLabel>
                             <Select
                                 labelId="account-select"
@@ -469,7 +452,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         </FormControl>
                         <TextField
                             label="Amount"
-                            name="amount_to_pay"
+                            name="amountToPay"
                             placeholder="0.00"
                             value={amountToPay}
                             onChange={(e) => setAmountToPay(parseFloat(Number(e.target.value).toFixed(2)))}
@@ -480,7 +463,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Tendered Amount"
-                            name="tendered_amount"
+                            name="tenderedAmount"
                             placeholder="0.00"
                             type="number"
                             value={amountTendered}
