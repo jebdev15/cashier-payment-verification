@@ -15,3 +15,11 @@ export type AccountDataType = {
     employee_type?: string;
     id_number?: string;
 }
+
+export type AdminAccountDataType = {
+    id: number;
+    userId: number;
+    email: string;
+    accessLevel: number;
+    status: number;
+}

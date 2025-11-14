@@ -63,22 +63,9 @@ const ShowTransactions = () => {
     }
   }, [cookie.accessToken, offset, limit, tabValue]);
 
-  // ✅ Fetch entry modes
-  const fetchEntryModes = React.useCallback(async () => {
-    try {
-      const response = await axiosInstanceWithAuthorization(cookie.accessToken).get(
-        "/api/transactions/entry-mode"
-      );
-      if (response.status === 200) setEntryModes(response.data);
-    } catch (error) {
-      console.error("Error fetching entry modes:", error);
-    }
-  }, [cookie.accessToken]);
-
   React.useEffect(() => {
     fetchTransactions();
-    fetchEntryModes();
-  }, [fetchTransactions, fetchEntryModes, refresh]);
+  }, [fetchTransactions, refresh]);
 
   const columns = [
     { field: "_id", headerName: "No.", width: 100 },
@@ -207,7 +194,6 @@ const ShowTransactions = () => {
             open={open}
             onClose={() => setOpen(false)}
             data={selectedRow}
-            entryModes={entryModes}
             onSave={handleUpdateTransaction}
             editable={editable}
           />
@@ -218,7 +204,6 @@ const ShowTransactions = () => {
             open={open}
             onClose={() => setOpen(false)}
             data={selectedRow}
-            entryModes={entryModes}
             onSave={handleUpdateTransaction}
             editable={editable}
           />
@@ -229,7 +214,6 @@ const ShowTransactions = () => {
             open={open}
             onClose={() => setOpen(false)}
             data={selectedRow}
-            entryModes={entryModes}
             onSave={handleUpdateTransaction}
             editable={editable}
           />
