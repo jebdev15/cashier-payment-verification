@@ -16,7 +16,38 @@ type Props = {
   sysUsers: SysUserType[];
 };
 
-const accessLevels = ["superadmin", "admin", "cashier"];
+const accessLevels = [
+    {
+        id: 1,
+        label: "Super Admin",
+        accessLevel: 1
+    },
+    {
+        id: 2,
+        label: "Admin",
+        accessLevel: 2
+    },
+    {
+        id: 3,
+        label: "Cashier Admin",
+        accessLevel: 3
+    },
+    {
+        id: 4,
+        label: "Cashier User",
+        accessLevel: 4
+    },
+    {
+        id: 5,
+        label: "Assessment Admin",
+        accessLevel: 5
+    },
+    {
+        id: 6,
+        label: "Assessment User",
+        accessLevel: 6
+    }
+];
 
 const AdminUserEditDialog: React.FC<Props> = ({ open, onClose, data, onSuccess, sysUsers }) => {
   const [{ accessToken }] = useCookies(["accessToken"]);
@@ -41,7 +72,7 @@ const AdminUserEditDialog: React.FC<Props> = ({ open, onClose, data, onSuccess, 
     if (!data) return;
     setSaving(true);
     try {
-      await axiosInstanceWithAuthorization(accessToken).put(`/api/admin-users/${data.userId}`, {
+      await axiosInstanceWithAuthorization(accessToken).put(`/api/admin-sys-users/${data.userId}`, {
         fullname,
         email,
         accessLevel,
@@ -56,8 +87,7 @@ const AdminUserEditDialog: React.FC<Props> = ({ open, onClose, data, onSuccess, 
     }
   };
 
-  const matchedSys = data ? sysUsers.find(u => u.userId === data.userId) : null;
-
+  const matchedSys = data ? sysUsers.find(u => Number(u.userId) === data.userId) : null;
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Edit Admin User</DialogTitle>
@@ -93,7 +123,7 @@ const AdminUserEditDialog: React.FC<Props> = ({ open, onClose, data, onSuccess, 
               required
             >
               {accessLevels.map(level => (
-                <MenuItem key={level} value={level}>{level}</MenuItem>
+                <MenuItem selected={Number(level.accessLevel) === Number(accessLevel)} key={level.id} value={level.id}>{level.label}</MenuItem>
               ))}
             </Select>
           </FormControl>

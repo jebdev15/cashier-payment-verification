@@ -8,6 +8,10 @@ import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import CustomCircularProgress from "@/components/CustomCircularProgress";
 
+// Simple module-level cache keyed by "status:offset:limit"
+const acctPageCache: Record<string, { items: AccountDataType[]; total: number }> = {};
+const acctInflight: Record<string, Promise<{ items: AccountDataType[]; total: number }>> = {};
+
 const ShowAccounts = () => {
   const navigate = useNavigate();
   const [cookie] = useCookies(["accessToken"]);
@@ -34,16 +38,46 @@ const ShowAccounts = () => {
   const fetchAccounts = React.useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    const key = `${tabValue}:${offset}:${limit}`;
+    // Serve from cache if available
+    if (acctPageCache[key]) {
+      const cached = acctPageCache[key];
+      setData(cached.items);
+      setTotalCount(cached.total);
+      setLoading(false);
+      return;
+    }
+
     try {
       const statusParam = `&status=${encodeURIComponent(tabValue)}`;
-      const res = await axiosInstanceWithAuthorization(cookie.accessToken).get(
-        `/api/users?offset=${offset}&limit=${limit}${statusParam}`
-      );
-      if (res.status === 200) {
-        const resData = res.data;
-        setData(resData?.data || resData);
-        setTotalCount(resData?.[0]?.totalCount || resData.total || (Array.isArray(resData) ? resData.length : 0) || 0);
+      if (!acctInflight[key]) {
+        acctInflight[key] = (async () => {
+          const res = await axiosInstanceWithAuthorization(cookie.accessToken).get(
+            `/api/users?offset=${offset}&limit=${limit}${statusParam}`
+          );
+          if (res.status !== 200) return { items: [], total: 0 };
+
+          const resData = res.data;
+
+          // Normalize response
+          const items: AccountDataType[] = Array.isArray(resData?.data)
+            ? resData.data
+            : Array.isArray(resData)
+              ? resData
+              : [];
+          const total =
+            Number(resData?.total ?? 0) ||
+            (Array.isArray(resData) && resData.length > 0 ? Number(resData[0]?.totalCount ?? 0) : 0) ||
+            items.length;
+
+          acctPageCache[key] = { items, total };
+          return acctPageCache[key];
+        })();
       }
+      const { items, total } = await acctInflight[key];
+      setData(items || []);
+      setTotalCount(total || 0);
     } catch (e: any) {
       setError(e?.message || "Failed to load accounts");
     } finally {

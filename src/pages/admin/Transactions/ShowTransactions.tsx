@@ -9,6 +9,10 @@ import TransactionDialogForStudent from "@/components/modals/TransactionDialogFo
 import TransactionDialogForExternal from "@/components/modals/TransactionDialogForExternal";
 import TransactionDialogForEmployee from "@/components/modals/TransactionDialogForEmployee";
 
+// Simple module-level cache keyed by "status:offset:limit"
+const txPageCache: Record<string, { items: TransactionDataType[]; total: number }> = {};
+const txInflight: Record<string, Promise<{ items: TransactionDataType[]; total: number }>> = {};
+
 const filterMiscellaneousFeeAsPayload = (checkedItems: string[], miscellaneousFees: any[]) => {
   return miscellaneousFees.filter(
     (fee) => Number(fee.balance) > 0 && checkedItems.includes(fee.nature_of_collection_id.toString())
@@ -44,17 +48,51 @@ const ShowTransactions = () => {
   const fetchTransactions = React.useCallback(async () => {
     setLoading(true);
     setError(null);
+    const key = `${tabValue}:${offset}:${limit}`;
+
+    // Serve from cache if available
+    if (txPageCache[key]) {
+      const cached = txPageCache[key];
+      setData(cached.items);
+      setTotalCount(cached.total);
+      setLoading(false);
+      return;
+    }
+
     try {
       const statusParam = `&status=${encodeURIComponent(tabValue)}`;
-      const response = await axiosInstanceWithAuthorization(cookie.accessToken).get(
-        `/api/admin-transactions?offset=${offset}&limit=${limit}${statusParam}`
-      );
+      // Reuse inflight request for same key
+      if (!txInflight[key]) {
+        txInflight[key] = (async () => {
+          const response = await axiosInstanceWithAuthorization(cookie.accessToken).get(
+            `/api/admin-transactions?offset=${offset}&limit=${limit}${statusParam}`
+          );
+          if (response.status !== 200) return { items: [], total: 0 };
 
-      if (response.status === 200) {
-        const resData = response.data;
-        setData(resData.data || resData); // Handle both array or {data:[]} shapes
-        setTotalCount(resData.length > 0 ? resData[0].totalCount : 0);
+          const resData = response.data;
+
+          // Normalize response
+          // Support shapes: {data:{items,total}} | {data:[]} | [] | array with totalCount in first row
+          const items: TransactionDataType[] = Array.isArray(resData?.data?.items)
+            ? resData.data.items
+            : Array.isArray(resData?.data)
+              ? resData.data
+              : Array.isArray(resData)
+                ? resData
+                : [];
+          const total =
+            Number(resData?.data?.total ?? 0) ||
+            Number(resData?.total ?? 0) ||
+            (Array.isArray(resData) && resData.length > 0 ? Number(resData[0]?.totalCount ?? 0) : 0);
+
+          txPageCache[key] = { items, total };
+          return txPageCache[key];
+        })();
       }
+
+      const { items, total } = await txInflight[key];
+      setData(items || []);
+      setTotalCount(total || 0);
     } catch (err: any) {
       console.error("Error fetching transactions:", err);
       setError(err.message || "Failed to fetch transactions");
@@ -66,6 +104,15 @@ const ShowTransactions = () => {
   React.useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions, refresh]);
+
+  // Invalidate the cache when refresh is triggered (e.g., after update)
+  React.useEffect(() => {
+    if (!refresh) return;
+    Object.keys(txPageCache).forEach((k) => delete txPageCache[k]);
+    Object.keys(txInflight).forEach((k) => delete txInflight[k]);
+    fetchTransactions();
+    setRefresh(false);
+  }, [refresh, fetchTransactions]);
 
   const columns = [
     { field: "_id", headerName: "No.", width: 100 },

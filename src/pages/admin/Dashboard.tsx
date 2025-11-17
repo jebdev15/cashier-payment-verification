@@ -1,35 +1,110 @@
 import React from "react";
 import { Alert, Box, Grid, Typography } from "@mui/material";
 import { CheckCircleOutlined, HourglassEmpty, CancelOutlined } from "@mui/icons-material";
-import { useAxios } from "../../hooks/useAxios";
+import { axiosInstanceWithAuthorization } from "@/api/app";
+import { useCookies } from "react-cookie";
 import { red, orange, green } from "@mui/material/colors";
 
+// Module-level cache + inflight promise for dashboard
+let dashboardCache: any | null = null;
+let dashboardInflight: Promise<any> | null = null;
+
 const Dashboard = () => {
-  const { data, loading, error } = useAxios({
-    url: "/api/users/dashboard",
-    method: "GET",
-    authorized: true,
-  });
+  const [{ accessToken }] = useCookies(["accessToken"]);
+  const [data, setData] = React.useState<any | null>(dashboardCache);
+  const [loading, setLoading] = React.useState<boolean>(!dashboardCache);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const fetchDashboard = async () => {
+      setLoading(true);
+      setError(null);
+
+      if (dashboardCache) {
+        setData(dashboardCache);
+        setLoading(false);
+        return;
+      }
+
+      if (!dashboardInflight) {
+        dashboardInflight = (async () => {
+          try {
+            const res = await axiosInstanceWithAuthorization(accessToken).get("/api/users/dashboard");
+            if (res.status === 200) {
+              dashboardCache = res.data;
+              return dashboardCache;
+            }
+            throw new Error("Failed to load dashboard");
+          } catch (err: any) {
+            throw err;
+          }
+        })();
+      }
+
+      try {
+        const result = await dashboardInflight;
+        if (cancelled) return;
+        setData(result);
+      } catch (err: any) {
+        if (cancelled) return;
+        setError(err?.message || "Failed to load dashboard");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken]);
+
+  // Optional refresh helper (not used in UI currently)
+  const refreshDashboard = React.useCallback(() => {
+    dashboardCache = null;
+    dashboardInflight = null;
+    setLoading(true);
+    setError(null);
+    // trigger effect by setting loading (effect reads cache/inflight)
+    // call fetch immediately to update state
+    (async () => {
+      try {
+        const res = await axiosInstanceWithAuthorization(accessToken).get("/api/users/dashboard");
+        if (res.status === 200) {
+          dashboardCache = res.data;
+          setData(res.data);
+        }
+      } catch (err: any) {
+        setError(err?.message || "Failed to load dashboard");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [accessToken]);
 
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Alert severity="error">{error}</Alert>;
 
+  const safeData = data || {};
   const userStats = [
     {
       label: "Active Users",
-      value: data?.totalActiveUsers || 0,
+      value: safeData?.totalActiveUsers || 0,
       icon: <CheckCircleOutlined sx={{ color: "green" }} />,
       color: green[50],
     },
     {
       label: "Pending Users",
-      value: data?.totalPendingUsers || 0,
+      value: safeData?.totalPendingUsers || 0,
       icon: <HourglassEmpty sx={{ color: "orange" }} />,
       color: orange[50],
     },
     {
       label: "Rejected Users",
-      value: data?.totalRejectedUsers || 0,
+      value: safeData?.totalRejectedUsers || 0,
       icon: <CancelOutlined sx={{ color: "red" }} />,
       color: red[50],
     },
@@ -38,19 +113,19 @@ const Dashboard = () => {
   const transactionStats = [
     {
       label: "Approved Transactions",
-      value: data?.totalApprovedTransactions || 0,
+      value: safeData?.totalApprovedTransactions || 0,
       icon: <CheckCircleOutlined sx={{ color: "green" }} />,
       color: green[50],
     },
     {
       label: "Pending Transactions",
-      value: data?.totalPendingTransactions || 0,
+      value: safeData?.totalPendingTransactions || 0,
       icon: <HourglassEmpty sx={{ color: "orange" }} />,
       color: orange[50],
     },
     {
       label: "Rejected Transactions",
-      value: data?.totalRejectedTransactions || 0,
+      value: safeData?.totalRejectedTransactions || 0,
       icon: <CancelOutlined sx={{ color: "red" }} />,
       color: red[50],
     },
