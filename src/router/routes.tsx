@@ -25,7 +25,9 @@ const EditAccount = React.lazy(() => import("../pages/admin/Accounts/EditAccount
 const ShowAdminAccounts = React.lazy(() => import("../pages/admin/Accounts/AdminAccounts"));
 // const EditAdminAccount = React.lazy(() => import("../pages/admin/Accounts/EditAdminAccount"));
 const ShowTransactions = React.lazy(() => import("../pages/admin/Transactions/ShowTransactions"));
-
+const AdminReportsPage = React.lazy(() => import("../pages/admin/Reports"));
+const PrintReportRouter = React.lazy(() => import("../pages/admin/reports/PrintReportRouter"));
+const AdminSettings = React.lazy(() => import("../pages/admin/Settings"));
 export const routes = createBrowserRouter([
     {
         path: "/",
@@ -142,6 +144,30 @@ export const routes = createBrowserRouter([
                     },
                 ]
             },
+            {
+                path: "reports",
+                errorElement: <RouteErrorElement />,
+                children: [
+                    {
+                        index: true,
+                        element: <AdminReportsPage />,
+                    },
+                    {
+                        path: "print/:reportType",
+                        element: <PrintReportRouter />,
+                    }
+                ]
+            },
+            {
+                path: "settings",
+                errorElement: <RouteErrorElement />,
+                children: [
+                    {
+                        index: true,
+                        element: <AdminSettings />,
+                    },
+                ]
+            }
         ],
     },
 ]);
