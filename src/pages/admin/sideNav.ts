@@ -2,7 +2,9 @@ import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
   History as HistoryIcon,
+  Report as ReportIcon,
   SupervisorAccount as SupervisorAccountIcon,
+  Settings as SettingsIcon
 } from "@mui/icons-material";
 
 export const sideNav = [
@@ -34,12 +36,12 @@ export const sideNav = [
     path: "/reports",
     label: "Reports",
     abbreviation: "rp",
-    icon: HistoryIcon,
+    icon: ReportIcon,
   },
-  {
-    path: "/settings",
-    label: "Settings",
-    abbreviation: "st",
-    icon: HistoryIcon,
-  },
+  // {
+  //   path: "/settings",
+  //   label: "Settings",
+  //   abbreviation: "st",
+  //   icon: SettingsIcon,
+  // },
 ];

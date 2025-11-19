@@ -29,8 +29,8 @@ const Settings = () => {
     const fetch2FAStatus = async () => {
       try {
         const res = await axiosInstanceWithAuthorization(accessToken).get("/api/settings/2fa/status");
-        if (res.status === 200) {
-          setTwoFAEnabled(res.data.enabled || false);
+        if (res.status === 200 && res.data.success) {
+          setTwoFAEnabled(res.data.data?.enabled || false);
         }
       } catch (err) {
         console.error("Failed to fetch 2FA status", err);
