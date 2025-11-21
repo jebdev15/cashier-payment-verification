@@ -22,4 +22,5 @@ export type AdminAccountDataType = {
     email: string;
     accessLevel: number;
     status: number;
+    department?: number;
 }

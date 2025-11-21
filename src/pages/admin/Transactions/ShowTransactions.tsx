@@ -117,7 +117,7 @@ const ShowTransactions = () => {
   const columns = [
     { field: "_id", headerName: "No.", width: 100 },
     { field: "userType", headerName: "User Type", minWidth: 50 },
-    { field: "payorName", headerName: "Payor Name", minWidth: 250, flex: 1 },
+    { field: "payorName", headerName: "Payor", minWidth: 250, flex: 1 },
     { field: "referenceId", headerName: "Reference ID", minWidth: 175, flex: 1 },
     {
       field: "status",

@@ -1,16 +1,8 @@
 import React from "react";
-import { useParams } from "react-router-dom";
-import DailyCollectionReport from "./DailyCollectionReport";
 
+// Deprecated: direct inline preview now used; keep minimal fallback.
 const PrintReportRouter = () => {
-  const { reportType } = useParams<{ reportType: string }>();
-
-  switch (reportType) {
-    case "daily-collection":
-      return <DailyCollectionReport />;
-    default:
-      return <div>Report not found</div>;
-  }
+  return <div style={{ padding: 16 }}>Report route deprecated. Use inline preview in Reports page.</div>;
 };
 
 export default PrintReportRouter;

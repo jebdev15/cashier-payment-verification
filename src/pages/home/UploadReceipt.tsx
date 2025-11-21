@@ -163,7 +163,7 @@ const UploadReceipt = () => {
   // Compute dynamic label for reference field based on mode of payment
   const referenceLabel = React.useMemo(() => {
     const m = (modeOfPayment || "").toLowerCase();
-    if (m.includes("lddap") || m.includes("lddap-ada")) return "LDDAP-ADA No.";
+    if (m.includes("lddap") || m.includes("lddap-ada")) return "ADA/Check No.";
     if (m.includes("check") || m.includes("direct bank deposit - check")) return "Check Number";
     return "Reference Number";
   }, [modeOfPayment]);

@@ -48,7 +48,7 @@ const Layout = () => {
       <Header />
       <Box sx={{ display: "flex", pt: { xs: "64px", sm: "72px" }, height: "100%", flex: 1 }}>
         <Sidebar />
-        <Box sx={{ flex: 1, padding: 2 }}>
+        <Box className="print-root" sx={{ flex: 1, padding: 2 }}>
           {/* <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, px: { xs: 2, md: 3 }, py: 2, minHeight: "100%" }}> */}
           <Outlet />
           {/* </Box> */}

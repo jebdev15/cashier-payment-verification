@@ -92,7 +92,7 @@ const ShowAccounts = () => {
   const columns = [
     { field: "id", headerName: "No.", width: 100 },
     { field: "userType", headerName: "User Type", minWidth: 50 },
-    { field: "payorName", headerName: "Payor Name", minWidth: 150, flex: 1 },
+    { field: "payorName", headerName: "Name", minWidth: 150, flex: 1 },
     { field: "email", headerName: "Email Address", minWidth: 100, flex: 1 },
     {
       field: "status",

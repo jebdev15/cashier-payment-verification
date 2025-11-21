@@ -24,6 +24,7 @@ const Header = () => {
         backdropFilter: "blur(0.5rem)",
         boxShadow: 2,
       }}
+      className="no-print"
     >
       <Toolbar>
         <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 1 }} onClick={handleToggleSidebar}>

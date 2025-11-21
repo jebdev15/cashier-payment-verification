@@ -10,6 +10,7 @@ import { formatAccessLevel } from "@/utils/formatAccessLevel";
 import AdminUserAddDialog from "@/components/modals/AdminUserAddDialog";
 import AdminUserEditDialog from "@/components/modals/AdminUserEditDialog";
 import { useSysUsersCache } from "@/hooks/useSysUsersCache";
+import { formatAdminDepartment } from "@/utils/formatAdminDepartment";
 
 // Simple module-level cache keyed by "offset:limit"
 const adminUsersPageCache: Record<string, { items: AdminAccountDataType[]; total: number }> = {};
@@ -106,6 +107,7 @@ const AdminAccounts = () => {
 
     const columns = [
         { field: "id", headerName: "No.", width: 100 },
+        { field: "fullname", headerName: "Full Name", minWidth: 150, flex: 1 },
         {
             field: "accessLevel",
             headerName: "Role",
@@ -115,7 +117,15 @@ const AdminAccounts = () => {
                 return formatAccessLevel(row.accessLevel);
             }
         },
-        { field: "fullname", headerName: "Full Name", minWidth: 150, flex: 1 },
+        {
+            field: "department",
+            headerName: "Department",
+            minWidth: 100,
+            flex: 1,
+            renderCell: ({ row }: { row: AdminAccountDataType }) => {
+                return formatAdminDepartment(row.department ?? 0);
+            }
+        },
         { field: "email", headerName: "Email Address", minWidth: 100, flex: 1 },
         {
             field: "status",

@@ -1,10 +1,10 @@
 import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
-  History as HistoryIcon,
-  Report as ReportIcon,
+  Repeat as HistoryIcon,
   SupervisorAccount as SupervisorAccountIcon,
-  Settings as SettingsIcon
+  Article as ReportIcon,
+  // Settings as SettingsIcon
 } from "@mui/icons-material";
 
 export const sideNav = [

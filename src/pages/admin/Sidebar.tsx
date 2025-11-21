@@ -80,6 +80,7 @@ const Sidebar = () => {
           zIndex: "999",
           bgcolor: { md: "#f0f0f0", xs: "transparent" },
         }}
+        className="no-print"
       >
         <nav style={{ display: "flex", height: "100%" }} aria-label="main mailbox folders">
           <List sx={{ display: "flex", flexDirection: "column", gap: 1, flexGrow: 1, backgroundColor: "background.paper", borderRadius: 4, boxShadow: 2, overflow: "hidden" }} disablePadding>
