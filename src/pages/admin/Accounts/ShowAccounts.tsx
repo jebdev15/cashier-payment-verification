@@ -7,6 +7,9 @@ import { AccountDataType } from "./type";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import CustomCircularProgress from "@/components/CustomCircularProgress";
+import StudentAccountDialog from "@/components/modals/StudentAccountDialog";
+import EmployeeAccountDialog from "@/components/modals/EmployeeAccountDialog";
+import ExternalAccountDialog from "@/components/modals/ExternalAccountDialog";
 
 // Simple module-level cache keyed by "status:offset:limit"
 const acctPageCache: Record<string, { items: AccountDataType[]; total: number }> = {};
@@ -111,9 +114,14 @@ const ShowAccounts = () => {
       headerName: "Action",
       width: 125,
       renderCell: ({ row }: { row: AccountDataType }) => {
+        const handleClick = () => {
+          setSelectedAccount(row);
+          setEditable(row.status === "pending");
+          setDialogOpen(true);
+        };
         return (
           <Tooltip title={row.status === "pending" ? "Edit" : "View"}>
-            <IconButton color="primary" onClick={() => navigate(`/admin/accounts/${row.user_id}`)}>
+            <IconButton color="primary" onClick={handleClick}>
               {row.status === "pending" ? <EditIcon /> : <SubjectIcon />}
             </IconButton>
           </Tooltip>
@@ -132,6 +140,60 @@ const ShowAccounts = () => {
     })) || [];
 
   const totalPages = Math.ceil(totalCount / limit) || 1;
+
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [selectedAccount, setSelectedAccount] = React.useState<AccountDataType | null>(null);
+  const [editable, setEditable] = React.useState(false);
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setSelectedAccount(null);
+  };
+
+  const handleDialogSuccess = () => {
+    // Invalidate cache and refetch
+    Object.keys(acctPageCache).forEach((k) => delete acctPageCache[k]);
+    Object.keys(acctInflight).forEach((k) => delete acctInflight[k]);
+    fetchAccounts();
+  };
+
+  const renderDialog = () => {
+    if (!selectedAccount) return null;
+    switch (selectedAccount.userType) {
+      case "Student":
+        return (
+          <StudentAccountDialog
+            open={dialogOpen}
+            onClose={handleDialogClose}
+            data={selectedAccount as any}
+            editable={editable}
+            onSuccess={handleDialogSuccess}
+          />
+        );
+      case "Employee":
+        return (
+          <EmployeeAccountDialog
+            open={dialogOpen}
+            onClose={handleDialogClose}
+            data={selectedAccount as any}
+            editable={editable}
+            onSuccess={handleDialogSuccess}
+          />
+        );
+      case "External":
+        return (
+          <ExternalAccountDialog
+            open={dialogOpen}
+            onClose={handleDialogClose}
+            data={selectedAccount as any}
+            editable={editable}
+            onSuccess={handleDialogSuccess}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <React.Suspense fallback={<CustomCircularProgress />}>
@@ -173,6 +235,7 @@ const ShowAccounts = () => {
           </Box>
         </Box>
       </Box>
+      {dialogOpen && renderDialog()}
     </React.Suspense>
   );
 };

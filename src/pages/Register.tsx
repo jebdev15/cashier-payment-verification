@@ -16,7 +16,7 @@ type RegisterDataType = {
   yearLevel: string;
   studentId: string;
   idNumber: string;
-  employeeType: string;
+  designation: string;
   payor_name: string;
   firstName: string;
   middleName: string;
@@ -34,7 +34,7 @@ const initialRegisterData: RegisterDataType = {
   yearLevel: "1",
   studentId: "",
   idNumber: "",
-  employeeType: "",
+  designation: "",
   payor_name: "",
   firstName: "",
   middleName: "",
@@ -46,7 +46,7 @@ const initialRegisterData: RegisterDataType = {
 };
 
 const userTypeOptions = ["Student", "External", "Employee"];
-const employeeTypeOptions = ["Faculty", "Staff"];
+const designationOptions = ["Faculty", "Staff"];
 
 const getTalisayColleges = (data: typeof campusesJson) => {
   return data["Talisay"].colleges.map((college) => ({
@@ -132,7 +132,7 @@ const Register = () => {
       formData.append("payorName", payorName);
       formData.append("studentId", registerData.studentId);
       formData.append("idNumber", registerData.idNumber);
-      formData.append("employeeType", registerData.employeeType);
+      formData.append("designation", registerData.designation);
       formData.append("firstName", registerData.firstName);
       formData.append("middleName", registerData.middleName);
       formData.append("lastName", registerData.lastName);
@@ -385,8 +385,8 @@ const Register = () => {
             <Select
               label="Designation"
               labelId="designation-label"
-              name="employeeType"
-              value={registerData.employeeType}
+              name="designation"
+              value={registerData.designation}
               onChange={handleChangeSelect}
               startAdornment={<WorkIcon color="primary" sx={{ mr: 1 }} />}
               inputProps={{
@@ -397,7 +397,7 @@ const Register = () => {
               required={registerData.userType === "Employee"}
             >
               <MenuItem value="" disabled><em>Please Select</em></MenuItem>
-              {employeeTypeOptions.map((option) => (
+              {designationOptions.map((option) => (
                 <MenuItem sx={{ whiteSpace: "normal !important" }} key={option} value={option}>
                   {option}
                 </MenuItem>
