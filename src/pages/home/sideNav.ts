@@ -10,29 +10,20 @@ export const sideNav = [
         label: "Statement of Account",
         abbreviation: "sao",
         icon: AccountBalanceIcon,
+        userType: ["Student"]
     },
     {
         path: "/upload-receipt",
         label: "Upload Receipt",
         abbreviation: "ur",
-        icon: FileUploadIcon
-    },
-    {
-        path: "/upload-receipt",
-        label: "Upload Receipt",
-        abbreviation: "ur-ex",
-        icon: FileUploadIcon
-    },
-    {
-        path: "/upload-receipt",
-        label: "Upload Receipt",
-        abbreviation: "ur-emp",
-        icon: FileUploadIcon
+        icon: FileUploadIcon,
+        userType: ["Student", "External", "Employee"]
     },
     {
         path: "/transaction-history",
         label: "Transaction History",
         abbreviation: "th",
-        icon: HistoryIcon
+        icon: HistoryIcon,
+        userType: ["Student", "External", "Employee"]
     }
 ]

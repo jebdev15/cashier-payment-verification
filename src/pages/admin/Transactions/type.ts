@@ -1,37 +1,35 @@
 export type TransactionDataType = {
     id?: string;
     studentAccountId?: string;
-    reference_id?: string;
-    reference_number?: string;
-    e_or?: string;
-    student_id?: string;
-    name_of_payor?: string;
+    referenceId?: string;
+    referenceNumber?: string;
+    eOr?: string;
+    studentId?: string;
+    payor?: string;
     email?: string;
-    program_code?: string;
-    year_level_roman?: string;
-    school_year?: string;
+    programCode?: string; // was program_code
+    yearLevelRoman?: string; // was year_level_roman
+    schoolYear?: string; // was school_year
     semester?: string;
-    mode_of_payment?: string;
+    modeOfPayment?: string; // was mode_of_payment
     amount?: number;
     balance?: number;
-    amount_paid?: number;
+    amountPaid?: number; // was amount_paid
     particulars?: string;
     purpose?: string;
-    payment_id?: string;
+    paymentId?: string; // was payment_id
     status?: string;
-    expires_at?: Date;
-    created_at?: Date;
+    expiresAt?: Date; // was expires_at
+    createdAt?: Date; // was created_at
     filePath?: string;
     userType?: string;
     checkedItems?: string[];
-    entryMode?: string;
     accountType?: string;
     details?: string;
     remarks?: string;
-    amountToPay?: number;
-    amountTendered?: number;
-    amount_to_pay?: string;
-    amount_tendered?: string;
+    // merged numeric and string variants into unions where duplicates existed
+    amountToPay?: number | string; // merged amountToPay (number) and amount_to_pay (string)
+    amountTendered?: number | string; // merged amountTendered (number) and amount_tendered (string)
     selectedAccount?: string;
     miscellaneousFees?: any[];
     distribution?: { miscellaneous: number; tuition: number; totalPayable: number; accountsPayable: number; };
@@ -41,12 +39,4 @@ export type SnackbarState = {
   open: boolean;
   message: string;
   severity: "success" | "error" | "warning" | "info" | undefined;
-}
-
-export type TransactionModalEntryModeType = {
-    entry_mode_id: number;
-    entry_mode_title: string;
-    entry_mode_desc: string;
-    credit: string;
-    debit: string;
 }

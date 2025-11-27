@@ -149,22 +149,10 @@ const Sidebar = () => {
               <Typography gutterBottom variant="caption" component="div" color="text.secondary">
                 {userData.isStudent && userData.student_id}
               </Typography>
-              {userData.isStudent && (
-                <Typography gutterBottom variant="caption" component="div" color="text.secondary">
-                  {userData.isStudent && "Student"}
-                  {userData.isExternal && "External"}
-                </Typography>
-              )}
             </ListItem>
 
             <Box sx={{ px: 1, display: "grid", gap: 1 }}>
               {sideNav.map((item, index) => {
-                if (userData.isExternal && ["sao", "ur"].includes(item.abbreviation)) return null;
-                if (userData.isEmployee && ["sao", "ur"].includes(item.abbreviation)) return null;
-                if (userData.isStudent && item.abbreviation === "ur-ex") return null;
-                if (userData.isStudent && item.abbreviation === "ur-emp") return null;
-                if (userData.isExternal && item.abbreviation === "ur-emp") return null;
-                if (userData.isEmployee && item.abbreviation === "ur-ex") return null;
                 return (
                   <ListItem disablePadding key={index}>
                     <ListItemButton

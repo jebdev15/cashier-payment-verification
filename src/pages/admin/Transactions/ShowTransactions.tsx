@@ -1,8 +1,8 @@
 import React from "react";
-import { Alert, Box, IconButton, Tooltip, Typography, Pagination, Tabs, Tab } from "@mui/material";
-import { Subject as SubjectIcon } from "@mui/icons-material";
+import { Alert, Box, IconButton, Tooltip, Typography, Pagination, Tabs, Tab, Button } from "@mui/material";
+import { Subject as SubjectIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { TransactionDataType, TransactionModalEntryModeType } from "./type";
+import { TransactionDataType } from "./type";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import TransactionDialogForStudent from "@/components/modals/TransactionDialogForStudent";
@@ -25,7 +25,6 @@ const ShowTransactions = () => {
   const [data, setData] = React.useState<TransactionDataType[]>([]);
   const [selectedRow, setSelectedRow] = React.useState<TransactionDataType | null>(null);
   const [editable, setEditable] = React.useState(false);
-  const [entryModes, setEntryModes] = React.useState<TransactionModalEntryModeType[]>([]);
   const [refresh, setRefresh] = React.useState(false);
 
   // ✅ Pagination states (offset–limit model)
@@ -177,19 +176,20 @@ const ShowTransactions = () => {
       );
       const formData = new FormData();
       formData.append("id", updatedData.id || "");
-      formData.append("studentAccountID", updatedData.student_account_id || "");
-      formData.append("referenceID", updatedData.reference_id || "");
-      formData.append("referenceNumber", updatedData.reference_number || "");
-      formData.append("studentID", updatedData.student_id || "");
-      formData.append("nameOfPayor", updatedData.name_of_payor || "");
+      // fixed: use camelCase property access
+      formData.append("studentAccountID", updatedData.studentAccountId || "");
+      // convert snake_case -> camelCase usage
+      formData.append("referenceID", updatedData.referenceId || "");
+      formData.append("referenceNumber", updatedData.referenceNumber || "");
+      formData.append("studentID", updatedData.studentId || "");
+      formData.append("nameOfPayor", updatedData.payor || "");
       formData.append("email", updatedData.email || "");
-      formData.append("programCode", updatedData.program_code || "");
-      formData.append("yearLevelRoman", updatedData.year_level_roman || "");
-      formData.append("schoolYear", updatedData.school_year || "");
+      formData.append("programCode", updatedData.programCode || "");
+      formData.append("yearLevelRoman", updatedData.yearLevelRoman || "");
+      formData.append("schoolYear", updatedData.schoolYear || "");
       formData.append("semester", updatedData.semester || "");
-      formData.append("modeOfPayment", updatedData.mode_of_payment || "");
+      formData.append("modeOfPayment", updatedData.modeOfPayment || "");
       formData.append("status", updatedData.status || "");
-      formData.append("entryMode", updatedData.entryMode || "");
       formData.append("accountType", updatedData.selectedAccount || "");
       formData.append("particulars", updatedData.particulars || "");
       formData.append("details", updatedData.details || "");
@@ -280,6 +280,15 @@ const ShowTransactions = () => {
 
   const totalPages = Math.ceil(totalCount / limit);
 
+  // ✅ Manual reload function
+    const handleReload = () => {
+      // Clear cache
+      Object.keys(txPageCache).forEach((k) => delete txPageCache[k]);
+      Object.keys(txInflight).forEach((k) => delete txInflight[k]);
+      // Refetch current page
+      fetchTransactions();
+    };
+
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
       <Typography
@@ -292,10 +301,23 @@ const ShowTransactions = () => {
         Transactions
       </Typography>
         <Box sx={{ display: "grid", gap: 2, bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2 }}>
+          {/* ✅ Add Reload Button */}
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<RefreshIcon />}
+              onClick={handleReload}
+              disabled={loading}
+            >
+              Reload
+            </Button>
+          </Box>
+
           { /* Tabs */}
           <Tabs
-            value={tabValue}  // Current tab value
-            onChange={handleTabChange}  // Function to handle tab change
+            value={tabValue}
+            onChange={handleTabChange}
             indicatorColor="primary"
             textColor="primary"
             centered

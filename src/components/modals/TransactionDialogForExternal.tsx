@@ -12,20 +12,12 @@ import ReceiptViewerComponent from "../ReceiptViewerComponent";
 type Props = {
     open: boolean;
     data: TransactionDataType | null;
-    entryModes?: TransactionModalEntryModeType[];
     snackbar?: SnackbarState;
     onClose: () => void;
     onSave?: (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, selectedAccount?: string) => void;
     editable?: boolean;
 };
 
-type TransactionModalEntryModeType = {
-    entry_mode_id: number;
-    entry_mode_title: string;
-    entry_mode_desc: string;
-    credit: string;
-    debit: string;
-};
 
 const TransactionDialogForExternal: React.FC<Props> = ({
     open,
@@ -78,13 +70,14 @@ const TransactionDialogForExternal: React.FC<Props> = ({
 
     React.useEffect(() => {
         const updateAllTheDetailsIfApproved = () => {
-            if (!editable && formData?.status === 'approved') {
-                setSelectedAccount(formData.account_type || "");
-                setRemarks(formData.remarks || "");
-                setDetails(formData.details || "");
-                setAmountTendered(parseFloat(formData.amount_tendered || "0"));
+            const fd = formData ?? data;
+            if (!editable && (fd?.status ?? data?.status) === 'approved') {
+                setSelectedAccount(fd.accountType ?? "");
+                setRemarks(fd.remarks ?? "");
+                setDetails(fd.details ?? "");
+                setAmountTendered(parseFloat((fd.amountTendered ?? "0").toString()));
             }
-        }
+        };
         updateAllTheDetailsIfApproved();
     }, []);
     /**
@@ -101,8 +94,8 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                 <Divider sx={{ mb: 2 }} />
                 <TextField
                     label="Name of Institution/Agency"
-                    name="name_of_payor"
-                    value={formData?.name_of_payor || ""}
+                    name="payor"
+                    value={formData?.payor || ""}
                     onChange={handleChange}
                     fullWidth
                     disabled={!editable}
@@ -110,8 +103,8 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                 />
                 <TextField
                     label="Reference ID"
-                    name="reference_id"
-                    value={formData?.reference_id || ""}
+                    name="referenceId"
+                    value={formData?.referenceId ?? ""}
                     onChange={handleChange}
                     fullWidth
                     disabled
@@ -119,8 +112,8 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                 />
                 <TextField
                     label="Reference Number"
-                    name="reference_number"
-                    value={formData?.reference_number || ""}
+                    name="referenceNumber"
+                    value={formData?.referenceNumber ?? ""}
                     onChange={handleChange}
                     fullWidth
                     disabled
@@ -129,15 +122,19 @@ const TransactionDialogForExternal: React.FC<Props> = ({
 
                 <TextField
                     label="eOR Number"
-                    name="e_or"
-                    value={formData?.e_or || ""}
+                    name="eOr"
+                    value={formData?.eOr ?? ""}
                     fullWidth
                     disabled
                     margin="dense"
                 />
                 <TextField
                     label="Created At"
-                    value={formData?.created_at ? new Date(formData.created_at).toLocaleString() : ""}
+                    value={
+                        formData?.createdAt
+                            ? new Date(formData.createdAt).toLocaleString()
+                            : ""
+                    }
                     fullWidth
                     disabled
                     margin="dense"
@@ -168,8 +165,8 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                     <TextField
                         label="Mode of Payment"
                         type="text"
-                        name="mode_of_payment"
-                        value={formData?.mode_of_payment || ""}
+                        name="modeOfPayment"
+                        value={formData?.modeOfPayment || ""}
                         fullWidth
                         disabled
                     />
@@ -201,7 +198,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         }
                         label="Particulars"
                         margin="dense"
-                        disabled={!editable || !selectedAccount || formData?.status !== 'approved'}
+                        disabled={!editable || !selectedAccount || (formData?.status ?? formData?.status) !== 'approved'}
                         inputProps={{
                             sx: {
                                 whiteSpace: "normal !important",
@@ -242,10 +239,10 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         label="Amount Received"
                         name="amountTendered"
                         type="number"
-                        value={amountTendered}
+                        value={amountTendered ?? parseFloat((formData?.amountTendered ?? "0").toString())}
                         onChange={(e) => setAmountTendered(parseFloat(Number(e.target.value).toFixed(2)))}
                         fullWidth
-                        disabled={!editable || formData?.status !== 'approved'}
+                        disabled={!editable || (formData?.status ?? data?.status) !== 'approved'}
                     />
                 </FormControl>
             </Grid>

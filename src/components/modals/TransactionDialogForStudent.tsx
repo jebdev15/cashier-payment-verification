@@ -112,17 +112,23 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                     // Process the fees data as needed
                     console.log("Fees data:", response.data);
 
-                    const implementMiscellaneousFeesId = response.data?.miscellaneous_fee.map((fee: any, index: number) => ({
+                    // map server snake_case fields to camelCase aliases for local usage
+                    const implementMiscellaneousFeesId = response.data?.miscellaneousFee?.map((fee: any, index: number) => ({
                         ...fee,
-                        id: ++index, // Ensure each fee has a unique id
-                    }));
+                        id: ++index,
+                        // camelCase aliases (keep original keys too)
+                        natureOfCollectionId: fee.natureOfCollectionId ?? fee.nature_of_collection_id,
+                        itemTitle: fee.itemTitle ?? fee.item_title,
+                        amount: fee.amount,
+                        balance: fee.balance,
+                    })) || [];
+
                     console.log({ implementMiscellaneousFeesId });
                     setMiscellaneousFees(implementMiscellaneousFeesId);
 
                     // Log the balances to the console
-                    console.log("Balances:", response.data?.unpaid_miscellaneous_fees);
-                    // setMiscellaneousFeesBalance(response.data?.unpaid_miscellaneous_fees || "0.00");
-                    setTuitionFee(response.data?.tuition_fee.total || "0.00");
+                    console.log("Balances:", response.data?.unpaidMiscellaneousFees);
+                    setTuitionFee(response.data?.tuitionFee?.total || "0.00");
                 }
             } catch (error) {
                 console.error("Error fetching fees:", error);
@@ -133,7 +139,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                 setSelectedAccount(formData.accountType || "");
                 setDetails(formData.details || "");
                 setRemarks(formData.remarks || "");
-                setAmountTendered(parseFloat(formData.amount_tendered || "0"));
+                setAmountTendered(parseFloat(formData.amountTendered || "0"));
             }
         }
         if (cookie?.accessToken) {
@@ -216,9 +222,10 @@ const TransactionDialogForStudent: React.FC<Props> = ({
         let remaining = amountTendered;
 
         // ✅ Step 1: Filter selected miscellaneous fees
-        const selectedMiscFees = miscellaneousFees.filter(fee =>
-            checkedItems.includes(fee.nature_of_collection_id.toString())
-        );
+        const selectedMiscFees = miscellaneousFees.filter((fee) => {
+            const nid = fee.natureOfCollectionId;
+            return checkedItems.includes(nid?.toString());
+        });
 
         // ✅ Step 2: Compute total miscellaneous balance
         // const totalMiscBalance = selectedMiscFees.reduce(
@@ -259,19 +266,28 @@ const TransactionDialogForStudent: React.FC<Props> = ({
 
     React.useEffect(() => {
         if (data) {
-            setFormData(data);
+            setFormData({
+                ...data,
+                // canonicalize some keys to camelCase for local editing
+                referenceId: data.referenceId,
+                referenceNumber: data.referenceNumber,
+                studentId: data.studentId,
+                amountToPay: data.amountToPay,
+                amountTendered: data.amountTendered,
+            });
         }
-        if (!editable && formData?.status === 'approved') {
-            setSelectedAccount(formData.accountType || "");
-            setDetails(formData.details || "");
-            setRemarks(formData.remarks || "");
-            setAmountToPay(parseFloat(formData.amount_to_pay || "0"));
-            setAmountTendered(parseFloat(formData.amount_tendered || "0"));
+        if (!editable && (formData?.status ?? data?.status) === 'approved') {
+            const fd = formData ?? data;
+            setSelectedAccount(fd?.accountType ?? "");
+            setDetails(fd?.details ?? "");
+            setRemarks(fd?.remarks ?? "");
+            setAmountToPay(parseFloat((fd?.amountToPay ?? "0").toString()));
+            setAmountTendered(parseFloat((fd?.amountTendered ?? "0").toString()));
             setDistribution((prev) => ({
                 ...prev,
-                tuition: Number(formData.distribution?.tuition) || 0,
-                miscellaneous: Number(formData.distribution?.miscellaneous) || 0,
-            }))
+                tuition: Number(fd?.distribution?.tuition) || 0,
+                miscellaneous: Number(fd?.distribution?.miscellaneous) || 0,
+            }));
         }
     }, []);
     /**
@@ -299,8 +315,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Reference ID"
-                            name="reference_id"
-                            value={formData?.reference_id || ""}
+                            name="referenceId"
+                            value={formData?.referenceId ?? ""}
                             onChange={handleChange}
                             fullWidth
                             margin="dense"
@@ -308,8 +324,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Reference Number"
-                            name="reference_number"
-                            value={formData?.reference_number || ""}
+                            name="referenceNumber"
+                            value={formData?.referenceNumber ?? ""}
                             onChange={handleChange}
                             fullWidth
                             margin="dense"
@@ -317,15 +333,16 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Student ID"
-                            value={formData?.student_id || ""}
+                            name="studentId"
+                            value={formData?.studentId ?? ""}
                             fullWidth
                             margin="dense"
                             disabled
                         />
                         <TextField
                             label="Payor Name"
-                            name="name_of_payor"
-                            value={formData?.name_of_payor || ""}
+                            name="payor"
+                            value={formData?.payor || ""}
                             onChange={handleChange}
                             fullWidth
                             margin="dense"
@@ -342,8 +359,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Amount Paid"
-                            name="amount_paid"
-                            value={formData?.amount_paid || ""}
+                            name="amountPaid"
+                            value={formData?.amountPaid ?? ""}
                             onChange={handleChange}
                             type="number"
                             fullWidth
@@ -499,13 +516,13 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                             <TableCell padding="checkbox">
                                                 <Checkbox
                                                     onChange={handleCheckedItems}
-                                                    value={fee.nature_of_collection_id}
-                                                    disabled={fee.balance <= 0 || formData?.status !== 'approved'}
-                                                    checked={!!checkedItems.includes(fee.nature_of_collection_id.toString())}
+                                                    value={fee.natureOfCollectionId?.toString()}
+                                                    disabled={(fee.balance ?? 0) <= 0 || formData?.status !== 'approved'}
+                                                    checked={!!checkedItems.includes((fee.natureOfCollectionId ?? "").toString())}
                                                 />
                                             </TableCell>
                                         )}
-                                        <TableCell>{fee.item_title}</TableCell>
+                                        <TableCell>{fee.itemTitle}</TableCell>
                                         <TableCell>{fee.amount}</TableCell>
                                         <TableCell>{fee.balance}</TableCell>
                                     </TableRow>
@@ -566,8 +583,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Reference ID"
-                            name="reference_id"
-                            value={formData?.reference_id || ""}
+                            name="referenceId"
+                            value={formData?.referenceId ?? ""}
                             onChange={handleChange}
                             fullWidth
                             margin="dense"
@@ -575,8 +592,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Reference Number"
-                            name="reference_number"
-                            value={formData?.reference_number || ""}
+                            name="referenceNumber"
+                            value={formData?.referenceNumber ?? ""}
                             onChange={handleChange}
                             fullWidth
                             margin="dense"
@@ -584,15 +601,16 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Student ID"
-                            value={formData?.student_id || ""}
+                            name="studentId"
+                            value={formData?.studentId ?? ""}
                             fullWidth
                             margin="dense"
                             disabled
                         />
                         <TextField
                             label="Payor Name"
-                            name="name_of_payor"
-                            value={formData?.name_of_payor || ""}
+                            name="payor"
+                            value={formData?.payor || ""}
                             onChange={handleChange}
                             fullWidth
                             margin="dense"
@@ -609,8 +627,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         />
                         <TextField
                             label="Amount Paid"
-                            name="amount_paid"
-                            value={formData?.amount_paid || ""}
+                            name="amountPaid"
+                            value={formData?.amountPaid ?? ""}
                             onChange={handleChange}
                             type="number"
                             fullWidth

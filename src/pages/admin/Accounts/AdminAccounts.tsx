@@ -1,6 +1,6 @@
 import React from "react";
 import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Button } from "@mui/material";
-import { Edit as EditIcon, Add as AddIcon } from "@mui/icons-material";
+import { Edit as EditIcon, Add as AddIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { AccountDataType, AdminAccountDataType } from "./type";
 import { axiosInstanceWithAuthorization } from "@/api/app";
@@ -105,6 +105,17 @@ const AdminAccounts = () => {
         refreshSysUsers();
     };
 
+    // ✅ Manual reload function
+    const handleReload = React.useCallback(() => {
+        // Clear cache
+        Object.keys(adminUsersPageCache).forEach((k) => delete adminUsersPageCache[k]);
+        Object.keys(adminUsersInflight).forEach((k) => delete adminUsersInflight[k]);
+        // Refetch current page
+        fetchAccounts();
+        // Also refresh sys users cache
+        refreshSysUsers();
+    }, [fetchAccounts, refreshSysUsers]);
+
     const columns = [
         { field: "id", headerName: "No.", width: 100 },
         { field: "fullname", headerName: "Full Name", minWidth: 150, flex: 1 },
@@ -175,6 +186,16 @@ const AdminAccounts = () => {
 
             <Box sx={{ display: "grid", gap: 2 }}>
                 <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+                    {/* ✅ Add Reload Button */}
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<RefreshIcon />}
+                        onClick={handleReload}
+                        disabled={loading}
+                    >
+                        Reload
+                    </Button>
                     <Button
                         variant="contained"
                         size="small"

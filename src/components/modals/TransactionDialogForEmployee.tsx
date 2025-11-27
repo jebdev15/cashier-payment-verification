@@ -72,11 +72,12 @@ const TransactionModal: React.FC<Props> = ({
 
     // Update form data on load
     React.useEffect(() => {
-        if(!editable && formData?.status === 'approved') {
-            setSelectedAccount(formData.account_type || "");
-            setDetails(formData.details || "");
-            setRemarks(formData.remarks || "");
-            setAmountTendered(parseFloat(formData.amount_tendered || "0"));
+        const fd = formData ?? data;
+        if (!editable && (fd?.status ?? data?.status) === 'approved') {
+            setSelectedAccount(fd.accountType ?? "");
+            setDetails(fd.details ?? "");
+            setRemarks(fd.remarks ?? "");
+            setAmountTendered(parseFloat((fd.amountTendered ?? "0").toString()));
         }
     }, []);
     /**
@@ -93,8 +94,8 @@ const TransactionModal: React.FC<Props> = ({
                 <Divider sx={{ mb: 2 }} />
                 <TextField
                     label="Name of Employee"
-                    name="name_of_payor"
-                    value={formData?.name_of_payor || ""}
+                    name="payor"
+                    value={formData?.payor || ""}
                     onChange={handleChange}
                     fullWidth
                     disabled={!editable}
@@ -102,8 +103,8 @@ const TransactionModal: React.FC<Props> = ({
                 />
                 <TextField
                     label="Reference ID"
-                    name="reference_id"
-                    value={formData?.reference_id || ""}
+                    name="referenceId"
+                    value={formData?.referenceId ?? ""}
                     onChange={handleChange}
                     fullWidth
                     disabled
@@ -111,8 +112,8 @@ const TransactionModal: React.FC<Props> = ({
                 />
                 <TextField
                     label="Reference Number"
-                    name="reference_number"
-                    value={formData?.reference_number || ""}
+                    name="referenceNumber"
+                    value={formData?.referenceNumber ?? ""}
                     onChange={handleChange}
                     fullWidth
                     disabled
@@ -121,15 +122,15 @@ const TransactionModal: React.FC<Props> = ({
 
                 <TextField
                     label="eOR Number"
-                    name="e_or"
-                    value={formData?.e_or || ""}
+                    name="eOr"
+                    value={formData?.eOr ?? ""}
                     fullWidth
                     disabled
                     margin="dense"
                 />
                 <TextField
                     label="Created At"
-                    value={formData?.created_at ? new Date(formData.created_at).toLocaleString() : ""}
+                    value={formData?.createdAt ? new Date(formData.createdAt).toLocaleString() : ""}
                     fullWidth
                     disabled
                     margin="dense"
@@ -160,8 +161,8 @@ const TransactionModal: React.FC<Props> = ({
                     <TextField
                         label="Mode of Payment"
                         type="text"
-                        name="mode_of_payment"
-                        value={formData?.mode_of_payment || ""}
+                        name="modeOfPayment"
+                        value={formData?.modeOfPayment || ""}
                         fullWidth
                         disabled
                     />
@@ -223,7 +224,7 @@ const TransactionModal: React.FC<Props> = ({
                         label="Amount Received"
                         name="amountTendered"
                         type="number"
-                        value={amountTendered}
+                        value={amountTendered ?? (parseFloat(formData?.amountTendered ?? "0"))}
                         onChange={(e) => setAmountTendered(parseFloat(Number(e.target.value).toFixed(2)))}
                         fullWidth
                         disabled={!editable || formData?.status !== 'approved'}

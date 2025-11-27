@@ -8,6 +8,7 @@ import { isAxiosError } from "axios";
 import campusesJson from "./campuses.json";
 import SnackbarProvider from "../components/Snackbar";
 import { formatTime } from "@/utils/timeFormatter";
+import { detectCampus, CampusType } from "@/utils/campusDetector";
 
 type RegisterDataType = {
   userType: string;
@@ -48,8 +49,8 @@ const initialRegisterData: RegisterDataType = {
 const userTypeOptions = ["Student", "External", "Employee"];
 const designationOptions = ["Faculty", "Staff"];
 
-const getTalisayColleges = (data: typeof campusesJson) => {
-  return data["Talisay"].colleges.map((college) => ({
+const getColleges = (data: typeof campusesJson, campus: CampusType) => {
+  return data[campus].colleges.map((college) => ({
     college_code: college.college_code,
     college_description: college.college_description,
   }));
@@ -70,7 +71,8 @@ const Register = () => {
   const [countdown, setCountdown] = React.useState<number>(0);
 
   const recaptcha = React.useRef<ReCAPTCHA>(null);
-  const talisayCollegeOptions = React.useMemo(() => getTalisayColleges(campusesJson), []);
+  const currentCampus = React.useMemo(() => detectCampus(), []);
+  const talisayCollegeOptions = React.useMemo(() => getColleges(campusesJson, currentCampus), [currentCampus]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -82,7 +84,7 @@ const Register = () => {
     setRegisterData((prev) => ({ ...prev, [name]: value }));
 
     if (name === "college") {
-      const selectedCollege = campusesJson["Talisay"].colleges.find((college) => college.college_description === value);
+      const selectedCollege = campusesJson[currentCampus].colleges.find((college) => college.college_description === value);
       setProgramOptions(selectedCollege?.courses || []);
       setRegisterData((prev) => ({ ...prev, program: "" }));
     }

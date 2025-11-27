@@ -1,8 +1,7 @@
 import React from "react";
-import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Tabs, Tab } from "@mui/material";
-import { Edit as EditIcon, Subject as SubjectIcon } from "@mui/icons-material";
+import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Tabs, Tab, Button } from "@mui/material";
+import { Edit as EditIcon, Subject as SubjectIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useNavigate } from "react-router";
 import { AccountDataType } from "./type";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
@@ -16,7 +15,6 @@ const acctPageCache: Record<string, { items: AccountDataType[]; total: number }>
 const acctInflight: Record<string, Promise<{ items: AccountDataType[]; total: number }>> = {};
 
 const ShowAccounts = () => {
-  const navigate = useNavigate();
   const [cookie] = useCookies(["accessToken"]);
 
   // Server-side data + status/tab
@@ -29,7 +27,9 @@ const ShowAccounts = () => {
   const [limit, setLimit] = React.useState(10);
   const [totalCount, setTotalCount] = React.useState(0);
   const offset = (page - 1) * limit;
-
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [selectedAccount, setSelectedAccount] = React.useState<AccountDataType | null>(null);
+  const [editable, setEditable] = React.useState(false);
   // Tabs default to "pending"
   const [tabValue, setTabValue] = React.useState<string>("pending");
   const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -88,6 +88,15 @@ const ShowAccounts = () => {
     }
   }, [cookie.accessToken, offset, limit, tabValue]);
 
+  // ✅ Manual reload function
+  const handleReload = React.useCallback(() => {
+    // Clear cache
+    Object.keys(acctPageCache).forEach((k) => delete acctPageCache[k]);
+    Object.keys(acctInflight).forEach((k) => delete acctInflight[k]);
+    // Refetch current page
+    fetchAccounts();
+  }, [fetchAccounts]);
+
   React.useEffect(() => {
     fetchAccounts();
   }, [fetchAccounts]);
@@ -115,6 +124,7 @@ const ShowAccounts = () => {
       width: 125,
       renderCell: ({ row }: { row: AccountDataType }) => {
         const handleClick = () => {
+          console.log(row);
           setSelectedAccount(row);
           setEditable(row.status === "pending");
           setDialogOpen(true);
@@ -136,14 +146,12 @@ const ShowAccounts = () => {
     data?.map((item: AccountDataType, index: number) => ({
       ...item,
       id: offset + index + 1,
-      user_id: item.id,
+      userId: item.id,
     })) || [];
 
   const totalPages = Math.ceil(totalCount / limit) || 1;
 
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [selectedAccount, setSelectedAccount] = React.useState<AccountDataType | null>(null);
-  const [editable, setEditable] = React.useState(false);
+
 
   const handleDialogClose = () => {
     setDialogOpen(false);
@@ -195,6 +203,8 @@ const ShowAccounts = () => {
     }
   };
 
+
+
   return (
     <React.Suspense fallback={<CustomCircularProgress />}>
       <Typography variant="h6" color="textSecondary" letterSpacing={3} textTransform={"uppercase"} mb={1}>
@@ -202,6 +212,19 @@ const ShowAccounts = () => {
       </Typography>
 
       <Box sx={{ display: "grid", gap: 2 }}>
+        {/* ✅ Add Reload Button */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<RefreshIcon />}
+            onClick={handleReload}
+            disabled={loading}
+          >
+            Reload
+          </Button>
+        </Box>
+
         {/* Tabs */}
         <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
           <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary" centered>

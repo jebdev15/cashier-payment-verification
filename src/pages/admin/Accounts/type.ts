@@ -1,19 +1,19 @@
 export type AccountDataType = {
     id: number;
-    user_id: number;
+    userId: number;
     college: string;
     program: string;
     yearLevel: string;
-    payor_name: string;
-    student_id: string;
+    payor: string;
+    studentId: string;
     email: string;
     firstName: string;
     middleName: string;
     lastName: string;
     status: string;
     userType: string;
-    employee_type?: string;
-    id_number?: string;
+    designation?: string;
+    idNumber?: string;
 }
 
 export type AdminAccountDataType = {
