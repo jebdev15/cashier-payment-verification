@@ -1,6 +1,6 @@
 import React from "react";
-import { Alert, Box, Grid, Typography } from "@mui/material";
-import { CheckCircleOutlined, HourglassEmpty, CancelOutlined } from "@mui/icons-material";
+import { Alert, Box, Grid, Typography, Button } from "@mui/material";
+import { CheckCircleOutlined, HourglassEmpty, CancelOutlined, Refresh as RefreshIcon } from "@mui/icons-material";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import { red, orange, green } from "@mui/material/colors";
@@ -161,6 +161,18 @@ const Dashboard = () => {
       </Typography>
 
       <Box sx={{ display: "grid", gap: 2 }}>
+        {/* Reload Button */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<RefreshIcon />}
+            onClick={refreshDashboard}
+            disabled={loading}
+          >
+            Reload
+          </Button>
+        </Box>
         <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2 }}>
           <Typography variant="h6" mb={2}>
             User Overview

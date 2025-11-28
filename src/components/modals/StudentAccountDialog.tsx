@@ -8,6 +8,7 @@ import { axiosInstanceWithAuthorization } from "@/api/app";
 
 type StudentAccountData = {
   id: string;
+  userId: string;
   payor: string;
   studentId: string;
   email: string;
@@ -48,10 +49,10 @@ const StudentAccountDialog: React.FC<Props> = ({ open, onClose, data, editable =
     try {
       if (formData.status === "rejected") {
         // Delete the account if rejected
-        await axiosInstanceWithAuthorization(accessToken).delete(`/api/users/${formData.id}`);
+        await axiosInstanceWithAuthorization(accessToken).delete(`/api/users/${formData.userId}`);
       } else {
         // Update the account if approved or pending
-        await axiosInstanceWithAuthorization(accessToken).put(`/api/users/${formData.id}`, formData);
+        await axiosInstanceWithAuthorization(accessToken).put(`/api/users/${formData.userId}`, formData);
       }
       onSuccess?.();
       onClose();

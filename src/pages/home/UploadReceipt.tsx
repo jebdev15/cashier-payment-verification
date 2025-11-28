@@ -99,7 +99,7 @@ const UploadReceipt = () => {
   const getParticularLabel = (id: number): string => {
     const particular = particularsData?.find((p) => p.nature_of_collection_id === id);
     return particular
-      ? `${particular.item_title} (${particular.item_abbreviation})`
+      ? particular.item_title
       : String(id);
   };
 
@@ -214,7 +214,10 @@ const UploadReceipt = () => {
                                 label={label}
                                 size="small"
                                 sx={{
-                                  maxWidth: { xs: 120, sm: 160 },
+                                  // maxWidth: { xs: 120, sm: 160 },
+                                  height: "auto !important",
+                                  lineHeight: "normal !important",
+                                  py: 1,
                                   "& .MuiChip-label": {
                                     overflow: "hidden",
                                     textOverflow: "ellipsis",
@@ -346,7 +349,7 @@ const UploadReceipt = () => {
             <Grid size={{ xs: 12, md: 8 }}>
               <Box
                 sx={{
-                  height: { xs: 320, sm: 460 },
+                  height: "100%",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",

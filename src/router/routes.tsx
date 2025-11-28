@@ -28,6 +28,7 @@ const ShowTransactions = React.lazy(() => import("../pages/admin/Transactions/Sh
 const AdminReportsPage = React.lazy(() => import("../pages/admin/Reports"));
 const PrintReportRouter = React.lazy(() => import("../pages/admin/reports/PrintReportRouter"));
 const AdminSettings = React.lazy(() => import("../pages/admin/Settings"));
+const SystemLog = React.lazy(() => import("../pages/admin/SystemLog"));
 export const routes = createBrowserRouter([
     {
         path: "/",
@@ -156,6 +157,16 @@ export const routes = createBrowserRouter([
                         path: "print/:reportType",
                         element: <PrintReportRouter />,
                     }
+                ]
+            },
+            {
+                path: "system-log",
+                errorElement: <RouteErrorElement />,
+                children: [
+                    {
+                        index: true,
+                        element: <SystemLog />,
+                    },
                 ]
             },
             {

@@ -43,13 +43,15 @@ const EmployeeAccountDialog: React.FC<Props> = ({ open, onClose, data, editable 
     if (!formData) return;
     setSaving(true);
     setConfirmOpen(false);
+    const fd = new FormData();
+    fd.append("status", formData.status);
     try {
       if (formData.status === "rejected") {
         // Delete the account if rejected
         await axiosInstanceWithAuthorization(accessToken).delete(`/api/users/${formData.userId}`);
       } else {
         // Update the account if approved or pending
-        await axiosInstanceWithAuthorization(accessToken).put(`/api/users/${formData.userId}`, formData);
+        await axiosInstanceWithAuthorization(accessToken).put(`/api/users/${formData.userId}`, fd);
       }
       onSuccess?.();
       onClose();
