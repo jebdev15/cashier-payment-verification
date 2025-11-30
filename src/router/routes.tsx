@@ -10,10 +10,8 @@ const HomeLayoutContextProvider = React.lazy(() => import("../context/HomeLayout
 const HomeLayout = React.lazy(() => import("../pages/home/Layout"));
 const StatementOfAccount = React.lazy(() => import("../pages/home/StatementOfAccount"));
 const UploadReceipt = React.lazy(() => import("../pages/home/UploadReceipt"));
-const ExternalUploadReceipt = React.lazy(() => import("../pages/home/ExternalUploadReceipt"));
 const ExternalHomePage = React.lazy(() => import("../pages/home/ExternalHomepage"));
 const EmployeeHomePage = React.lazy(() => import("../pages/home/EmployeeHomepage"));
-const EmployeeUploadReceipt = React.lazy(() => import("../pages/home/EmployeeUploadReceipt"));
 const TransactionHistory = React.lazy(() => import("../pages/home/TransactionHistory"));
 
 const AdminLogin = React.lazy(() => import("../pages/admin/Login"));
@@ -71,10 +69,6 @@ export const routes = createBrowserRouter([
                         index: true,
                         element: <ExternalHomePage />,
                     },
-                    {
-                        path: "upload-receipt",
-                        element: <ExternalUploadReceipt />,
-                    },
                 ]
             },
             {
@@ -83,10 +77,6 @@ export const routes = createBrowserRouter([
                     {
                         index: true,
                         element: <EmployeeHomePage />,
-                    },
-                    {
-                        path: "upload-receipt",
-                        element: <EmployeeUploadReceipt />,
                     },
                 ]
             }
@@ -115,10 +105,6 @@ export const routes = createBrowserRouter([
                         index: true,
                         element: <ShowAdminAccounts />,
                     },
-                    // {
-                    //     path: ":id",
-                    //     element: <EditAccount />,
-                    // },
                 ]
             },
             {

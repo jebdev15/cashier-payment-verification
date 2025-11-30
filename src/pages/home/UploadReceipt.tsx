@@ -318,14 +318,13 @@ const UploadReceipt = () => {
                       accept: "image/*"
                     }
                   }}
-                  // inputProps={{ accept: "image/*" }}
                 />
 
                 <Button
                   variant="contained"
                   type="submit"
                   fullWidth
-                  disabled={!image || loading.upload}
+                  disabled={!image || loading.upload || !referenceNumber || !modeOfPayment || selectedParticulars.length === 0}
                   sx={{
                     borderRadius: 3,
                     bgcolor: `color-mix(in srgb, ${theme.palette.primary.main} 75%, transparent)`,
