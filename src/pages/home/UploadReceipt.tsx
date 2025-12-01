@@ -17,9 +17,9 @@ import {
   Grid,
   Stack,
 } from "@mui/material";
-import imageCompression from "browser-image-compression";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { base64ToBlob } from "@/utils/base64ToBlog";
+import { compressImageIfNeeded, fileToBase64 } from "@/utils/imageCompressor";
 import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
 import { useAxios } from "@/hooks/useAxios";
@@ -47,7 +47,7 @@ const UploadReceipt = () => {
   const [referenceId, setReferenceId] = React.useState<string>("");
   const [referenceNumber, setReferenceNumber] = React.useState<string>("");
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("");
-  const [remarks, setRemarks] = React.useState<string>("");
+  const [details, setDetails] = React.useState<string>("");
   const [selectedParticulars, setSelectedParticulars] = React.useState<number[]>([]);
   const [snackbar, setSnackbar] = React.useState({
     open: false,
@@ -65,24 +65,19 @@ const UploadReceipt = () => {
     const file = event.target.files?.[0];
     if (file) {
       try {
-        if (file.size > 2 * 1024 * 1024) {
-          setError("File size exceeds 2 MB. Compressing...");
-        } else {
-          setError(null);
+        setError(null);
+        
+        // Compress image only if it exceeds the size limit (2MB)
+        const { file: processedFile, wasCompressed, message } = await compressImageIfNeeded(file, 2);
+        
+        // Show compression info if compression occurred
+        if (wasCompressed) {
+          setError(message);
         }
 
-        const compressedFile = await imageCompression(file, {
-          maxSizeMB: 2,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-        });
-
-        const reader = new FileReader();
-        reader.onload = () => {
-          setImage(reader.result as string);
-          setError(null);
-        };
-        reader.readAsDataURL(compressedFile);
+        // Convert the processed file to base64
+        const base64String = await fileToBase64(processedFile);
+        setImage(base64String);
         setImageName(file.name);
       } catch (err) {
         console.error(err);
@@ -123,7 +118,7 @@ const UploadReceipt = () => {
       const blob = base64ToBlob(image);
       const formData = new FormData();
       formData.append("receipt", blob || image, imageName);
-      formData.append("remarks", remarks);
+      formData.append("details", details);
       formData.append("referenceId", referenceId);
       formData.append("referenceNumber", referenceNumber);
       formData.append("modeOfPayment", modeOfPayment);
@@ -140,7 +135,7 @@ const UploadReceipt = () => {
         setReferenceId("");
         setReferenceNumber("");
         setModeOfPayment("");
-        setRemarks("");
+        setDetails("");
         setSelectedParticulars([]);
         setImage(null);
         setImageName(undefined);
@@ -300,12 +295,12 @@ const UploadReceipt = () => {
                 />
 
                 <TextField
-                  label="Remarks"
+                  label="Details"
                   fullWidth
                   multiline
                   minRows={2}
-                  value={remarks}
-                  onChange={(e) => setRemarks(e.target.value)}
+                  value={details}
+                  onChange={(e) => setDetails(e.target.value)}
                 />
 
                 <TextField

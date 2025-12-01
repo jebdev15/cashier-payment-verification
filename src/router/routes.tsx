@@ -21,7 +21,6 @@ const Dashboard = React.lazy(() => import("../pages/admin/Dashboard"));
 const ShowAccounts = React.lazy(() => import("../pages/admin/Accounts/ShowAccounts"));
 const EditAccount = React.lazy(() => import("../pages/admin/Accounts/EditAccount"));
 const ShowAdminAccounts = React.lazy(() => import("../pages/admin/Accounts/AdminAccounts"));
-// const EditAdminAccount = React.lazy(() => import("../pages/admin/Accounts/EditAdminAccount"));
 const ShowTransactions = React.lazy(() => import("../pages/admin/Transactions/ShowTransactions"));
 const AdminReportsPage = React.lazy(() => import("../pages/admin/Reports"));
 const PrintReportRouter = React.lazy(() => import("../pages/admin/reports/PrintReportRouter"));
@@ -64,21 +63,11 @@ export const routes = createBrowserRouter([
             },
             {
                 path: "external",
-                children: [
-                    {
-                        index: true,
-                        element: <ExternalHomePage />,
-                    },
-                ]
+                element: <ExternalHomePage />,
             },
             {
                 path: "employee",
-                children: [
-                    {
-                        index: true,
-                        element: <EmployeeHomePage />,
-                    },
-                ]
+                element: <EmployeeHomePage />,
             }
         ],
     },

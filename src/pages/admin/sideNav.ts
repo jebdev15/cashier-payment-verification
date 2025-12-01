@@ -1,7 +1,7 @@
 import {
   Dashboard as DashboardIcon,
   People as PeopleIcon,
-  History as HistoryIcon,
+  // History as HistoryIcon,
   Repeat as TransactionsIcon,
   SupervisorAccount as SupervisorAccountIcon,
   Article as ReportIcon,
@@ -39,12 +39,12 @@ export const sideNav = [
     abbreviation: "rp",
     icon: ReportIcon,
   },
-  {
-    path: "/system-log",
-    label: "System Log",
-    abbreviation: "sl",
-    icon: HistoryIcon,
-  }
+  // {
+  //   path: "/system-log",
+  //   label: "System Log",
+  //   abbreviation: "sl",
+  //   icon: HistoryIcon,
+  // }
   // {
   //   path: "/settings",
   //   label: "Settings",

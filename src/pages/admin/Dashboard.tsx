@@ -5,13 +5,23 @@ import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import { red, orange, green } from "@mui/material/colors";
 
+// Types
+type DashboardData = {
+  totalActiveUsers?: number;
+  totalPendingUsers?: number;
+  totalRejectedUsers?: number;
+  totalApprovedTransactions?: number;
+  totalPendingTransactions?: number;
+  totalRejectedTransactions?: number;
+};
+
 // Module-level cache + inflight promise for dashboard
-let dashboardCache: any | null = null;
-let dashboardInflight: Promise<any> | null = null;
+let dashboardCache: DashboardData | null = null;
+let dashboardInflight: Promise<DashboardData> | null = null;
 
 const Dashboard = () => {
   const [{ accessToken }] = useCookies(["accessToken"]);
-  const [data, setData] = React.useState<any | null>(dashboardCache);
+  const [data, setData] = React.useState<DashboardData | null>(dashboardCache);
   const [loading, setLoading] = React.useState<boolean>(!dashboardCache);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -30,16 +40,12 @@ const Dashboard = () => {
 
       if (!dashboardInflight) {
         dashboardInflight = (async () => {
-          try {
-            const res = await axiosInstanceWithAuthorization(accessToken).get("/api/users/dashboard");
-            if (res.status === 200) {
-              dashboardCache = res.data;
-              return dashboardCache;
-            }
-            throw new Error("Failed to load dashboard");
-          } catch (err: any) {
-            throw err;
+          const res = await axiosInstanceWithAuthorization(accessToken).get("/api/users/dashboard");
+          if (res.status === 200) {
+            dashboardCache = res.data;
+            return dashboardCache as DashboardData;
           }
+          throw new Error("Failed to load dashboard");
         })();
       }
 
@@ -47,9 +53,10 @@ const Dashboard = () => {
         const result = await dashboardInflight;
         if (cancelled) return;
         setData(result);
-      } catch (err: any) {
+      } catch (err) {
         if (cancelled) return;
-        setError(err?.message || "Failed to load dashboard");
+        const error = err as { message?: string };
+        setError(error?.message || "Failed to load dashboard");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -77,8 +84,9 @@ const Dashboard = () => {
           dashboardCache = res.data;
           setData(res.data);
         }
-      } catch (err: any) {
-        setError(err?.message || "Failed to load dashboard");
+      } catch (err) {
+        const error = err as { message?: string };
+        setError(error?.message || "Failed to load dashboard");
       } finally {
         setLoading(false);
       }
@@ -131,7 +139,14 @@ const Dashboard = () => {
     },
   ];
 
-  const StatCard = ({ label, value, icon, color }: any) => (
+  type StatCardProps = {
+    label: string;
+    value: number;
+    icon: React.ReactNode;
+    color: string;
+  };
+
+  const StatCard = ({ label, value, icon, color }: StatCardProps) => (
     <Box
       sx={{
         py: 3,
