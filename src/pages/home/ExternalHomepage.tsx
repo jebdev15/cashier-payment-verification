@@ -8,18 +8,18 @@ import { jwtDecode } from "jwt-decode";
 const ExternalHomePage = () => {
   const [cookie] = useCookies(['accessToken']);
   const navigate = useNavigate();
-  const [payorName, setPayorName] = React.useState<string>("External User");
+  const [payor, setPayor] = React.useState<string>("External User");
   React.useEffect(() => {
       if(cookie) {
-        const { payor_name } = jwtDecode<{ payor_name: string }>(cookie.accessToken);
-        setPayorName(payor_name);
+        const { payor } = jwtDecode<{ payor: string }>(cookie.accessToken);
+        setPayor(payor);
       }
     },[cookie]);
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
       <Box sx={{ p: 2 }}>
         <Typography variant="h4" gutterBottom>
-          Welcome, {payorName}!
+          Welcome, {payor}!
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" mb={3}>
           Submit your receipts and monitor your transaction verification.

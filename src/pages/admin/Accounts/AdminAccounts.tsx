@@ -7,8 +7,8 @@ import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import CustomCircularProgress from "@/components/CustomCircularProgress";
 import { formatAccessLevel } from "@/utils/formatAccessLevel";
-import AdminUserAddDialog from "@/components/modals/AdminUserAddDialog";
-import AdminUserEditDialog from "@/components/modals/AdminUserEditDialog";
+import AdminUserAddDialog from "@/components/modals/admin/AdminUserAddDialog";
+import AdminUserEditDialog from "@/components/modals/admin/AdminUserEditDialog";
 import { useSysUsersCache } from "@/hooks/useSysUsersCache";
 import { formatAdminDepartment } from "@/utils/formatAdminDepartment";
 

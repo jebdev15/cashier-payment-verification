@@ -7,7 +7,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import ReceiptViewerComponent from "../ReceiptViewerComponent";
+import ReceiptViewerComponent from "../../ReceiptViewerComponent";
 
 type Props = {
     open: boolean;

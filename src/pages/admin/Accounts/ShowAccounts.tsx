@@ -6,9 +6,9 @@ import { AccountDataType } from "./type";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
 import CustomCircularProgress from "@/components/CustomCircularProgress";
-import StudentAccountDialog from "@/components/modals/StudentAccountDialog";
-import EmployeeAccountDialog from "@/components/modals/EmployeeAccountDialog";
-import ExternalAccountDialog from "@/components/modals/ExternalAccountDialog";
+import StudentAccountDialog from "@/components/modals/admin/StudentAccountDialog";
+import EmployeeAccountDialog from "@/components/modals/admin/EmployeeAccountDialog";
+import ExternalAccountDialog from "@/components/modals/admin/ExternalAccountDialog";
 
 // Simple module-level cache keyed by "status:offset:limit"
 const acctPageCache: Record<string, { items: AccountDataType[]; total: number }> = {};
@@ -104,7 +104,7 @@ const ShowAccounts = () => {
   const columns = [
     { field: "id", headerName: "No.", width: 100 },
     { field: "userType", headerName: "User Type", minWidth: 50 },
-    { field: "payorName", headerName: "Name", minWidth: 150, flex: 1 },
+    { field: "payor", headerName: "Name", minWidth: 150, flex: 1 },
     { field: "email", headerName: "Email Address", minWidth: 100, flex: 1 },
     {
       field: "status",
@@ -231,7 +231,7 @@ const ShowAccounts = () => {
             <Tab label="All" value="all" />
             <Tab label="Pending" value="pending" />
             <Tab label="Approved" value="approved" />
-            <Tab label="Rejected" value="rejected" />
+            {/* <Tab label="Rejected" value="rejected" /> */}
           </Tabs>
 
           {/* Table */}

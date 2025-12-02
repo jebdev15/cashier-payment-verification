@@ -2,13 +2,12 @@ import React from "react";
 import { Alert, Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { Subject as SubjectIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useAxios } from "../../hooks/useAxios";
-// import TransactionModal from "@/components/modals/TransactionModal";
-import TransactionModalForStudent from "@/components/modals/TransactionDialogForStudent";
-import TransactionModalForEmployee from "@/components/modals/TransactionDialogForEmployee";
-import TransactionModalForExternal from "@/components/modals/TransactionDialogForExternal";
+import { useAxios } from "@/hooks/useAxios";
+import TransactionModalForStudent from "@/components/modals/home/TransactionDialogForStudent";
+import TransactionModalForEmployee from "@/components/modals/home/TransactionDialogForEmployee";
+import TransactionModalForExternal from "@/components/modals/home/TransactionDialogForExternal";
 import CustomCircularProgress from "@/components/CustomCircularProgress";
-import { TransactionDataType } from "../admin/Transactions/type";
+import { TransactionDataType } from "@/pages/admin/Transactions/type";
 const TransactionHistory = () => {
   const [rows, setRows] = React.useState<any[]>([]);
   const [open, setOpen] = React.useState(false);
@@ -20,9 +19,9 @@ const TransactionHistory = () => {
 
   const columns = [
     { field: "_id", headerName: "No.", width: 100 },
-    { field: "reference_id", headerName: "Reference ID", minWidth: 250, flex: 1.5 },
+    { field: "referenceId", headerName: "Reference ID", minWidth: 250, flex: 1.5 },
     { field: "status", headerName: "Status", minWidth: 175, flex: 1.5 },
-    { field: "created_at", headerName: "Created At", minWidth: 200, flex: 1, valueGetter: (value: string) => new Date(value).toLocaleString() },
+    { field: "createdAt", headerName: "Created At", minWidth: 200, flex: 1, valueGetter: (value: string) => new Date(value).toLocaleString() },
     {
       field: "action",
       headerName: "Action",
@@ -31,6 +30,7 @@ const TransactionHistory = () => {
         const handleClick = () => {
           setOpen(true);
           setSelectedRow(row);
+          console.log("Selected Row:", row);
         };
         return (
           <Tooltip title="View">
@@ -72,9 +72,6 @@ const TransactionHistory = () => {
       </Typography>
       <Box sx={{ display: "grid", gap: 2 }}>
         <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
-          {/* <Typography variant="h6" mb={2}>
-            Transactions
-          </Typography> */}
           <Box sx={{ maxHeight: "calc(100dvh - 225px)", overflow: "auto" }}>
             <DataGrid
               rows={rows}

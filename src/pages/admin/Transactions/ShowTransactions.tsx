@@ -5,9 +5,9 @@ import { DataGrid } from "@mui/x-data-grid";
 import { TransactionDataType } from "./type";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
-import TransactionDialogForStudent from "@/components/modals/TransactionDialogForStudent";
-import TransactionDialogForExternal from "@/components/modals/TransactionDialogForExternal";
-import TransactionDialogForEmployee from "@/components/modals/TransactionDialogForEmployee";
+import TransactionDialogForStudent from "@/components/modals/admin/TransactionDialogForStudent";
+import TransactionDialogForExternal from "@/components/modals/admin/TransactionDialogForExternal";
+import TransactionDialogForEmployee from "@/components/modals/admin/TransactionDialogForEmployee";
 
 // Simple module-level cache keyed by "status:offset:limit"
 const txPageCache: Record<string, { items: TransactionDataType[]; total: number }> = {};

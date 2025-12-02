@@ -9,7 +9,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { axiosInstance } from "@/api/app";
 import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import ReceiptViewerComponent from "../ReceiptViewerComponent";
+import ReceiptViewerComponent from "../../ReceiptViewerComponent";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode";
 
