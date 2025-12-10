@@ -79,6 +79,21 @@ const Register = () => {
     setRegisterData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Capitalize text for name fields
+  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    // Capitalize: first letter uppercase, rest lowercase
+    const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+    setRegisterData((prev) => ({ ...prev, [name]: capitalizedValue }));
+  };
+
+  // Uppercase for ID fields
+  const handleIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const uppercaseValue = value.toUpperCase();
+    setRegisterData((prev) => ({ ...prev, [name]: uppercaseValue }));
+  };
+
   const handleChangeSelect = (event: SelectChangeEvent<string>) => {
     const { name, value } = event.target;
     setRegisterData((prev) => ({ ...prev, [name]: value }));
@@ -126,18 +141,26 @@ const Register = () => {
 
     try {
       const formData = new FormData();
-      const payorName = registerData.userType === "External" ? registerData.payor_name : `${registerData.lastName.toUpperCase()}, ${registerData.firstName.toUpperCase()} ${registerData?.middleName?.toLowerCase() || ""}`;
+      // Ensure all names are capitalized during submission
+      const firstName = registerData.firstName.charAt(0).toUpperCase() + registerData.firstName.slice(1).toLowerCase();
+      const middleName = registerData.middleName ? registerData.middleName.charAt(0).toUpperCase() + registerData.middleName.slice(1).toLowerCase() : "";
+      const lastName = registerData.lastName.charAt(0).toUpperCase() + registerData.lastName.slice(1).toLowerCase();
+      const payorName = registerData.userType === "External" 
+        ? registerData.payor_name.charAt(0).toUpperCase() + registerData.payor_name.slice(1).toLowerCase()
+        : `${lastName}, ${firstName} ${middleName || ""}`;
+      const studentId = registerData.studentId.toUpperCase();
+      const idNumber = registerData.idNumber.toUpperCase();
       formData.append("userType", registerData.userType);
       formData.append("college", registerData.college);
       formData.append("program", registerData.program);
       formData.append("yearLevel", registerData.yearLevel);
       formData.append("payorName", payorName);
-      formData.append("studentId", registerData.studentId);
-      formData.append("idNumber", registerData.idNumber);
+      formData.append("studentId", studentId);
+      formData.append("idNumber", idNumber);
       formData.append("designation", registerData.designation);
-      formData.append("firstName", registerData.firstName);
-      formData.append("middleName", registerData.middleName);
-      formData.append("lastName", registerData.lastName);
+      formData.append("firstName", firstName);
+      formData.append("middleName", middleName);
+      formData.append("lastName", lastName);
       formData.append("contactNumber", registerData.contactNumber);
       formData.append("email", registerData.email);
       formData.append("code", registerData.code);
@@ -158,7 +181,7 @@ const Register = () => {
 
   // const { middleName, ...requiredFields } = registerData;
   // const disableButton = Object.values(requiredFields).some((val) => val === "") || loading.registrationForm;
-  const disableButton = loading.registrationForm || loading.sendCode || !registerData.recaptchaToken;
+  const disableButton = loading.registrationForm || loading.sendCode || !registerData.code || !registerData.recaptchaToken;
   React.useEffect(() => {
     if (countdown <= 0) return;
     const interval = setInterval(() => {
@@ -298,7 +321,7 @@ const Register = () => {
               label="Student ID"
               name="studentId"
               value={registerData.studentId}
-              onChange={handleChange}
+              onChange={handleIdChange}
               slotProps={{
                 htmlInput: { maxLength: 12 },
                 input: {
@@ -316,7 +339,7 @@ const Register = () => {
               label="First Name"
               name="firstName"
               value={registerData.firstName}
-              onChange={handleChange}
+              onChange={handleNameChange}
               slotProps={{
                 input: {
                   sx: { input: { px: 1 } },
@@ -332,7 +355,7 @@ const Register = () => {
               label="Middle Name"
               name="middleName"
               value={registerData.middleName}
-              onChange={handleChange}
+              onChange={handleNameChange}
               slotProps={{
                 input: {
                   sx: { input: { px: 1 } },
@@ -347,7 +370,7 @@ const Register = () => {
               label="Last Name"
               name="lastName"
               value={registerData.lastName}
-              onChange={handleChange}
+              onChange={handleNameChange}
               slotProps={{
                 input: {
                   sx: { input: { px: 1 } },
@@ -367,7 +390,7 @@ const Register = () => {
             label="Name of Institution/Agency"
             name="payor_name"
             value={registerData.payor_name}
-            onChange={handleChange}
+            onChange={handleNameChange}
             slotProps={{
               input: {
                 sx: { input: { px: 1 } },
@@ -413,7 +436,7 @@ const Register = () => {
               label="ID Number"
               name="idNumber"
               value={registerData.idNumber}
-              onChange={handleChange}
+              onChange={handleIdChange}
               slotProps={{
                 htmlInput: { maxLength: 12 },
                 input: {
@@ -431,7 +454,7 @@ const Register = () => {
               label="First Name"
               name="firstName"
               value={registerData.firstName}
-              onChange={handleChange}
+              onChange={handleNameChange}
               slotProps={{
                 input: {
                   sx: { input: { px: 1 } },
@@ -447,7 +470,7 @@ const Register = () => {
               label="Middle Name"
               name="middleName"
               value={registerData.middleName}
-              onChange={handleChange}
+              onChange={handleNameChange}
               slotProps={{
                 input: {
                   sx: { input: { px: 1 } },
@@ -462,7 +485,7 @@ const Register = () => {
               label="Last Name"
               name="lastName"
               value={registerData.lastName}
-              onChange={handleChange}
+              onChange={handleNameChange}
               slotProps={{
                 input: {
                   sx: { input: { px: 1 } },

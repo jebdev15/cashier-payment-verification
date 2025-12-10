@@ -119,6 +119,28 @@ const ShowAccounts = () => {
       },
     },
     {
+      field: "hasMatchingRecord",
+      headerName: "Match Found",
+      width: 130,
+      renderCell: ({ row }: { row: AccountDataType }) => {
+        if (row.status !== "pending") return null;
+        const hasMatch = row.hasMatchingRecord === 1;
+        return (
+          <Tooltip title={hasMatch ? "Matching record found in database" : "No matching record found"}>
+            <Typography 
+              variant="caption" 
+              sx={{ 
+                color: hasMatch ? "green" : "gray",
+                fontWeight: hasMatch ? "bold" : "normal"
+              }}
+            >
+              {hasMatch ? "✓ MATCH" : "NO MATCH"}
+            </Typography>
+          </Tooltip>
+        );
+      },
+    },
+    {
       field: "action",
       headerName: "Action",
       width: 125,

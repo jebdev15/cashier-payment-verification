@@ -14,6 +14,7 @@ export type AccountDataType = {
     userType: string;
     designation?: string;
     idNumber?: string;
+    hasMatchingRecord?: number;
 }
 
 export type AdminAccountDataType = {
