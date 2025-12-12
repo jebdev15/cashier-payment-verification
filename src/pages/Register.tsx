@@ -306,7 +306,7 @@ const Register = () => {
               }}
               required={registerData.userType === "Student"}
             >
-              {["1", "2", "3", "4"].map((yearLevel, i) => (
+              {["1", "2", "3", "4", "5"].map((yearLevel, i) => (
                 <MenuItem sx={{ whiteSpace: "normal !important" }} key={i} value={yearLevel}>
                   {yearLevel}
                 </MenuItem>

@@ -1,1 +1,1 @@
-export const modeOfPaymentOptions = ["Direct Bank Deposit - Check", "Direct Bank Deposit - Cash", "LBP LinkBiz", "LDDAP-ADA", "Online Bank Transfer"];
+export const modeOfPaymentOptions = ["Direct Bank Deposit - Check", "Direct Bank Deposit - Cash", "LBP LinkBiz", "LDDAP-ADA/eMDS", "Online Bank Transfer"];

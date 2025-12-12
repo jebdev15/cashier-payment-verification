@@ -73,7 +73,7 @@ const Login = () => {
           path: "/",
           expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1), // 1 day
         });
-        navigate(redirectTo, { replace: true });
+        navigate('/home', { replace: true });
         resolve();
       }, 1000);
     });

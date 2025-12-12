@@ -1,5 +1,5 @@
 import {
-    AccountBalance as AccountBalanceIcon,
+    Home as HomeIcon,
     FileUpload as FileUploadIcon,
     History as HistoryIcon
 } from '@mui/icons-material'
@@ -7,9 +7,9 @@ import {
 export const sideNav = [
     {
         path: "",
-        label: "Statement of Account",
-        abbreviation: "sao",
-        icon: AccountBalanceIcon,
+        label: "Home",
+        abbreviation: "home",
+        icon: HomeIcon,
         userType: ["Student"]
     },
     {

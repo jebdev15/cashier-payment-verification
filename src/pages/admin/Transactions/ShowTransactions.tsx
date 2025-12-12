@@ -205,6 +205,7 @@ const ShowTransactions = () => {
       formData.append("checkedItems", JSON.stringify(updatedData.checkedItems || []));
       formData.append("miscellaneousFees", JSON.stringify(miscFee || []));
       formData.append("userType", updatedData.userType || "");
+      formData.append("adminParticulars", JSON.stringify(updatedData.adminParticulars || []));
       formData.append(
         "distribution",
         JSON.stringify(
@@ -218,7 +219,7 @@ const ShowTransactions = () => {
       );
 
       const response = await axiosInstanceWithAuthorization(cookie.accessToken).put(
-        `/api/transactions/${updatedData.id}`,
+        `/api/admin-transactions/${updatedData.id}`,
         formData
       );
 

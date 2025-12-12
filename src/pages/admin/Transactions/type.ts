@@ -33,6 +33,9 @@ export type TransactionDataType = {
     selectedAccount?: string;
     miscellaneousFees?: any[];
     distribution?: { miscellaneous: number; tuition: number; totalPayable: number; accountsPayable: number; };
+    payorParticulars?: string | any[]; // Particulars selected by payor during upload
+    adminParticulars?: number[]; // Particulars selected by admin during approval
+    entryMode?: string;
 };
 
 export type SnackbarState = {

@@ -3,7 +3,7 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
     Button, Grid, Typography, Select, MenuItem, IconButton,
     Checkbox, Table, TableBody, TableCell, TableHead, TableRow,
-    Divider, FormControl, InputLabel
+    Divider, FormControl, InputLabel, Chip, Box, ListItemText
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { axiosInstance } from "@/api/app";
@@ -54,6 +54,9 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
     const [miscellaneousFees, setMiscellaneousFees] = React.useState<any[]>([]);
     const [tuitionFee, setTuitionFee] = React.useState<string>("0.00");
+    const [adminParticulars, setAdminParticulars] = React.useState<number[]>([]);
+    const [payorParticulars, setPayorParticulars] = React.useState<any[]>([]);
+    const [allParticulars, setAllParticulars] = React.useState<any[]>([]);
     // const [miscellaneousFeesBalance, setMiscellaneousFeesBalance] = React.useState<string>("0.00");
     const [distribution, setDistribution] = React.useState({
         miscellaneous: 0,
@@ -89,7 +92,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     // 🔹 Handle submit
     const handleSubmit = () => {
         if (editable && formData && onSave) {
-            onSave({ ...formData, checkedItems, miscellaneousFees, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount, distribution });
+            onSave({ ...formData, checkedItems, miscellaneousFees, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount, distribution, adminParticulars });
         }
     };
 
@@ -102,7 +105,33 @@ const TransactionDialogForStudent: React.FC<Props> = ({
             // Optional: only display image if it's .jpg, .jpeg, .png
             const validImage = typeof filePath === "string" && /\.(jpg|jpeg|png)$/i.test(filePath);
             if (validImage) setImage(imageUrl);
+            
+            // Parse payor particulars
+            if (data.payorParticulars) {
+                try {
+                    const parsed = typeof data.payorParticulars === 'string' 
+                        ? JSON.parse(data.payorParticulars) 
+                        : data.payorParticulars;
+                    setPayorParticulars(Array.isArray(parsed) ? parsed : []);
+                } catch (e) {
+                    console.error('Failed to parse payor particulars:', e);
+                    setPayorParticulars([]);
+                }
+            }
         }
+        
+        // Fetch all available particulars
+        const fetchParticulars = async () => {
+            try {
+                const response = await axiosInstance.get('/api/particulars');
+                if (response.data) {
+                    setAllParticulars(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching particulars:', error);
+            }
+        };
+        fetchParticulars();
     }, [data]);
     React.useEffect(() => {
         const fetchStudentMiscellaneousFees = async () => {
@@ -419,28 +448,71 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                 <MenuItem value="GS">GS</MenuItem>
                             </Select>
                         </FormControl>
+                        {/* Display Payor's Selected Particulars */}
+                        {payorParticulars && payorParticulars.length > 0 && (
+                            <Box sx={{ mb: 2 }}>
+                                <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1 }}>
+                                    Particulars Selected by Payor:
+                                </Typography>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                    {payorParticulars.map((particular, index) => {
+                                        const particularName = typeof particular === 'object' && particular?.name 
+                                            ? particular.name 
+                                            : (allParticulars.find(p => p.particular_id === particular)?.particular_name || `ID: ${particular}`);
+                                        return (
+                                            <Chip 
+                                                key={index} 
+                                                label={particularName} 
+                                                size="small" 
+                                                color="info"
+                                                variant="outlined"
+                                            />
+                                        );
+                                    })}
+                                </Box>
+                            </Box>
+                        )}
+                        
+                        {/* Admin Particulars Multi-Select */}
                         <FormControl fullWidth disabled={!selectedAccount}>
-                            <InputLabel id="particular-select">Particulars</InputLabel>
+                            <InputLabel id="admin-particulars-select">Admin Particulars (Multiple Selection)</InputLabel>
                             <Select
-                                labelId="particular-select"
-                                value={formData?.particulars}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({ ...prev, particulars: e.target.value }))
-                                }
-                                label="Particulars"
+                                labelId="admin-particulars-select"
+                                multiple
+                                value={adminParticulars}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setAdminParticulars(typeof value === 'string' ? [] : value);
+                                }}
+                                label="Admin Particulars (Multiple Selection)"
                                 margin="dense"
                                 disabled={!editable || !selectedAccount || formData?.status !== 'approved'}
-                                inputProps={{
-                                    sx: {
-                                        whiteSpace: "normal !important",
-                                    },
-                                }}
+                                renderValue={(selected) => (
+                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                        {selected.map((value) => {
+                                            const particular = allParticulars.find(p => p.particular_id === value);
+                                            return (
+                                                <Chip 
+                                                    key={value} 
+                                                    label={particular?.particular_name || value} 
+                                                    size="small" 
+                                                />
+                                            );
+                                        })}
+                                    </Box>
+                                )}
                             >
-                                {filteredParticulars.map((name, index) => (
-                                    <MenuItem key={index} value={name} sx={{ whiteSpace: "normal !important" }}>
-                                        {name}
-                                    </MenuItem>
-                                ))}
+                                {allParticulars
+                                    .filter(p => p.student_type === selectedAccount)
+                                    .map((particular) => (
+                                        <MenuItem key={particular.particular_id} value={particular.particular_id}>
+                                            <Checkbox checked={adminParticulars.indexOf(particular.particular_id) > -1} />
+                                            <ListItemText 
+                                                primary={particular.particular_name} 
+                                                sx={{ whiteSpace: "normal !important" }}
+                                            />
+                                        </MenuItem>
+                                    ))}
                             </Select>
                         </FormControl>
                         <FormControl fullWidth  >

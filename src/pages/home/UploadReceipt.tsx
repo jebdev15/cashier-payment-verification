@@ -16,6 +16,7 @@ import {
   Tooltip,
   Grid,
   Stack,
+  FormLabel,
 } from "@mui/material";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { base64ToBlob } from "@/utils/base64ToBlog";
@@ -63,27 +64,38 @@ const UploadReceipt = () => {
 
   const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      try {
-        setError(null);
-        
-        // Compress image only if it exceeds the size limit (2MB)
-        const { file: processedFile, wasCompressed, message } = await compressImageIfNeeded(file, 2);
-        
-        // Show compression info if compression occurred
-        if (wasCompressed) {
-          setError(message);
-        }
+    if (!file) return;
 
-        // Convert the processed file to base64
-        const base64String = await fileToBase64(processedFile);
-        setImage(base64String);
-        setImageName(file.name);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to process the image. Please try again.");
-      }
+    // Validate file is an image
+    const isImage = file.type ? file.type.startsWith("image/") : /\.(jpe?g|png)$/i.test(file.name);
+    if (!isImage) {
+      setSnackbar({ open: true, message: "Only image files are allowed (jpg, png)", severity: "error" });
+      // clear the file input so user can reselect
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
+
+    try {
+      setError(null);
+
+      // Compress image only if it exceeds the size limit (2MB)
+      const { file: processedFile, wasCompressed, message } = await compressImageIfNeeded(file, 2);
+
+      // Show compression info if compression occurred
+      if (wasCompressed) {
+        setError(message);
+      }
+
+      // Convert the processed file to base64
+      const base64String = await fileToBase64(processedFile);
+      setImage(base64String);
+      setImageName(file.name);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to process the image. Please try again.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+    
   };
 
   const handleParticularsChange = (event: SelectChangeEvent<number[]>) => {
@@ -291,7 +303,7 @@ const UploadReceipt = () => {
                   fullWidth
                   value={referenceNumber}
                   onChange={(e) => setReferenceNumber(e.target.value)}
-                  slotProps={{ htmlInput: { maxLength: 64 } }}
+                  slotProps={{ htmlInput: { maxLength: 20 } }}
                 />
 
                 <TextField
@@ -302,18 +314,25 @@ const UploadReceipt = () => {
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                 />
+                <FormControl fullWidth>
+                  <TextField
+                    type="file"
+                    fullWidth
+                    onChange={handleChangeFile}
+                    inputRef={fileInputRef}
+                    slotProps={{
+                      htmlInput: {
+                        accept: "image/*"
+                      }
+                    }}
+                  />
+                  <FormLabel sx={{ mt: 1, fontSize: 12, color: "text.secondary" }}>
+                    <Alert severity="info" sx={{ p: 1, fontSize: 12 }}>
+                    Proof of satisfaction that the amount is already credited to the CHMSU account (e.g., validated bank deposit slip, fund transfer receipt, online/mobile banking confirmation, etc.).
+                    </Alert>
+                  </FormLabel>
+                </FormControl>
 
-                <TextField
-                  type="file"
-                  fullWidth
-                  onChange={handleChangeFile}
-                  inputRef={fileInputRef}
-                  slotProps={{
-                    htmlInput: {
-                      accept: "image/*"
-                    }
-                  }}
-                />
 
                 <Button
                   variant="contained"

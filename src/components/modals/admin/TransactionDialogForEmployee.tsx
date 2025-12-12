@@ -2,9 +2,10 @@ import React from "react";
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
     Button, Grid, Typography, Select, MenuItem, IconButton,
-    Divider, FormControl, InputLabel
+    Divider, FormControl, InputLabel, Chip, Box, ListItemText, Checkbox
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { axiosInstance } from "@/api/app";
 import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
 import ReceiptViewerComponent from "../../ReceiptViewerComponent";
@@ -36,7 +37,9 @@ const TransactionModal: React.FC<Props> = ({
     const [details, setDetails] = React.useState<string>("");
     const [selectedAccount, setSelectedAccount] = React.useState("");
     const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
-    const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
+    const [adminParticulars, setAdminParticulars] = React.useState<number[]>([]);
+    const [payorParticulars, setPayorParticulars] = React.useState<any[]>([]);
+    const [allParticulars, setAllParticulars] = React.useState<any[]>([]);
 
     // 🔹 Handle text inputs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -48,7 +51,7 @@ const TransactionModal: React.FC<Props> = ({
     // 🔹 Handle submit
     const handleSubmit = () => {
         if (editable && formData && onSave) {
-            onSave({ ...formData, checkedItems, entryMode: '1', details, remarks, amountToPay, amountTendered, selectedAccount });
+            onSave({ ...formData, details, remarks, amountToPay, amountTendered, selectedAccount, adminParticulars });
         }
     };
 
@@ -58,6 +61,32 @@ const TransactionModal: React.FC<Props> = ({
             const url = `${import.meta.env.VITE_API_URL}/${data.filePath}`;
             if (/\.(jpg|jpeg|png)$/i.test(data.filePath)) setImage(url);
         }
+        
+        // Parse payor particulars
+        if (data?.payorParticulars) {
+            try {
+                const parsed = typeof data.payorParticulars === 'string' 
+                    ? JSON.parse(data.payorParticulars) 
+                    : data.payorParticulars;
+                setPayorParticulars(Array.isArray(parsed) ? parsed : []);
+            } catch (e) {
+                console.error('Failed to parse payor particulars:', e);
+                setPayorParticulars([]);
+            }
+        }
+        
+        // Fetch all available particulars
+        const fetchParticulars = async () => {
+            try {
+                const response = await axiosInstance.get('/api/particulars');
+                if (response.data) {
+                    setAllParticulars(response.data);
+                }
+            } catch (error) {
+                console.error('Error fetching particulars:', error);
+            }
+        };
+        fetchParticulars();
     }, [data]);
 
     // 🔹 Update particulars when account changes
@@ -74,7 +103,7 @@ const TransactionModal: React.FC<Props> = ({
     React.useEffect(() => {
         const fd = formData ?? data;
         if (!editable && (fd?.status ?? data?.status) === 'approved') {
-            setSelectedAccount(fd.accountType ?? "");
+            setSelectedAccount(fd.fundCluster ?? "");
             setDetails(fd.details ?? "");
             setRemarks(fd.remarks ?? "");
             setAmountTendered(parseFloat((fd.amountTendered ?? "0").toString()));
@@ -93,7 +122,7 @@ const TransactionModal: React.FC<Props> = ({
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <TextField
-                    label="Name of Employee"
+                    label="Payor"
                     name="payor"
                     value={formData?.payor || ""}
                     onChange={handleChange}
@@ -157,16 +186,6 @@ const TransactionModal: React.FC<Props> = ({
                     Payment Details
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
-                {/* <FormControl fullWidth margin="dense">
-                    <TextField
-                        label="Mode of Payment"
-                        type="text"
-                        name="modeOfPayment"
-                        value={formData?.modeOfPayment || ""}
-                        fullWidth
-                        disabled
-                    />
-                </FormControl> */}
                 <FormControl fullWidth margin="dense">
                     <InputLabel id="account-select">Fund Cluster</InputLabel>
                     <Select
@@ -184,28 +203,71 @@ const TransactionModal: React.FC<Props> = ({
                         <MenuItem value="GS">GS</MenuItem>
                     </Select>
                 </FormControl>
+                {/* Display Payor's Selected Particulars */}
+                {payorParticulars && payorParticulars.length > 0 && (
+                    <Box sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" color="textSecondary" sx={{ mb: 1 }}>
+                            Particulars Selected by Payor:
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            {payorParticulars.map((particular, index) => {
+                                const particularName = typeof particular === 'object' && particular?.name 
+                                    ? particular.name 
+                                    : (allParticulars.find(p => p.particular_id === particular)?.particular_name || `ID: ${particular}`);
+                                return (
+                                    <Chip 
+                                        key={index} 
+                                        label={particularName} 
+                                        size="small" 
+                                        color="info"
+                                        variant="outlined"
+                                    />
+                                );
+                            })}
+                        </Box>
+                    </Box>
+                )}
+                
+                {/* Admin Particulars Multi-Select */}
                 <FormControl fullWidth disabled={!selectedAccount} margin="dense">
-                    <InputLabel id="particular-select">Particulars</InputLabel>
+                    <InputLabel id="admin-particulars-select">Admin Particulars (Multiple Selection)</InputLabel>
                     <Select
-                        labelId="particular-select"
-                        value={formData?.particulars}
-                        onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, particulars: e.target.value }))
-                        }
-                        label="Particulars"
+                        labelId="admin-particulars-select"
+                        multiple
+                        value={filteredParticulars}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setAdminParticulars(typeof value === 'string' ? [] : value);
+                        }}
+                        label="Admin Particulars (Multiple Selection)"
                         margin="dense"
                         disabled={!editable || !selectedAccount || formData?.status !== 'approved'}
-                        inputProps={{
-                            sx: {
-                                whiteSpace: "normal !important",
-                            },
-                        }}
+                        renderValue={(selected) => (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                {selected.map((value) => {
+                                    const particular = allParticulars.find(p => p.particular_id === value);
+                                    return (
+                                        <Chip 
+                                            key={value} 
+                                            label={particular?.particular_name || value} 
+                                            size="small" 
+                                        />
+                                    );
+                                })}
+                            </Box>
+                        )}
                     >
-                        {filteredParticulars.map((name, index) => (
-                            <MenuItem key={index} value={name} sx={{ whiteSpace: "normal !important" }}>
-                                {name}
-                            </MenuItem>
-                        ))}
+                        {allParticulars
+                            .filter(p => p.student_type === selectedAccount)
+                            .map((particular) => (
+                                <MenuItem key={particular.particular_id} value={particular.particular_id}>
+                                    <Checkbox checked={adminParticulars.indexOf(particular.particular_id) > -1} />
+                                    <ListItemText 
+                                        primary={particular.particular_name} 
+                                        sx={{ whiteSpace: "normal !important" }}
+                                    />
+                                </MenuItem>
+                            ))}
                     </Select>
                 </FormControl>
                 <FormControl fullWidth margin="dense">

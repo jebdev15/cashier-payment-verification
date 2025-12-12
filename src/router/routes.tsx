@@ -8,10 +8,8 @@ const Register = React.lazy(() => import("../pages/Register"));
 const RouteErrorElement = React.lazy(() => import("../components/errors/RouteErrorElement"));
 const HomeLayoutContextProvider = React.lazy(() => import("../context/HomeLayoutContext"));
 const HomeLayout = React.lazy(() => import("../pages/home/Layout"));
-const StatementOfAccount = React.lazy(() => import("../pages/home/StatementOfAccount"));
 const UploadReceipt = React.lazy(() => import("../pages/home/UploadReceipt"));
-const ExternalHomePage = React.lazy(() => import("../pages/home/ExternalHomepage"));
-const EmployeeHomePage = React.lazy(() => import("../pages/home/EmployeeHomepage"));
+const HomePage = React.lazy(() => import("../pages/home/Homepage"));
 const TransactionHistory = React.lazy(() => import("../pages/home/TransactionHistory"));
 
 const AdminLogin = React.lazy(() => import("../pages/admin/Login"));
@@ -51,7 +49,8 @@ export const routes = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <StatementOfAccount />,
+                element: <HomePage />,
+                // element: <StatementOfAccount />,
             },
             {
                 path: "upload-receipt",
@@ -61,14 +60,6 @@ export const routes = createBrowserRouter([
                 path: "transaction-history",
                 element: <TransactionHistory />,
             },
-            {
-                path: "external",
-                element: <ExternalHomePage />,
-            },
-            {
-                path: "employee",
-                element: <EmployeeHomePage />,
-            }
         ],
     },
     {
