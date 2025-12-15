@@ -3,15 +3,19 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
     Button, Grid, Typography, Select, MenuItem, IconButton,
     Checkbox, Table, TableBody, TableCell, TableHead, TableRow,
-    Divider, FormControl, InputLabel, Chip, Box, ListItemText
+    Divider, FormControl, InputLabel, Chip, Box, ListItemText,
+    CircularProgress
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { axiosInstance } from "@/api/app";
 import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import ReceiptViewerComponent from "../../ReceiptViewerComponent";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode";
+import { extractAccountItemTitle } from "@/utils/extractAccountItemTitle";
+import ReceiptPreviewDialog from "./ReceiptPreviewDialog";
+import SubmittedReceiptPreviewDialog from "./SubmittedReceiptPreviewDialog";
 
 type Props = {
     open: boolean;
@@ -21,6 +25,8 @@ type Props = {
     onClose: () => void;
     onSave?: (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, selectedAccount?: string) => void;
     editable?: boolean;
+    allParticulars?: any[];
+    loading?: boolean;
 };
 
 type TransactionModalEntryModeType = {
@@ -38,6 +44,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     onClose,
     onSave,
     editable = false,
+    allParticulars = [],
+    loading = false,
 }) => {
     const [cookie] = useCookies(["accessToken"]);
     const [formData, setFormData] = React.useState<TransactionDataType | null>(data);
@@ -56,7 +64,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     const [tuitionFee, setTuitionFee] = React.useState<string>("0.00");
     const [adminParticulars, setAdminParticulars] = React.useState<number[]>([]);
     const [payorParticulars, setPayorParticulars] = React.useState<any[]>([]);
-    const [allParticulars, setAllParticulars] = React.useState<any[]>([]);
+    const [previewOpen, setPreviewOpen] = React.useState(false);
+    const [submittedReceiptPreviewOpen, setSubmittedReceiptPreviewOpen] = React.useState(false);
     // const [miscellaneousFeesBalance, setMiscellaneousFeesBalance] = React.useState<string>("0.00");
     const [distribution, setDistribution] = React.useState({
         miscellaneous: 0,
@@ -92,7 +101,26 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     // 🔹 Handle submit
     const handleSubmit = () => {
         if (editable && formData && onSave) {
-            onSave({ ...formData, checkedItems, miscellaneousFees, entryMode, details, remarks, amountToPay, amountTendered, selectedAccount, distribution, adminParticulars });
+            // Get particular names from IDs
+            const adminParticularsNames = adminParticulars
+                .map(id => allParticulars.find(p => p.particular_id === id)?.item_title)
+                .filter(Boolean)
+                .join(', ');
+            
+            onSave({ 
+                ...formData, 
+                checkedItems, 
+                miscellaneousFees, 
+                entryMode, 
+                details, 
+                remarks, 
+                amountToPay, 
+                amountTendered, 
+                selectedAccount, 
+                distribution, 
+                adminParticulars,
+                adminParticularsText: adminParticularsNames
+            });
         }
     };
 
@@ -119,19 +147,6 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                 }
             }
         }
-        
-        // Fetch all available particulars
-        const fetchParticulars = async () => {
-            try {
-                const response = await axiosInstance.get('/api/particulars');
-                if (response.data) {
-                    setAllParticulars(response.data);
-                }
-            } catch (error) {
-                console.error('Error fetching particulars:', error);
-            }
-        };
-        fetchParticulars();
     }, [data]);
     React.useEffect(() => {
         const fetchStudentMiscellaneousFees = async () => {
@@ -333,80 +348,48 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                             Account Details
                         </Typography>
                         <Divider sx={{ mb: 2 }} />
-                        <TextField
-                            label="Student Account ID"
-                            value={formData?.studentAccountId || ""}
-                            onChange={handleChange}
-                            type="number"
-                            fullWidth
-                            margin="dense"
-                            disabled
-                        />
-                        <TextField
-                            label="Reference ID"
-                            name="referenceId"
-                            value={formData?.referenceId ?? ""}
-                            onChange={handleChange}
-                            fullWidth
-                            margin="dense"
-                            disabled
-                        />
-                        <TextField
-                            label="Reference Number"
-                            name="referenceNumber"
-                            value={formData?.referenceNumber ?? ""}
-                            onChange={handleChange}
-                            fullWidth
-                            margin="dense"
-                            disabled
-                        />
-                        <TextField
-                            label="Student ID"
-                            name="studentId"
-                            value={formData?.studentId ?? ""}
-                            fullWidth
-                            margin="dense"
-                            disabled
-                        />
-                        <TextField
-                            label="Payor Name"
-                            name="payor"
-                            value={formData?.payor || ""}
-                            onChange={handleChange}
-                            fullWidth
-                            margin="dense"
-                            disabled
-                        />
-                        <TextField
-                            label="Balance"
-                            name="balance"
-                            value={formData?.balance || ""}
-                            onChange={handleChange}
-                            fullWidth
-                            margin="dense"
-                            disabled
-                        />
-                        <TextField
-                            label="Amount Paid"
-                            name="amountPaid"
-                            value={formData?.amountPaid ?? ""}
-                            onChange={handleChange}
-                            type="number"
-                            fullWidth
-                            margin="dense"
-                            disabled
-                        />
-                        <TextField
-                            label="Total"
-                            name="amount"
-                            value={formData?.amount || ""}
-                            onChange={handleChange}
-                            type="number"
-                            fullWidth
-                            margin="dense"
-                            disabled
-                        />
-                        <FormControl fullWidth>
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="textSecondary">Student Account ID</Typography>
+                            <Typography variant="body1">{formData?.studentAccountId || "N/A"}</Typography>
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="textSecondary">Reference ID</Typography>
+                            <Typography variant="body1" fontWeight="medium">{formData?.referenceId || "N/A"}</Typography>
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="textSecondary">Reference Number</Typography>
+                            <Typography variant="body1" fontWeight="medium">{formData?.referenceNumber || "N/A"}</Typography>
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="textSecondary">Student ID</Typography>
+                            <Typography variant="body1">{formData?.studentId || "N/A"}</Typography>
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="textSecondary">Payor Name</Typography>
+                            <Typography variant="body1">{formData?.payor || "N/A"}</Typography>
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="textSecondary">Balance</Typography>
+                            <Typography variant="body1" color="error.main">₱{Number(formData?.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="textSecondary">Amount Paid</Typography>
+                            <Typography variant="body1" color="success.main">₱{Number(formData?.amountPaid || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+                        </Box>
+                        <Box sx={{ mb: 2 }}>
+                            <Typography variant="caption" color="textSecondary">Total</Typography>
+                            <Typography variant="body1" fontWeight="bold">₱{Number(formData?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</Typography>
+                        </Box>
+                        
+                    </Grid >
+
+                    {/* 2. Payment */}
+                    < Grid size={{ xs: 12, md: 4 }}>
+                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                            Payment Details
+                        </Typography>
+                        <Divider sx={{ mb: 2 }} />
+                        <FormControl fullWidth sx={{ mb: 2 }}>
                             <InputLabel id="transactionStatus-select">Status</InputLabel>
                             <Select
                                 labelId="transactionStatus-select"
@@ -423,14 +406,6 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                 <MenuItem value="rejected">{formData?.status === "rejected" ? "Rejected" : "Reject"}</MenuItem>
                             </Select>
                         </FormControl>
-                    </Grid >
-
-                    {/* 2. Payment */}
-                    < Grid size={{ xs: 12, md: 4 }}>
-                        <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                            Payment
-                        </Typography>
-                        <Divider sx={{ mb: 2 }} />
                         <FormControl fullWidth sx={{ mb: 2 }}>
                             <InputLabel id="account-select">Account Title</InputLabel>
                             <Select
@@ -458,7 +433,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                     {payorParticulars.map((particular, index) => {
                                         const particularName = typeof particular === 'object' && particular?.name 
                                             ? particular.name 
-                                            : (allParticulars.find(p => p.particular_id === particular)?.particular_name || `ID: ${particular}`);
+                                            : (allParticulars.find(p => p.particular_id === particular)?.item_title || extractAccountItemTitle(particular, allParticulars));
                                         return (
                                             <Chip 
                                                 key={index} 
@@ -494,7 +469,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                             return (
                                                 <Chip 
                                                     key={value} 
-                                                    label={particular?.particular_name || value} 
+                                                    label={particular?.item_title || extractAccountItemTitle(value, allParticulars)} 
                                                     size="small" 
                                                 />
                                             );
@@ -503,12 +478,12 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                 )}
                             >
                                 {allParticulars
-                                    .filter(p => p.student_type === selectedAccount)
+                                    .filter(p => p.account_title === selectedAccount)
                                     .map((particular) => (
                                         <MenuItem key={particular.particular_id} value={particular.particular_id}>
                                             <Checkbox checked={adminParticulars.indexOf(particular.particular_id) > -1} />
                                             <ListItemText 
-                                                primary={particular.particular_name} 
+                                                primary={particular.item_title} 
                                                 sx={{ whiteSpace: "normal !important" }}
                                             />
                                         </MenuItem>
@@ -743,33 +718,82 @@ const TransactionDialogForStudent: React.FC<Props> = ({
         return renderStudentForm();
     };
 
-    const renderReceiptSection = () => (
-        <ReceiptViewerComponent image={image || ""} />
-    )
+    const getSelectedParticularsForPreview = () => {
+        return adminParticulars
+            .map(id => allParticulars.find(p => p.particular_id === id))
+            .filter(Boolean);
+    };
+
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-            {/* Header */}
-            <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography>{editable ? "Update Transaction" : "View Transaction"}</Typography>
-                <IconButton onClick={onClose}><CloseIcon /></IconButton>
-            </DialogTitle>
+        <>
+            <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+                {/* Header */}
+                <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography variant="h6">{editable ? "Update Transaction" : "View Transaction"}</Typography>
+                        {image && (
+                            <Chip 
+                                icon={<VisibilityIcon />}
+                                label="Receipt Submitted"
+                                color="success"
+                                size="small"
+                                onClick={() => setSubmittedReceiptPreviewOpen(true)}
+                                sx={{ cursor: 'pointer' }}
+                            />
+                        )}
+                    </Box>
+                    <Box>
+                        {formData?.status === 'approved' && (
+                            <IconButton 
+                                onClick={() => setPreviewOpen(true)} 
+                                color="primary"
+                                title="Preview Official Receipt"
+                                sx={{ mr: 1 }}
+                            >
+                                <VisibilityIcon />
+                            </IconButton>
+                        )}
+                        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+                    </Box>
+                </DialogTitle>
 
-            {/* Receipt Preview */}
-            <DialogContent>
-                {/* Content */}
-                {renderContent()}
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle1">Receipt Preview</Typography>
-                {renderReceiptSection()}
-            </DialogContent>
+                <DialogContent>
+                    {renderContent()}
+                </DialogContent>
 
-            {/* Footer */}
-            {editable && (
-                <DialogActions>
-                    <Button onClick={handleSubmit} variant="contained">Save</Button>
-                </DialogActions>
-            )}
-        </Dialog>
+                {/* Footer */}
+                {editable && (
+                    <DialogActions>
+                        <Button 
+                            onClick={handleSubmit} 
+                            variant="contained"
+                            disabled={loading}
+                            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                        >
+                            {loading ? "Updating..." : "Save"}
+                        </Button>
+                    </DialogActions>
+                )}
+            </Dialog>
+
+            {/* Receipt Preview Dialog */}
+            <ReceiptPreviewDialog
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                data={formData}
+                eorNumber={formData?.eorNumber}
+                adminParticulars={getSelectedParticularsForPreview()}
+            />
+
+            {/* Submitted Receipt Preview Dialog */}
+            <SubmittedReceiptPreviewDialog
+                open={submittedReceiptPreviewOpen}
+                onClose={() => setSubmittedReceiptPreviewOpen(false)}
+                imageUrl={image}
+                referenceId={formData?.referenceId}
+                title="Submitted Receipt - Student"
+            />
+        </>
     );
 };
 

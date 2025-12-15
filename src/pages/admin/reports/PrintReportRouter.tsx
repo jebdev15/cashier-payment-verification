@@ -1,4 +1,3 @@
-import React from "react";
 
 // Deprecated: direct inline preview now used; keep minimal fallback.
 const PrintReportRouter = () => {

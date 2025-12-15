@@ -2,14 +2,16 @@ import React from "react";
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, TextField,
     Button, Grid, Typography, Select, MenuItem, IconButton,
-    Divider, FormControl, InputLabel, Chip, Box, ListItemText, Checkbox
+    Divider, FormControl, InputLabel, Chip, Box, ListItemText, Checkbox,
+    CircularProgress
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { axiosInstance } from "@/api/app";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import ReceiptViewerComponent from "../../ReceiptViewerComponent";
 import { extractAccountItemTitle } from "@/utils/extractAccountItemTitle";
+import ReceiptPreviewDialog from "./ReceiptPreviewDialog";
+import SubmittedReceiptPreviewDialog from "./SubmittedReceiptPreviewDialog";
 
 type Props = {
     open: boolean;
@@ -18,6 +20,8 @@ type Props = {
     onClose: () => void;
     onSave?: (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, selectedAccount?: string) => void;
     editable?: boolean;
+    allParticulars?: any[];
+    loading?: boolean;
 };
 
 
@@ -27,6 +31,8 @@ const TransactionDialogForExternal: React.FC<Props> = ({
     onClose,
     onSave,
     editable = false,
+    allParticulars = [],
+    loading = false,
 }) => {
     const [formData, setFormData] = React.useState<TransactionDataType | null>(data);
     const [image, setImage] = React.useState<string | null>(null);
@@ -39,7 +45,8 @@ const TransactionDialogForExternal: React.FC<Props> = ({
     const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
     const [adminParticulars, setAdminParticulars] = React.useState<number[]>([]);
     const [payorParticulars, setPayorParticulars] = React.useState<any[]>([]);
-    const [allParticulars, setAllParticulars] = React.useState<any[]>([]);
+    const [previewOpen, setPreviewOpen] = React.useState(false);
+    const [submittedReceiptPreviewOpen, setSubmittedReceiptPreviewOpen] = React.useState(false);
 
     // 🔹 Handle text inputs
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -51,7 +58,21 @@ const TransactionDialogForExternal: React.FC<Props> = ({
     // 🔹 Handle submit
     const handleSubmit = () => {
         if (editable && formData && onSave) {
-            onSave({ ...formData, details, remarks, amountTendered, selectedAccount, adminParticulars });
+            // Get particular names from IDs
+            const adminParticularsNames = adminParticulars
+                .map(id => allParticulars.find(p => p.nature_of_collection_id === id)?.item_title)
+                .filter(Boolean)
+                .join(', ');
+            
+            onSave({ 
+                ...formData, 
+                details, 
+                remarks, 
+                amountTendered, 
+                selectedAccount, 
+                adminParticulars,
+                adminParticularsText: adminParticularsNames
+            });
         }
     };
 
@@ -74,19 +95,6 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                 setPayorParticulars([]);
             }
         }
-        
-        // Fetch all available particulars
-        const fetchParticulars = async () => {
-            try {
-                const response = await axiosInstance.get('/api/particulars');
-                if (response.data) {
-                    setAllParticulars(response.data);
-                }
-            } catch (error) {
-                console.error('Error fetching particulars:', error);
-            }
-        };
-        fetchParticulars();
     }, [data]);
 
     // 🔹 Update particulars when account changes
@@ -123,54 +131,34 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                     Account Details
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
-                <TextField
-                    label="Name of Institution/Agency"
-                    name="payor"
-                    value={formData?.payor || ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!editable}
-                    margin="dense"
-                />
-                <TextField
-                    label="Reference ID"
-                    name="referenceId"
-                    value={formData?.referenceId ?? ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-                <TextField
-                    label="Reference Number"
-                    name="referenceNumber"
-                    value={formData?.referenceNumber ?? ""}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="textSecondary">Name of Institution/Agency</Typography>
+                    <Typography variant="body1">{formData?.payor || "N/A"}</Typography>
+                </Box>
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="textSecondary">Reference ID</Typography>
+                    <Typography variant="body1" fontWeight="medium">{formData?.referenceId || "N/A"}</Typography>
+                </Box>
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="textSecondary">Reference Number</Typography>
+                    <Typography variant="body1" fontWeight="medium">{formData?.referenceNumber || "N/A"}</Typography>
+                </Box>
 
-                <TextField
-                    label="eOR Number"
-                    name="eOr"
-                    value={formData?.eOr ?? ""}
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
-                <TextField
-                    label="Created At"
-                    value={
-                        formData?.createdAt
-                            ? new Date(formData.createdAt).toLocaleString()
-                            : ""
-                    }
-                    fullWidth
-                    disabled
-                    margin="dense"
-                />
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="textSecondary">eOR Number</Typography>
+                    <Typography variant="body1" fontWeight="medium" color="primary">{formData?.eOr || "N/A"}</Typography>
+                </Box>
+                <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="textSecondary">Created At</Typography>
+                    <Typography variant="body2">{formData?.createdAt ? new Date(formData.createdAt).toLocaleString() : "N/A"}</Typography>
+                </Box>
 
+                
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    Payment Details
+                </Typography>
                 <FormControl fullWidth margin="dense">
                     <InputLabel htmlFor="purpose-select">Status</InputLabel>
                     <Select
@@ -186,13 +174,8 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         <MenuItem value="rejected">{formData?.status === "rejected" ? "Rejected" : "Reject"}</MenuItem>
                     </Select>
                 </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                    Payment Details
-                </Typography>
                 <Divider sx={{ mb: 2 }} />
-                {/* <FormControl fullWidth margin="dense">
+                <FormControl fullWidth margin="dense">
                     <TextField
                         label="Mode of Payment"
                         type="text"
@@ -201,7 +184,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         fullWidth
                         disabled
                     />
-                </FormControl> */}
+                </FormControl>
                 <FormControl fullWidth margin="dense">
                     <InputLabel id="account-select">Fund Cluster</InputLabel>
                     <Select
@@ -228,8 +211,8 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                             {payorParticulars.map((particular, index) => {
                                 const particularName = typeof particular === 'object' && particular?.name 
-                                    ? extractAccountItemTitle([particular], allParticulars) 
-                                    : (allParticulars.find(p => p.particular_id === particular)?.particular_name || `ID: ${extractAccountItemTitle([particular], allParticulars)}`);
+                                    ? extractAccountItemTitle(particular.nature_of_collection_id, allParticulars) 
+                                    : (allParticulars.find(p => p.nature_of_collection_id === particular)?.item_title || extractAccountItemTitle(particular, allParticulars));
                                 return (
                                     <Chip 
                                         key={index} 
@@ -250,10 +233,10 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                     <Select
                         labelId="admin-particulars-select"
                         multiple
-                        value={filteredParticulars}
+                        value={adminParticulars}
                         onChange={(e) => {
                             const value = e.target.value;
-                            setAdminParticulars(typeof value === 'string' ? [] : value);
+                            setAdminParticulars(typeof value === 'string' ? [] : value as number[]);
                         }}
                         label="Admin Particulars (Multiple Selection)"
                         margin="dense"
@@ -261,11 +244,11 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         renderValue={(selected) => (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                 {selected.map((value) => {
-                                    const particular = allParticulars.find(p => p.particular_id === value);
+                                    const particular = allParticulars.find(p => p.nature_of_collection_id === value);
                                     return (
                                         <Chip 
                                             key={value} 
-                                            label={particular?.particular_name || value} 
+                                            label={particular?.item_title || extractAccountItemTitle(value, allParticulars)} 
                                             size="small" 
                                         />
                                     );
@@ -274,29 +257,18 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         )}
                     >
                         {allParticulars
-                            .filter(p => p.student_type === selectedAccount)
+                            .filter(p => p.account_title === selectedAccount)
                             .map((particular) => (
-                                <MenuItem key={particular.particular_id} value={particular.particular_id}>
-                                    <Checkbox checked={adminParticulars.indexOf(particular.particular_id) > -1} />
+                                <MenuItem key={particular.nature_of_collection_id} value={particular.nature_of_collection_id}>
+                                    <Checkbox checked={adminParticulars.indexOf(particular.nature_of_collection_id) > -1} />
                                     <ListItemText 
-                                        primary={particular.particular_name} 
+                                        primary={particular.item_title} 
                                         sx={{ whiteSpace: "normal !important" }}
                                     />
                                 </MenuItem>
                             ))}
                     </Select>
                 </FormControl>
-                {/* <FormControl fullWidth margin="dense" >
-                    <TextField
-                        label="Remarks"
-                        type="text"
-                        name="remarks"
-                        value={remarks}
-                        onChange={(e) => setRemarks(e.target.value)}
-                        disabled={!editable || formData?.status !== 'approved'}
-                        fullWidth
-                    />
-                </FormControl> */}
                 <FormControl fullWidth margin="dense">
                     <TextField
                         label="Details"
@@ -327,33 +299,82 @@ const TransactionDialogForExternal: React.FC<Props> = ({
         return renderExternalForm();
     };
 
-    const renderReceiptSection = () => (
-        <ReceiptViewerComponent image={image || ""} />
-    )
-    return (
-        <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-            {/* Header */}
-            <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography>{editable ? "Update Transaction" : "View Transaction"}</Typography>
-                <IconButton onClick={onClose}><CloseIcon /></IconButton>
-            </DialogTitle>
+    const getSelectedParticularsForPreview = () => {
+        return adminParticulars
+            .map(id => allParticulars.find(p => p.nature_of_collection_id === id))
+            .filter(Boolean);
+    };
 
-            {/* Receipt Preview */}
+    return (
+        <>
+            <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+                {/* Header */}
+                <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography variant="h6">{editable ? "Update Transaction" : "View Transaction"}</Typography>
+                        {image && (
+                            <Chip 
+                                icon={<VisibilityIcon />}
+                                label="Receipt Submitted"
+                                color="success"
+                                size="small"
+                                onClick={() => setSubmittedReceiptPreviewOpen(true)}
+                                sx={{ cursor: 'pointer' }}
+                            />
+                        )}
+                    </Box>
+                    <Box>
+                        {formData?.status === 'approved' && (
+                            <IconButton 
+                                onClick={() => setPreviewOpen(true)} 
+                                color="primary"
+                                title="Preview Official Receipt"
+                                sx={{ mr: 1 }}
+                            >
+                                <VisibilityIcon />
+                            </IconButton>
+                        )}
+                        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+                    </Box>
+                </DialogTitle>
+
             <DialogContent>
-                {/* Content */}
                 {renderContent()}
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle1">Receipt Preview</Typography>
-                {renderReceiptSection()}
             </DialogContent>
 
             {/* Footer */}
             {editable && (
                 <DialogActions>
-                    <Button onClick={handleSubmit} variant="contained">Save</Button>
+                    <Button 
+                        onClick={handleSubmit} 
+                        variant="contained"
+                        disabled={loading}
+                        startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                    >
+                        {loading ? "Updating..." : "Save"}
+                    </Button>
                 </DialogActions>
             )}
         </Dialog>
+
+        {/* Receipt Preview Dialog */}
+        <ReceiptPreviewDialog
+            open={previewOpen}
+            onClose={() => setPreviewOpen(false)}
+            data={formData}
+            eorNumber={formData?.eorNumber}
+            adminParticulars={getSelectedParticularsForPreview()}
+        />
+
+        {/* Submitted Receipt Preview Dialog */}
+        <SubmittedReceiptPreviewDialog
+            open={submittedReceiptPreviewOpen}
+            onClose={() => setSubmittedReceiptPreviewOpen(false)}
+            imageUrl={image}
+            referenceId={formData?.referenceId}
+            title="Submitted Receipt - External"
+        />
+        </>
     );
 };
 

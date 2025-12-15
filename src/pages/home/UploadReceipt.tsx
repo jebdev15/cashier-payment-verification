@@ -358,7 +358,7 @@ const UploadReceipt = () => {
               </Stack>
             </Grid>
 
-            {/* RIGHT PANEL - Image Preview */}
+            {/* RIGHT PANEL - Receipt Preview */}
             <Grid size={{ xs: 12, md: 8 }}>
               <Box
                 sx={{
@@ -385,7 +385,7 @@ const UploadReceipt = () => {
                   />
                 ) : (
                   <Typography color="text.secondary" textAlign="center" sx={{ px: 2 }}>
-                    Image Preview
+                    Receipt Preview
                   </Typography>
                 )}
               </Box>

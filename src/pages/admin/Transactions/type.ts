@@ -35,7 +35,11 @@ export type TransactionDataType = {
     distribution?: { miscellaneous: number; tuition: number; totalPayable: number; accountsPayable: number; };
     payorParticulars?: string | any[]; // Particulars selected by payor during upload
     adminParticulars?: number[]; // Particulars selected by admin during approval
+    adminParticularsText?: string; // Comma-separated particular names for display
     entryMode?: string;
+    eorNumber?: string; // Official receipt number
+    payorName?: string; // Name of payor (merged from various userType fields)
+    courseAndYearLevel?: string; // For students
 };
 
 export type SnackbarState = {

@@ -13,6 +13,10 @@ import TransactionDialogForEmployee from "@/components/modals/admin/TransactionD
 const txPageCache: Record<string, { items: TransactionDataType[]; total: number }> = {};
 const txInflight: Record<string, Promise<{ items: TransactionDataType[]; total: number }>> = {};
 
+// Module-level cache for particulars (persists across component remounts)
+let particularsCache: any[] | null = null;
+let particularsPromise: Promise<any[]> | null = null;
+
 const filterMiscellaneousFeeAsPayload = (checkedItems: string[], miscellaneousFees: any[]) => {
   return miscellaneousFees.filter(
     (fee) => Number(fee.balance) > 0 && checkedItems.includes(fee.nature_of_collection_id.toString())
@@ -26,6 +30,7 @@ const ShowTransactions = () => {
   const [selectedRow, setSelectedRow] = React.useState<TransactionDataType | null>(null);
   const [editable, setEditable] = React.useState(false);
   const [refresh, setRefresh] = React.useState(false);
+  const [allParticulars, setAllParticulars] = React.useState<any[]>([]);
 
   // ✅ Pagination states (offset–limit model)
   const [page, setPage] = React.useState(1);
@@ -34,6 +39,7 @@ const ShowTransactions = () => {
   const offset = (page - 1) * limit;
 
   const [loading, setLoading] = React.useState(false);
+  const [updateLoading, setUpdateLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
   // ✅ Tabs: default to "pending"
@@ -104,6 +110,40 @@ const ShowTransactions = () => {
     fetchTransactions();
   }, [fetchTransactions, refresh]);
 
+  // Fetch particulars with module-level caching (persists across component remounts)
+  React.useEffect(() => {
+    const fetchParticulars = async () => {
+      // If already cached, use it immediately
+      if (particularsCache) {
+        setAllParticulars(particularsCache);
+        return;
+      }
+
+      // If request is in-flight, reuse it
+      if (!particularsPromise) {
+        particularsPromise = (async () => {
+          try {
+            const response = await axiosInstanceWithAuthorization(cookie.accessToken).get('/api/particulars');
+            if (response.data) {
+              particularsCache = response.data;
+              return response.data;
+            }
+            return [];
+          } catch (error) {
+            console.error('Error fetching particulars:', error);
+            particularsPromise = null; // Allow retry on error
+            return [];
+          }
+        })();
+      }
+
+      const data = await particularsPromise;
+      setAllParticulars(data);
+    };
+    
+    fetchParticulars();
+  }, [cookie.accessToken]);
+
   // Invalidate the cache when refresh is triggered (e.g., after update)
   React.useEffect(() => {
     if (!refresh) return;
@@ -116,7 +156,7 @@ const ShowTransactions = () => {
   const columns = [
     { field: "_id", headerName: "No.", width: 100 },
     { field: "userType", headerName: "User Type", minWidth: 50 },
-    { field: "payorName", headerName: "Payor", minWidth: 250, flex: 1 },
+    { field: "payor", headerName: "Payor", minWidth: 250, flex: 1 },
     { field: "referenceId", headerName: "Reference ID", minWidth: 175, flex: 1 },
     {
       field: "status",
@@ -169,6 +209,7 @@ const ShowTransactions = () => {
     const confirmation = window.confirm("Are you sure you want to update this transaction?");
     if (!confirmation) return;
 
+    setUpdateLoading(true);
     try {
       const miscFee = filterMiscellaneousFeeAsPayload(
         updatedData.checkedItems || [],
@@ -206,6 +247,7 @@ const ShowTransactions = () => {
       formData.append("miscellaneousFees", JSON.stringify(miscFee || []));
       formData.append("userType", updatedData.userType || "");
       formData.append("adminParticulars", JSON.stringify(updatedData.adminParticulars || []));
+      formData.append("adminParticularsText", updatedData.adminParticularsText || "");
       formData.append(
         "distribution",
         JSON.stringify(
@@ -231,6 +273,8 @@ const ShowTransactions = () => {
     } catch (error) {
       console.error("Error updating transaction:", error);
       alert("Failed to update transaction. Please try again.");
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -244,6 +288,8 @@ const ShowTransactions = () => {
             data={selectedRow}
             onSave={handleUpdateTransaction}
             editable={editable}
+            allParticulars={allParticulars}
+            loading={updateLoading}
           />
         );
       case "External":
@@ -254,6 +300,8 @@ const ShowTransactions = () => {
             data={selectedRow}
             onSave={handleUpdateTransaction}
             editable={editable}
+            allParticulars={allParticulars}
+            loading={updateLoading}
           />
         );
       case "Employee":
@@ -264,6 +312,8 @@ const ShowTransactions = () => {
             data={selectedRow}
             onSave={handleUpdateTransaction}
             editable={editable}
+            allParticulars={allParticulars}
+            loading={updateLoading}
           />
         );
       default:

@@ -188,4 +188,4 @@ const DailyCollectionReport: React.FC<Props> = ({ from, to, rows }) => {
   );
 };
 
-export default DailyCollectionReport;
+export default React.memo(DailyCollectionReport);

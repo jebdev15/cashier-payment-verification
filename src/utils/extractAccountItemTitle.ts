@@ -1,11 +1,4 @@
-export const extractAccountItemTitle = (items: any[], allParticulars: any[]) => {
-    console.log({  items, allParticulars });
-    if (!items || items.length === 0) return "No particulars selected";
-
-    const titles = items.map((itemId) => {
-        const particular = allParticulars.find((p) => p.id === itemId);
-        return particular ? particular.name : `Unknown Particular (ID: ${itemId})`;
-    });
-
-    return titles.join(", ");
+export const extractAccountItemTitle = (item: number, allParticulars: any[]) => {
+    const foundItem = allParticulars.find(p => p.nature_of_collection_id === item);
+    return foundItem ? foundItem.item_title : 'Unknown Item';
 }
