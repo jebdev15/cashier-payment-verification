@@ -27,16 +27,13 @@ import { useAxios } from "@/hooks/useAxios";
 import SnackbarProvider from "@/components/Snackbar";
 import { theme } from "@/theme/theme";
 import { modeOfPaymentOptions } from "./modeOfPaymentOptions";
+import SubmittedReceiptPreviewDialog from "@/components/modals/admin/SubmittedReceiptPreviewDialog";
 // ...existing code...
 
 type ParticularType = {
-  account_title: string;
-  collection_type_name: string;
-  implementing_unit_title: string;
-  item_abbreviation: string;
-  item_title: string;
-  nature_of_collection_id: number;
-  nature_of_collection_type: number;
+  id: number;
+  fee: string;
+  fund_cluster: string;
 };
 
 const UploadReceipt = () => {
@@ -50,6 +47,7 @@ const UploadReceipt = () => {
   const [modeOfPayment, setModeOfPayment] = React.useState<string>("");
   const [details, setDetails] = React.useState<string>("");
   const [selectedParticulars, setSelectedParticulars] = React.useState<number[]>([]);
+  const [receiptPreviewOpen, setReceiptPreviewOpen] = React.useState(false);
   const [snackbar, setSnackbar] = React.useState({
     open: false,
     message: "",
@@ -95,7 +93,7 @@ const UploadReceipt = () => {
       setError("Failed to process the image. Please try again.");
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
-    
+
   };
 
   const handleParticularsChange = (event: SelectChangeEvent<number[]>) => {
@@ -104,9 +102,9 @@ const UploadReceipt = () => {
   };
 
   const getParticularLabel = (id: number): string => {
-    const particular = particularsData?.find((p) => p.nature_of_collection_id === id);
+    const particular = particularsData?.find((p) => p.id === id);
     return particular
-      ? particular.item_title
+      ? particular.fee
       : String(id);
   };
 
@@ -199,21 +197,22 @@ const UploadReceipt = () => {
         {/* Use Grid for responsive layout: stack on xs, columns on md+ */}
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            {/* LEFT PANEL - Form */}
-            <Grid size={{ xs: 12, md: 4 }}>
+            {/* FULL WIDTH - Form */}
+            <Grid size={{ xs: 12 }}>
               <Stack spacing={2}>
                 {/* <Typography variant="h6">Upload Receipt </Typography> */}
 
                 <FormControl fullWidth>
-                  <InputLabel>Particulars</InputLabel>
+                  <InputLabel>Fees</InputLabel>
                   <Select
                     multiple
                     value={selectedParticulars}
                     onChange={handleParticularsChange}
-                    input={<OutlinedInput label="Particulars" />}
+                    input={<OutlinedInput label="Fees" />}
                     renderValue={(selected) => (
                       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                         {selected.map((id) => {
+                          // const label = getParticularLabel(id);
                           const label = getParticularLabel(id);
                           return (
                             <Tooltip key={id} title={label}>
@@ -249,8 +248,8 @@ const UploadReceipt = () => {
                   >
                     {(particularsData || []).map((particular) => (
                       <MenuItem
-                        key={particular.nature_of_collection_id}
-                        value={particular.nature_of_collection_id}
+                        key={particular.id}
+                        value={particular.id}
                         sx={{
                           alignItems: "flex-start",
                           py: 1,
@@ -258,23 +257,23 @@ const UploadReceipt = () => {
                         }}
                       >
                         <Box sx={{ width: "100%" }}>
-                          <Tooltip title={`${particular.item_title} • ${particular.account_title}`}>
+                          <Tooltip title={`${particular.fee} • ${particular.fund_cluster}`}>
                             <Typography
                               variant="body2"
                               fontWeight="medium"
                               // noWrap
                               sx={{ maxWidth: "100%", display: "block" }}
                             >
-                              {particular.item_title}
+                              {particular.fee}
                             </Typography>
                           </Tooltip>
-                          <Typography
+                          {/* <Typography
                             variant="caption"
                             color="text.secondary"
                             sx={{ display: "block" }}
                           >
-                            {particular.collection_type_name} • {particular.account_title}
-                          </Typography>
+                            {particular.fee} • {particular.fund_cluster}
+                          </Typography> */}
                         </Box>
                       </MenuItem>
                     ))}
@@ -328,11 +327,22 @@ const UploadReceipt = () => {
                   />
                   <FormLabel sx={{ mt: 1, fontSize: 12, color: "text.secondary" }}>
                     <Alert severity="info" sx={{ p: 1, fontSize: 12 }}>
-                    Proof of satisfaction that the amount is already credited to the CHMSU account (e.g., validated bank deposit slip, fund transfer receipt, online/mobile banking confirmation, etc.).
+                      Proof of satisfaction that the amount is already credited to the CHMSU account (e.g., validated bank deposit slip, fund transfer receipt, online/mobile banking confirmation, etc.).
                     </Alert>
                   </FormLabel>
                 </FormControl>
 
+                {/* View Receipt Button */}
+                {image && (
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => setReceiptPreviewOpen(true)}
+                    sx={{ borderRadius: 3 }}
+                  >
+                    View Uploaded Receipt
+                  </Button>
+                )}
 
                 <Button
                   variant="contained"
@@ -357,39 +367,6 @@ const UploadReceipt = () => {
                 )}
               </Stack>
             </Grid>
-
-            {/* RIGHT PANEL - Receipt Preview */}
-            <Grid size={{ xs: 12, md: 8 }}>
-              <Box
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  bgcolor: "#f7f7f7",
-                  borderRadius: 3,
-                  p: 1,
-                  overflow: "hidden",
-                }}
-              >
-                {image ? (
-                  <img
-                    src={image}
-                    alt="Preview"
-                    style={{
-                      objectFit: "contain",
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: 8,
-                    }}
-                  />
-                ) : (
-                  <Typography color="text.secondary" textAlign="center" sx={{ px: 2 }}>
-                    Receipt Preview
-                  </Typography>
-                )}
-              </Box>
-            </Grid>
           </Grid>
         </Box>
       </Box>
@@ -399,6 +376,16 @@ const UploadReceipt = () => {
         message={snackbar.message}
         severity={snackbar.severity}
         onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      />
+
+      {/* Receipt Preview Dialog */}
+      <SubmittedReceiptPreviewDialog
+        open={receiptPreviewOpen}
+        onClose={() => setReceiptPreviewOpen(false)}
+        imageUrl={image}
+        title="Uploaded Receipt Preview"
+        referenceId={referenceId}
+        referenceNumber={referenceNumber}
       />
     </>
   );

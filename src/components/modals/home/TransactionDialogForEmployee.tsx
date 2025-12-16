@@ -6,7 +6,15 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { TransactionDataType } from "@/pages/admin/Transactions/type";
-import ReceiptViewerComponent from "@/components/ReceiptViewerComponent";
+import SubmittedReceiptPreviewDialog from "@/components/modals/admin/SubmittedReceiptPreviewDialog";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { axiosInstanceWithAuthorization } from "@/api/app";
+import { useCookies } from "react-cookie";
+
+interface Particular {
+    id: number;
+    fee: string;
+}
 
 type Props = {
     open: boolean;
@@ -20,7 +28,10 @@ const TransactionModal: React.FC<Props> = ({
     data,
     onClose,
 }) => {
+    const [cookie] = useCookies(["accessToken"]);
     const [image, setImage] = React.useState<string | null>(null);
+    const [receiptPreviewOpen, setReceiptPreviewOpen] = React.useState(false);
+    const [particularsText, setParticularsText] = React.useState<string>("");
 
     // 🔹 Load receipt image preview
     React.useEffect(() => {
@@ -29,6 +40,43 @@ const TransactionModal: React.FC<Props> = ({
             if (/\.(jpg|jpeg|png)$/i.test(data.filePath)) setImage(url);
         }
     }, [data]);
+
+    // 🔹 Fetch and format particulars
+    React.useEffect(() => {
+        const fetchParticulars = async () => {
+            if (data?.adminParticularsText) {
+                setParticularsText(data.adminParticularsText);
+                return;
+            }
+
+            if (data?.particulars) {
+                try {
+                    const parsed = typeof data.particulars === 'string' 
+                        ? JSON.parse(data.particulars) 
+                        : data.particulars;
+                    
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        const response = await axiosInstanceWithAuthorization(cookie.accessToken).get<Particular[]>('/api/particulars');
+                        if (response.data) {
+                            const names = parsed
+                                .map(id => response.data.find((p: Particular) => p.id === id)?.fee)
+                                .filter(Boolean)
+                                .join(', ');
+                            setParticularsText(names || data.particulars);
+                        } else {
+                            setParticularsText(data.particulars);
+                        }
+                    } else {
+                        setParticularsText(data.particulars);
+                    }
+                } catch {
+                    setParticularsText(data.particulars);
+                }
+            }
+        };
+
+        fetchParticulars();
+    }, [data, cookie.accessToken]);
 
     /**
      * 🟢 HELPER FUNCTIONS
@@ -96,7 +144,7 @@ const TransactionModal: React.FC<Props> = ({
                 <Divider sx={{ mb: 2 }} />
                 
                 <DataRow label="Fund Cluster" value={data?.accountType || data?.selectedAccount} />
-                <DataRow label="Particulars" value={data?.particulars} />
+                <DataRow label="Particulars" value={particularsText || "N/A"} />
                 <DataRow label="Details" value={data?.details} />
                 <DataRow 
                     label="Amount Received" 
@@ -110,26 +158,43 @@ const TransactionModal: React.FC<Props> = ({
         return renderEmployeeForm();
     };
 
-    const renderReceiptSection = () => (
-        <ReceiptViewerComponent image={image || ""} />
-    );
     return (
+        <>
         <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
             {/* Header */}
-            <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
+            <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography>View Transaction</Typography>
-                <IconButton onClick={onClose}><CloseIcon /></IconButton>
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                    {image && (
+                        <Chip
+                            icon={<VisibilityIcon />}
+                            label="View Receipt"
+                            color="primary"
+                            size="small"
+                            onClick={() => setReceiptPreviewOpen(true)}
+                            sx={{ cursor: "pointer" }}
+                        />
+                    )}
+                    <IconButton onClick={onClose}><CloseIcon /></IconButton>
+                </Box>
             </DialogTitle>
 
-            {/* Receipt Preview */}
+            {/* Content */}
             <DialogContent>
-                {/* Content */}
                 {renderContent()}
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="subtitle1" fontWeight="bold">Receipt Preview</Typography>
-                {renderReceiptSection()}
             </DialogContent>
         </Dialog>
+
+        {/* Receipt Preview Dialog */}
+        <SubmittedReceiptPreviewDialog
+            open={receiptPreviewOpen}
+            onClose={() => setReceiptPreviewOpen(false)}
+            imageUrl={image}
+            title="Submitted Receipt - Employee"
+            referenceId={data?.referenceId}
+            referenceNumber={data?.referenceNumber}
+        />
+        </>
     );
 };
 

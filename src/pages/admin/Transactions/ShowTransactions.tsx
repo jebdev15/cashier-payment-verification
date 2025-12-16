@@ -231,10 +231,9 @@ const ShowTransactions = () => {
       formData.append("semester", updatedData.semester || "");
       formData.append("modeOfPayment", updatedData.modeOfPayment || "");
       formData.append("status", updatedData.status || "");
-      formData.append("accountType", updatedData.selectedAccount || "");
+      formData.append("fundCluster", updatedData.selectedAccount || "");
       formData.append("particulars", updatedData.particulars || "");
       formData.append("details", updatedData.details || "");
-      formData.append("remarks", updatedData.remarks || "");
       formData.append(
         "amountToPay",
         updatedData.amountToPay ? updatedData.amountToPay.toString() : "0"

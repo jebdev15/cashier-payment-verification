@@ -7,9 +7,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import { extractAccountItemTitle } from "@/utils/extractAccountItemTitle";
 import ReceiptPreviewDialog from "./ReceiptPreviewDialog";
 import SubmittedReceiptPreviewDialog from "./SubmittedReceiptPreviewDialog";
 
@@ -61,17 +59,17 @@ const TransactionModal: React.FC<Props> = ({
         if (editable && formData && onSave) {
             // Get particular names from IDs
             const adminParticularsNames = adminParticulars
-                .map(id => allParticulars.find(p => p.particular_id === id)?.particular_name)
+                .map(id => allParticulars.find(p => p.id === id)?.fee)
                 .filter(Boolean)
                 .join(', ');
-            
-            onSave({ 
-                ...formData, 
-                details, 
-                remarks, 
-                amountToPay, 
-                amountTendered, 
-                selectedAccount, 
+
+            onSave({
+                ...formData,
+                details,
+                remarks,
+                amountToPay,
+                amountTendered,
+                selectedAccount,
                 adminParticulars,
                 adminParticularsText: adminParticularsNames
             });
@@ -84,12 +82,12 @@ const TransactionModal: React.FC<Props> = ({
             const url = `${import.meta.env.VITE_API_URL}/${data.filePath}`;
             if (/\.(jpg|jpeg|png)$/i.test(data.filePath)) setImage(url);
         }
-        
+
         // Parse payor particulars
         if (data?.payorParticulars) {
             try {
-                const parsed = typeof data.payorParticulars === 'string' 
-                    ? JSON.parse(data.payorParticulars) 
+                const parsed = typeof data.payorParticulars === 'string'
+                    ? JSON.parse(data.payorParticulars)
                     : data.payorParticulars;
                 setPayorParticulars(Array.isArray(parsed) ? parsed : []);
             } catch (e) {
@@ -102,12 +100,19 @@ const TransactionModal: React.FC<Props> = ({
     // 🔹 Update particulars when account changes
     React.useEffect(() => {
         if (selectedAccount) {
-            const filtered = fees.filter((item) => item.categories.includes(selectedAccount)).map((i) => i.name);
-            setFilteredParticulars(filtered);
+            const filtered = allParticulars.filter((item) => item.fund_cluster === selectedAccount);
+            console.log('🔍 Employee Dialog - Admin Particulars Filtering:', { 
+                selectedAccount, 
+                totalParticulars: allParticulars.length,
+                allParticulars: allParticulars, 
+                filtered: filtered,
+                filteredCount: filtered.length 
+            });
+            setFilteredParticulars(filtered.map(i => i.fee));
         } else {
             setFilteredParticulars([]);
         }
-    }, [selectedAccount]);
+    }, [selectedAccount, allParticulars]);
 
     // Update form data on load
     React.useEffect(() => {
@@ -153,7 +158,7 @@ const TransactionModal: React.FC<Props> = ({
                     <Typography variant="body2">{formData?.createdAt ? new Date(formData.createdAt).toLocaleString() : "N/A"}</Typography>
                 </Box>
 
-                
+
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -192,6 +197,7 @@ const TransactionModal: React.FC<Props> = ({
                         <MenuItem value="GS">GS</MenuItem>
                     </Select>
                 </FormControl>
+
                 {/* Display Payor's Selected Particulars */}
                 {payorParticulars && payorParticulars.length > 0 && (
                     <Box sx={{ mb: 2 }}>
@@ -200,14 +206,14 @@ const TransactionModal: React.FC<Props> = ({
                         </Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                             {payorParticulars.map((particular, index) => {
-                                const particularName = typeof particular === 'object' && particular?.name 
-                                    ? particular.name 
-                                    : (allParticulars.find(p => p.particular_id === particular)?.particular_name || extractAccountItemTitle(particular, allParticulars));
+                                const particularName = typeof particular === 'object' && particular?.fee
+                                    ? particular.fee
+                                    : (allParticulars.find(p => p.id === particular)?.fee || particular);
                                 return (
-                                    <Chip 
-                                        key={index} 
-                                        label={particularName} 
-                                        size="small" 
+                                    <Chip
+                                        key={index}
+                                        label={particularName}
+                                        size="small"
                                         color="info"
                                         variant="outlined"
                                     />
@@ -216,7 +222,7 @@ const TransactionModal: React.FC<Props> = ({
                         </Box>
                     </Box>
                 )}
-                
+
                 {/* Admin Particulars Multi-Select */}
                 <FormControl fullWidth disabled={!selectedAccount} margin="dense">
                     <InputLabel id="admin-particulars-select">Admin Particulars (Multiple Selection)</InputLabel>
@@ -234,12 +240,12 @@ const TransactionModal: React.FC<Props> = ({
                         renderValue={(selected) => (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                 {selected.map((value) => {
-                                    const particular = allParticulars.find(p => p.particular_id === value);
+                                    const particular = allParticulars.find(p => p.id === value);
                                     return (
-                                        <Chip 
-                                            key={value} 
-                                            label={particular?.particular_name || extractAccountItemTitle(value, allParticulars)} 
-                                            size="small" 
+                                        <Chip
+                                            key={value}
+                                            label={particular?.fee || value}
+                                            size="small"
                                         />
                                     );
                                 })}
@@ -247,12 +253,12 @@ const TransactionModal: React.FC<Props> = ({
                         )}
                     >
                         {allParticulars
-                            .filter(p => p.account_title === selectedAccount)
+                            .filter(p => p.fund_cluster === selectedAccount)
                             .map((particular) => (
-                                <MenuItem key={particular.nature_of_collection_id} value={particular.nature_of_collection_id}>
-                                    <Checkbox checked={adminParticulars.indexOf(particular.nature_of_collection_id) > -1} />
-                                    <ListItemText 
-                                        primary={`${particular.account_title} - ${particular.item_title}`} 
+                                <MenuItem key={particular.id} value={particular.id}>
+                                    <Checkbox checked={adminParticulars.indexOf(particular.id) > -1} />
+                                    <ListItemText
+                                        primary={particular.fee}
                                         sx={{ whiteSpace: "normal !important" }}
                                     />
                                 </MenuItem>
@@ -302,7 +308,7 @@ const TransactionModal: React.FC<Props> = ({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Typography variant="h6">{editable ? "Update Transaction" : "View Transaction"}</Typography>
                         {image && (
-                            <Chip 
+                            <Chip
                                 icon={<VisibilityIcon />}
                                 label="Receipt Submitted"
                                 color="success"
@@ -314,8 +320,8 @@ const TransactionModal: React.FC<Props> = ({
                     </Box>
                     <Box>
                         {formData?.status === 'approved' && (
-                            <IconButton 
-                                onClick={() => setPreviewOpen(true)} 
+                            <IconButton
+                                onClick={() => setPreviewOpen(true)}
                                 color="primary"
                                 title="Preview Official Receipt"
                                 sx={{ mr: 1 }}
@@ -327,42 +333,43 @@ const TransactionModal: React.FC<Props> = ({
                     </Box>
                 </DialogTitle>
 
-            <DialogContent>
-                {renderContent()}
-            </DialogContent>
+                <DialogContent>
+                    {renderContent()}
+                </DialogContent>
 
-            {/* Footer */}
-            {editable && (
-                <DialogActions>
-                    <Button 
-                        onClick={handleSubmit} 
-                        variant="contained"
-                        disabled={loading}
-                        startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
-                    >
-                        {loading ? "Updating..." : "Save"}
-                    </Button>
-                </DialogActions>
-            )}
-        </Dialog>
+                {/* Footer */}
+                {editable && (
+                    <DialogActions>
+                        <Button
+                            onClick={handleSubmit}
+                            variant="contained"
+                            disabled={loading}
+                            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+                        >
+                            {loading ? "Updating..." : "Save"}
+                        </Button>
+                    </DialogActions>
+                )}
+            </Dialog>
 
-        {/* Receipt Preview Dialog */}
-        <ReceiptPreviewDialog
-            open={previewOpen}
-            onClose={() => setPreviewOpen(false)}
-            data={formData}
-            eorNumber={formData?.eorNumber}
-            adminParticulars={getSelectedParticularsForPreview()}
-        />
+            {/* Receipt Preview Dialog */}
+            <ReceiptPreviewDialog
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                data={formData}
+                eorNumber={formData?.eorNumber}
+                adminParticulars={getSelectedParticularsForPreview()}
+            />
 
-        {/* Submitted Receipt Preview Dialog */}
-        <SubmittedReceiptPreviewDialog
-            open={submittedReceiptPreviewOpen}
-            onClose={() => setSubmittedReceiptPreviewOpen(false)}
-            imageUrl={image}
-            referenceId={formData?.referenceId}
-            title="Submitted Receipt - Employee"
-        />
+            {/* Submitted Receipt Preview Dialog */}
+            <SubmittedReceiptPreviewDialog
+                open={submittedReceiptPreviewOpen}
+                onClose={() => setSubmittedReceiptPreviewOpen(false)}
+                imageUrl={image}
+                referenceId={formData?.referenceId}
+                referenceNumber={formData?.referenceNumber}
+                title="Submitted Receipt - Employee"
+            />
         </>
     );
 };

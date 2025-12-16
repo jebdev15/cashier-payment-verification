@@ -24,7 +24,7 @@ export type TransactionDataType = {
     filePath?: string;
     userType?: string;
     checkedItems?: string[];
-    accountType?: string;
+    fundCluster?: string;
     details?: string;
     remarks?: string;
     // merged numeric and string variants into unions where duplicates existed

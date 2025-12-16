@@ -22,6 +22,7 @@ type Props = {
     imageUrl: string | null;
     title?: string;
     referenceId?: string;
+    referenceNumber?: string;
 };
 
 const SubmittedReceiptPreviewDialog: React.FC<Props> = ({
@@ -30,6 +31,7 @@ const SubmittedReceiptPreviewDialog: React.FC<Props> = ({
     imageUrl,
     title = "Submitted Receipt Preview",
     referenceId,
+    referenceNumber
 }) => {
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(false);
@@ -251,9 +253,9 @@ const SubmittedReceiptPreviewDialog: React.FC<Props> = ({
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2 }}>
-                {referenceId && (
+                {referenceNumber && (
                     <Typography variant="caption" color="text.secondary" sx={{ mr: 'auto' }}>
-                        Reference: {referenceId}
+                        Reference Number: {referenceNumber}
                     </Typography>
                 )}
                 <Button onClick={onClose} variant="outlined">

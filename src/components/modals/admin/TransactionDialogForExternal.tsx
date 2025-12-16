@@ -7,9 +7,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
-import { extractAccountItemTitle } from "@/utils/extractAccountItemTitle";
 import ReceiptPreviewDialog from "./ReceiptPreviewDialog";
 import SubmittedReceiptPreviewDialog from "./SubmittedReceiptPreviewDialog";
 
@@ -60,7 +58,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
         if (editable && formData && onSave) {
             // Get particular names from IDs
             const adminParticularsNames = adminParticulars
-                .map(id => allParticulars.find(p => p.nature_of_collection_id === id)?.item_title)
+                .map(id => allParticulars.find(p => p.id === id)?.fee)
                 .filter(Boolean)
                 .join(', ');
             
@@ -100,18 +98,24 @@ const TransactionDialogForExternal: React.FC<Props> = ({
     // 🔹 Update particulars when account changes
     React.useEffect(() => {
         if (selectedAccount) {
-            const filtered = fees.filter((item) => item.categories.includes(selectedAccount)).map((i) => i.name);
-            setFilteredParticulars(filtered);
+            const filtered = allParticulars.filter((item) => item.fund_cluster === selectedAccount);
+            console.log('🔍 External Dialog - Admin Particulars Filtering:', { 
+                selectedAccount, 
+                totalParticulars: allParticulars.length,
+                filteredFromDB: filtered,
+                filteredCount: filtered.length 
+            });
+            setFilteredParticulars(filtered.map(i => i.fee));
         } else {
             setFilteredParticulars([]);
         }
-    }, [selectedAccount]);
+    }, [selectedAccount, allParticulars]);
 
     React.useEffect(() => {
         const updateAllTheDetailsIfApproved = () => {
             const fd = formData ?? data;
             if (!editable && (fd?.status ?? data?.status) === 'approved') {
-                setSelectedAccount(fd.accountType ?? "");
+                setSelectedAccount(fd.fundCluster ?? "");
                 setRemarks(fd.remarks ?? "");
                 setDetails(fd.details ?? "");
                 setAmountTendered(parseFloat((fd.amountTendered ?? "0").toString()));
@@ -210,9 +214,9 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         </Typography>
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                             {payorParticulars.map((particular, index) => {
-                                const particularName = typeof particular === 'object' && particular?.name 
-                                    ? extractAccountItemTitle(particular.nature_of_collection_id, allParticulars) 
-                                    : (allParticulars.find(p => p.nature_of_collection_id === particular)?.item_title || extractAccountItemTitle(particular, allParticulars));
+                                const particularName = typeof particular === 'object' && particular?.fee
+                                    ? particular.fee
+                                    : (allParticulars.find(p => p.id === particular)?.fee || particular);
                                 return (
                                     <Chip 
                                         key={index} 
@@ -244,11 +248,11 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         renderValue={(selected) => (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                 {selected.map((value) => {
-                                    const particular = allParticulars.find(p => p.nature_of_collection_id === value);
+                                    const particular = allParticulars.find(p => p.id === value);
                                     return (
                                         <Chip 
                                             key={value} 
-                                            label={particular?.item_title || extractAccountItemTitle(value, allParticulars)} 
+                                            label={particular?.fee || value} 
                                             size="small" 
                                         />
                                     );
@@ -257,12 +261,12 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                         )}
                     >
                         {allParticulars
-                            .filter(p => p.account_title === selectedAccount)
+                            .filter(p => p.fund_cluster === selectedAccount)
                             .map((particular) => (
-                                <MenuItem key={particular.nature_of_collection_id} value={particular.nature_of_collection_id}>
-                                    <Checkbox checked={adminParticulars.indexOf(particular.nature_of_collection_id) > -1} />
+                                <MenuItem key={particular.id} value={particular.id}>
+                                    <Checkbox checked={adminParticulars.indexOf(particular.id) > -1} />
                                     <ListItemText 
-                                        primary={particular.item_title} 
+                                        primary={particular.fee} 
                                         sx={{ whiteSpace: "normal !important" }}
                                     />
                                 </MenuItem>
@@ -372,6 +376,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
             onClose={() => setSubmittedReceiptPreviewOpen(false)}
             imageUrl={image}
             referenceId={formData?.referenceId}
+            referenceNumber={formData?.referenceNumber}
             title="Submitted Receipt - External"
         />
         </>

@@ -37,6 +37,10 @@ const Reports = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [data, setData] = React.useState<TransactionRow[]>([]);
+  const [reportNo, setReportNo] = React.useState<string>("");
+  const [fundClusters, setFundClusters] = React.useState<string>("");
+  const [startSheetNo, setStartSheetNo] = React.useState<number>(1);
+  const [totalSheets, setTotalSheets] = React.useState<number>(1);
   const [showPreview, setShowPreview] = React.useState(false);
 
   const handlePreview = async () => {
@@ -53,7 +57,11 @@ const Reports = () => {
         `/api/reports/daily-collection?from=${targetDate}&to=${targetDate}`
       );
       if (res.status === 200) {
-        setData(res.data?.data || []);
+        setData(res.data?.data?.rows || res.data?.data || []);
+        setReportNo(res.data?.data?.reportNo || "");
+        setFundClusters(res.data?.data?.fundClusters || "");
+        setStartSheetNo(res.data?.data?.startSheetNo || 1);
+        setTotalSheets(res.data?.data?.totalSheets || 1);
         setShowPreview(true);
       }
     } catch (e: any) {
@@ -157,6 +165,10 @@ const Reports = () => {
             from={fromDate}
             to={fromDate}
             rows={data}
+            reportNo={reportNo}
+            fundClusters={fundClusters}
+            startSheetNo={startSheetNo}
+            totalSheets={totalSheets}
           />
         </Box>
       )}

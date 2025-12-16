@@ -9,38 +9,26 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { axiosInstance } from "@/api/app";
-import { fees } from "@/pages/admin/Transactions/fees";
 import { SnackbarState, TransactionDataType } from "@/pages/admin/Transactions/type";
 import { useCookies } from "react-cookie";
 import { jwtDecode } from "jwt-decode";
-import { extractAccountItemTitle } from "@/utils/extractAccountItemTitle";
 import ReceiptPreviewDialog from "./ReceiptPreviewDialog";
 import SubmittedReceiptPreviewDialog from "./SubmittedReceiptPreviewDialog";
 
 type Props = {
     open: boolean;
     data: TransactionDataType | null;
-    entryModes?: TransactionModalEntryModeType[];
     snackbar?: SnackbarState;
     onClose: () => void;
-    onSave?: (updatedData: TransactionDataType, checkedItems?: string[], entryMode?: string, details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, selectedAccount?: string) => void;
+    onSave?: (updatedData: TransactionDataType, checkedItems?: string[], details?: string, remarks?: string, amountToPay?: number, amountTendered?: number, selectedAccount?: string) => void;
     editable?: boolean;
     allParticulars?: any[];
     loading?: boolean;
 };
 
-type TransactionModalEntryModeType = {
-    entry_mode_id: number;
-    entry_mode_title: string;
-    entry_mode_desc: string;
-    credit: string;
-    debit: string;
-};
-
 const TransactionDialogForStudent: React.FC<Props> = ({
     open,
     data,
-    entryModes,
     onClose,
     onSave,
     editable = false,
@@ -56,7 +44,6 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     const [amountTendered, setAmountTendered] = React.useState<number>(0);
     const [remarks, setRemarks] = React.useState<string>("");
     const [details, setDetails] = React.useState<string>("");
-    const [entryMode, setEntryMode] = React.useState<string>("1");
     const [selectedAccount, setSelectedAccount] = React.useState("");
     const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
     const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
@@ -103,7 +90,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
         if (editable && formData && onSave) {
             // Get particular names from IDs
             const adminParticularsNames = adminParticulars
-                .map(id => allParticulars.find(p => p.particular_id === id)?.item_title)
+                .map(id => allParticulars.find(p => p.id === id)?.fee)
                 .filter(Boolean)
                 .join(', ');
             
@@ -111,7 +98,6 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                 ...formData, 
                 checkedItems, 
                 miscellaneousFees, 
-                entryMode, 
                 details, 
                 remarks, 
                 amountToPay, 
@@ -162,7 +148,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         id: ++index,
                         // camelCase aliases (keep original keys too)
                         natureOfCollectionId: fee.natureOfCollectionId ?? fee.nature_of_collection_id,
-                        itemTitle: fee.itemTitle ?? fee.item_title,
+                        itemTitle: fee.itemTitle ?? fee.fee,
                         amount: fee.amount,
                         balance: fee.balance,
                     })) || [];
@@ -200,14 +186,19 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     }, [])
     React.useEffect(() => {
         if (selectedAccount) {
-            const filtered = fees
-                .filter((item) => item.categories.includes(selectedAccount))
-                .map((item) => item.name);
-            setFilteredParticulars(filtered);
+            const filtered = allParticulars.filter((item) => item.fund_cluster === selectedAccount);
+            console.log('🔍 Student Dialog - Admin Particulars Filtering:', { 
+                selectedAccount, 
+                totalParticulars: allParticulars.length,
+                filtered: filtered,
+                filteredCount: filtered.length 
+            });
+            
+            setFilteredParticulars(filtered.map(i => i.fee));
         } else {
             setFilteredParticulars([]);
         }
-    }, [selectedAccount]);
+    }, [selectedAccount, allParticulars]);
     // React.useEffect(() => {
     //     if (!amountTendered) {
     //         setDistribution({ miscellaneous: 0, tuition: 0, totalPayable: 0, accountsPayable: 0 });
@@ -324,7 +315,6 @@ const TransactionDialogForStudent: React.FC<Props> = ({
             const fd = formData ?? data;
             setSelectedAccount(fd?.accountType ?? "");
             setDetails(fd?.details ?? "");
-            setRemarks(fd?.remarks ?? "");
             setAmountToPay(parseFloat((fd?.amountToPay ?? "0").toString()));
             setAmountTendered(parseFloat((fd?.amountTendered ?? "0").toString()));
             setDistribution((prev) => ({
@@ -407,14 +397,14 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                             </Select>
                         </FormControl>
                         <FormControl fullWidth sx={{ mb: 2 }}>
-                            <InputLabel id="account-select">Account Title</InputLabel>
+                            <InputLabel id="account-select">Fund Cluster</InputLabel>
                             <Select
                                 labelId="account-select"
                                 value={selectedAccount}
                                 onChange={(e) => {
                                     setSelectedAccount(e.target.value);
                                 }}
-                                label="Account Type"
+                                label="Fund Cluster"
                                 margin="dense"
                                 disabled={!editable || formData?.status !== 'approved'}
                             >
@@ -431,9 +421,9 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                 </Typography>
                                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                                     {payorParticulars.map((particular, index) => {
-                                        const particularName = typeof particular === 'object' && particular?.name 
-                                            ? particular.name 
-                                            : (allParticulars.find(p => p.particular_id === particular)?.item_title || extractAccountItemTitle(particular, allParticulars));
+                                        const particularName = typeof particular === 'object' && particular?.fee 
+                                            ? particular.fee 
+                                            : (allParticulars.find(p => p.id === particular)?.fee || particular);
                                         return (
                                             <Chip 
                                                 key={index} 
@@ -465,11 +455,11 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                 renderValue={(selected) => (
                                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                                         {selected.map((value) => {
-                                            const particular = allParticulars.find(p => p.particular_id === value);
+                                            const particular = allParticulars.find(p => p.id === value);
                                             return (
                                                 <Chip 
                                                     key={value} 
-                                                    label={particular?.item_title || extractAccountItemTitle(value, allParticulars)} 
+                                                    label={particular?.fee || value} 
                                                     size="small" 
                                                 />
                                             );
@@ -478,29 +468,17 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                                 )}
                             >
                                 {allParticulars
-                                    .filter(p => p.account_title === selectedAccount)
+                                    .filter(p => p.fund_cluster === selectedAccount)
                                     .map((particular) => (
-                                        <MenuItem key={particular.particular_id} value={particular.particular_id}>
-                                            <Checkbox checked={adminParticulars.indexOf(particular.particular_id) > -1} />
+                                        <MenuItem key={particular.id} value={particular.id}>
+                                            <Checkbox checked={adminParticulars.indexOf(particular.id) > -1} />
                                             <ListItemText 
-                                                primary={particular.item_title} 
+                                                primary={particular.fee} 
                                                 sx={{ whiteSpace: "normal !important" }}
                                             />
                                         </MenuItem>
                                     ))}
                             </Select>
-                        </FormControl>
-                        <FormControl fullWidth  >
-                            <TextField
-                                fullWidth
-                                type="text"
-                                name="remarks"
-                                label="Remarks"
-                                value={remarks}
-                                onChange={(e) => setRemarks(e.target.value)}
-                                margin="dense"
-                                disabled={!editable || formData?.status !== 'approved'}
-                            />
                         </FormControl>
                         <FormControl fullWidth  >
                             <TextField
@@ -762,7 +740,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                 </DialogContent>
 
                 {/* Footer */}
-                {editable && (
+                {editable && formData?.status !== "pending" && (
                     <DialogActions>
                         <Button 
                             onClick={handleSubmit} 
@@ -791,6 +769,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                 onClose={() => setSubmittedReceiptPreviewOpen(false)}
                 imageUrl={image}
                 referenceId={formData?.referenceId}
+                referenceNumber={formData?.referenceNumber}
                 title="Submitted Receipt - Student"
             />
         </>

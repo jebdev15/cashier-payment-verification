@@ -8,7 +8,8 @@ import { useNavigate } from "react-router";
 import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
 import { jwtDecode } from "jwt-decode";
-import SnackbarProvider from "../../components/Snackbar";
+import SnackbarProvider from "@/components/Snackbar";
+import { getCampus } from "@/utils/campusDetector";
 type GoogleTokenPayload = {
   name?: string;
   email?: string;
@@ -83,6 +84,9 @@ const Login: React.FC = () => {
                 </Typography>
                 <Typography variant="body1" color="primary">
                   {import.meta.env.VITE_APP_NAME}
+                </Typography>
+                <Typography variant="body2" color="primary">
+                  {getCampus()}
                 </Typography>
               </Box>
               <Box
