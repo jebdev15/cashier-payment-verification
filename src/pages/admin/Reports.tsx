@@ -11,12 +11,14 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  Stack
+  Stack,
+  Dialog,
+  DialogContent
 } from "@mui/material";
-import { Visibility as VisibilityIcon, Print as PrintIcon, Download as DownloadIcon } from "@mui/icons-material";
+import { Visibility as VisibilityIcon, Print as PrintIcon, Close as CloseIcon } from "@mui/icons-material";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
-import DailyCollectionReport from "./reports/DailyCollectionReport"; // repurposed as preview card
+import DailyCollectionReport from "./reports/DailyCollectionReport";
 
 type TransactionRow = {
   date: string;
@@ -36,12 +38,16 @@ const Reports = () => {
   const [toDate, setToDate] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [data, setData] = React.useState<TransactionRow[]>([]);
-  const [reportNo, setReportNo] = React.useState<string>("");
-  const [fundClusters, setFundClusters] = React.useState<string>("");
-  const [startSheetNo, setStartSheetNo] = React.useState<number>(1);
-  const [totalSheets, setTotalSheets] = React.useState<number>(1);
-  const [showPreview, setShowPreview] = React.useState(false);
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [reportData, setReportData] = React.useState<{
+    rows: TransactionRow[];
+    reportNo: string;
+    fundClusters: string;
+    startSheetNo: number;
+    totalSheets: number;
+    from: string;
+    to: string;
+  } | null>(null);
 
   const handlePreview = async () => {
     if (!reportType || !fromDate) {
@@ -50,25 +56,32 @@ const Reports = () => {
     }
     setLoading(true);
     setError(null);
-    setShowPreview(false);
     try {
       const targetDate = fromDate;
       const res = await axiosInstanceWithAuthorization(accessToken).get(
         `/api/reports/daily-collection?from=${targetDate}&to=${targetDate}`
       );
       if (res.status === 200) {
-        setData(res.data?.data?.rows || res.data?.data || []);
-        setReportNo(res.data?.data?.reportNo || "");
-        setFundClusters(res.data?.data?.fundClusters || "");
-        setStartSheetNo(res.data?.data?.startSheetNo || 1);
-        setTotalSheets(res.data?.data?.totalSheets || 1);
-        setShowPreview(true);
+        setReportData({
+          rows: res.data?.data?.rows || res.data?.data || [],
+          reportNo: res.data?.data?.reportNo || "",
+          fundClusters: res.data?.data?.fundClusters || "",
+          startSheetNo: res.data?.data?.startSheetNo || 1,
+          totalSheets: res.data?.data?.totalSheets || 1,
+          from: targetDate,
+          to: targetDate
+        });
+        setOpenDialog(true);
       }
     } catch (e: any) {
       setError(e?.response?.data?.message || "Failed to load report");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
   };
 
   const handlePrint = () => {
@@ -139,39 +152,72 @@ const Reports = () => {
             onClick={handlePreview}
             disabled={!reportType || !fromDate || loading}
           >
-            {loading ? <CircularProgress size={24} /> : "Preview Report"}
+            {loading ? <CircularProgress size={24} /> : "Generate Report"}
           </Button>
           {error && <Alert severity="error">{error}</Alert>}
         </Box>
       </Box>
 
-      {/* Preview Card */}
-      {showPreview && (
-        <Box sx={{ mt: 2, position: "relative" }}>
+      {/* Report Dialog */}
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog}
+        maxWidth={false}
+        fullWidth
+        PaperProps={{
+          sx: {
+            width: '98vw',
+            height: '98vh',
+            maxWidth: 'none',
+            m: 0
+          }
+        }}
+      >
+        <DialogContent sx={{ p: 0, position: 'relative', overflow: 'hidden' }}>
           <Stack
             direction="row"
             spacing={1}
+            sx={{ 
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 1000,
+              bgcolor: 'rgba(255,255,255,0.95)',
+              borderRadius: 1,
+              p: 0.5,
+              boxShadow: 2
+            }}
             className="no-print"
-            sx={{ mb: 1, justifyContent: "flex-end" }}
           >
-            <IconButton color="primary" onClick={handlePrint}>
+            <IconButton color="primary" onClick={handlePrint} size="small">
               <PrintIcon />
             </IconButton>
-            <IconButton color="primary" onClick={handleDownloadExcel}>
-              <DownloadIcon />
+            <IconButton onClick={handleCloseDialog} size="small">
+              <CloseIcon />
             </IconButton>
           </Stack>
-          <DailyCollectionReport
-            from={fromDate}
-            to={fromDate}
-            rows={data}
-            reportNo={reportNo}
-            fundClusters={fundClusters}
-            startSheetNo={startSheetNo}
-            totalSheets={totalSheets}
-          />
-        </Box>
-      )}
+          {reportData && (
+            <Box sx={{ 
+              p: 0, 
+              overflow: 'auto', 
+              height: '100%',
+              '&::-webkit-scrollbar': { display: 'none' },
+              msOverflowStyle: 'none',
+              scrollbarWidth: 'none'
+            }}>
+              <DailyCollectionReport
+                from={reportData.from}
+                to={reportData.to}
+                rows={reportData.rows}
+                reportNo={reportData.reportNo}
+                fundClusters={reportData.fundClusters}
+                startSheetNo={reportData.startSheetNo}
+                totalSheets={reportData.totalSheets}
+              />
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

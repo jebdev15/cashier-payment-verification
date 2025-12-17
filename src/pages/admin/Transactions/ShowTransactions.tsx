@@ -157,7 +157,8 @@ const ShowTransactions = () => {
     { field: "_id", headerName: "No.", width: 100 },
     { field: "userType", headerName: "User Type", minWidth: 50 },
     { field: "payor", headerName: "Payor", minWidth: 250, flex: 1 },
-    { field: "referenceId", headerName: "Reference ID", minWidth: 175, flex: 1 },
+    // { field: "referenceId", headerName: "Reference ID", minWidth: 175, flex: 1 },
+    { field: "eOr", headerName: "eOR / transaction confirmation number", minWidth: 100, flex: 1 },
     {
       field: "status",
       headerName: "Status",
