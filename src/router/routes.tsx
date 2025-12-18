@@ -96,10 +96,6 @@ export const routes = createBrowserRouter([
                         index: true,
                         element: <ShowAccounts />,
                     },
-                    {
-                        path: ":id",
-                        element: <EditAccount />,
-                    },
                 ]
             },
             {

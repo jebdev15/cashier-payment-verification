@@ -23,7 +23,6 @@ import { base64ToBlob } from "@/utils/base64ToBlog";
 import { compressImageIfNeeded, fileToBase64 } from "@/utils/imageCompressor";
 import { useCookies } from "react-cookie";
 import { isAxiosError } from "axios";
-import { useAxios } from "@/hooks/useAxios";
 import SnackbarProvider from "@/components/Snackbar";
 import { theme } from "@/theme/theme";
 import { modeOfPaymentOptions } from "./modeOfPaymentOptions";
@@ -35,6 +34,10 @@ type ParticularType = {
   fee: string;
   fund_cluster: string;
 };
+
+// Module-level cache for particulars (persists across component remounts)
+let particularsCache: ParticularType[] | null = null;
+let particularsPromise: Promise<ParticularType[]> | null = null;
 
 const UploadReceipt = () => {
   const [{ accessToken }] = useCookies(["accessToken"]);
@@ -48,6 +51,7 @@ const UploadReceipt = () => {
   const [details, setDetails] = React.useState<string>("");
   const [selectedParticulars, setSelectedParticulars] = React.useState<number[]>([]);
   const [receiptPreviewOpen, setReceiptPreviewOpen] = React.useState(false);
+  const [particularsData, setParticularsData] = React.useState<ParticularType[]>([]);
   const [snackbar, setSnackbar] = React.useState({
     open: false,
     message: "",
@@ -55,10 +59,39 @@ const UploadReceipt = () => {
   });
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const { data: particularsData } = useAxios<ParticularType[]>({
-    url: "/api/particulars",
-    authorized: true,
-  });
+  // Fetch particulars with module-level caching (persists across component remounts)
+  React.useEffect(() => {
+    const fetchParticulars = async () => {
+      // If already cached, use it immediately
+      if (particularsCache) {
+        setParticularsData(particularsCache);
+        return;
+      }
+
+      // If request is in-flight, reuse it
+      if (!particularsPromise) {
+        particularsPromise = (async () => {
+          try {
+            const response = await axiosInstanceWithAuthorization(accessToken).get('/api/particulars');
+            if (response.data) {
+              particularsCache = response.data;
+              return response.data;
+            }
+            return [];
+          } catch (error) {
+            console.error('Error fetching particulars:', error);
+            particularsPromise = null; // Allow retry on error
+            return [];
+          }
+        })();
+      }
+
+      const data = await particularsPromise;
+      setParticularsData(data);
+    };
+    
+    fetchParticulars();
+  }, [accessToken]);
 
   const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -198,7 +231,7 @@ const UploadReceipt = () => {
         <Box component="form" onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             {/* FULL WIDTH - Form */}
-            <Grid size={{ xs: 12 }}>
+            <Grid size={{ xs: 12, lg: 6 }}>
               <Stack spacing={2}>
                 {/* <Typography variant="h6">Upload Receipt </Typography> */}
 

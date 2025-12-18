@@ -163,11 +163,11 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
 
     const numberToWords = (num: number): string => {
         if (num === 0) return "ZERO";
-        
+
         const ones = ["", "ONE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE"];
         const teens = ["TEN", "ELEVEN", "TWELVE", "THIRTEEN", "FOURTEEN", "FIFTEEN", "SIXTEEN", "SEVENTEEN", "EIGHTEEN", "NINETEEN"];
         const tens = ["", "", "TWENTY", "THIRTY", "FORTY", "FIFTY", "SIXTY", "SEVENTY", "EIGHTY", "NINETY"];
-        
+
         const convertLessThanThousand = (n: number): string => {
             if (n === 0) return "";
             if (n < 10) return ones[n];
@@ -175,24 +175,24 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
             if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 !== 0 ? " " + ones[n % 10] : "");
             return ones[Math.floor(n / 100)] + " HUNDRED" + (n % 100 !== 0 ? " " + convertLessThanThousand(n % 100) : "");
         };
-        
+
         if (num < 1000) return convertLessThanThousand(num);
         if (num < 1000000) {
-            return convertLessThanThousand(Math.floor(num / 1000)) + " THOUSAND" + 
-                   (num % 1000 !== 0 ? " " + convertLessThanThousand(num % 1000) : "");
+            return convertLessThanThousand(Math.floor(num / 1000)) + " THOUSAND" +
+                (num % 1000 !== 0 ? " " + convertLessThanThousand(num % 1000) : "");
         }
-        return convertLessThanThousand(Math.floor(num / 1000000)) + " MILLION" + 
-               (num % 1000000 !== 0 ? " " + convertLessThanThousand(num % 1000000) : "");
+        return convertLessThanThousand(Math.floor(num / 1000000)) + " MILLION" +
+            (num % 1000000 !== 0 ? " " + convertLessThanThousand(num % 1000000) : "");
     };
 
     const getAmountInWords = () => {
-        const amount = typeof data?.amountTendered === 'string' 
-            ? parseFloat(data.amountTendered) 
+        const amount = typeof data?.amountTendered === 'string'
+            ? parseFloat(data.amountTendered)
             : (data?.amountTendered || 0);
-        
+
         const pesoPart = Math.floor(amount);
         const centavoPart = Math.round((amount - pesoPart) * 100);
-        
+
         let words = numberToWords(pesoPart) + " PESOS";
         if (centavoPart > 0) {
             words += ` AND ${numberToWords(centavoPart)} CENTAVOS`;
@@ -239,7 +239,7 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
                 </Box>
                 <Box className="info-row">
                     <span className="info-label">Fund Cluster:</span>
-                    <span>{data?.accountType || data?.selectedAccount || "N/A"}</span>
+                    <span>{data?.fundCluster || data?.selectedAccount || "N/A"}</span>
                 </Box>
                 <Box className="info-row">
                     <span className="info-label">Particulars:</span>
@@ -285,7 +285,7 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
             <Box className="section-title">CUSTOMER DETAILS</Box>
             <Box className="info-row">
                 <span className="info-label">Name of Payor:</span>
-                <span>{data?.payorName || "N/A"}</span>
+                <span>{data?.payor || "N/A"}</span>
             </Box>
             <Box className="info-row">
                 <span className="info-label">Email:</span>
@@ -303,7 +303,7 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
             </Box>
             <Box className="info-row">
                 <span className="info-label">Fund Cluster:</span>
-                <span>{data?.accountType || data?.selectedAccount || "N/A"}</span>
+                <span>{data?.fundCluster || data?.selectedAccount || "N/A"}</span>
             </Box>
             <Box className="info-row">
                 <span className="info-label">Particulars:</span>
@@ -317,12 +317,9 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
                 <span className="info-label">Date & Time:</span>
                 <span>{formatDate(data?.createdAt)}</span>
             </Box>
-
-            <Box sx={{ mt: 2 }}>
-                <Box className="info-row total-row" sx={{ fontSize: '14px', fontWeight: 'bold' }}>
-                    <span>Amount Received (Grand Total):</span>
-                    <span>{formatCurrency(data?.amountTendered)}</span>
-                </Box>
+            <Box className="info-row total-row" sx={{ fontSize: '14px', fontWeight: 'bold', mt: 1 }}>
+                <span className="info-label">Amount Received (Grand Total):</span>
+                <span>{formatCurrency(data?.amountTendered)}</span>
             </Box>
         </>
     );
@@ -331,8 +328,8 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
         <>
             <Box className="section-title">CUSTOMER DETAILS</Box>
             <Box className="info-row">
-                <span className="info-label">Name of Institution/Agency:</span>
-                <span>{data?.payorName || "N/A"}</span>
+                <span className="info-label">Name of Payor:</span>
+                <span>{data?.payor || "N/A"}</span>
             </Box>
             <Box className="info-row">
                 <span className="info-label">Email:</span>
@@ -350,22 +347,23 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
             </Box>
             <Box className="info-row">
                 <span className="info-label">Fund Cluster:</span>
-                <span>{data?.accountType || data?.selectedAccount || "N/A"}</span>
+                <span>{data?.fundCluster || data?.selectedAccount || "N/A"}</span>
             </Box>
             <Box className="info-row">
                 <span className="info-label">Particulars:</span>
                 <span>{getParticularsText()}</span>
             </Box>
             <Box className="info-row">
+                <span className="info-label">Details:</span>
+                <span>{data?.details || "N/A"}</span>
+            </Box>
+            <Box className="info-row">
                 <span className="info-label">Date & Time:</span>
                 <span>{formatDate(data?.createdAt)}</span>
             </Box>
-
-            <Box sx={{ mt: 2 }}>
-                <Box className="info-row total-row" sx={{ fontSize: '14px', fontWeight: 'bold' }}>
-                    <span>Amount Received (Grand Total):</span>
-                    <span>{formatCurrency(data?.amountTendered)}</span>
-                </Box>
+            <Box className="info-row total-row" sx={{ fontSize: '14px', fontWeight: 'bold', mt: 1 }}>
+                <span className="info-label">Amount Received (Grand Total):</span>
+                <span>{formatCurrency(data?.amountTendered)}</span>
             </Box>
         </>
     );
@@ -410,46 +408,43 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
                         backgroundColor: 'white',
                     }}
                 >
-                    {/* Header */}
-                    <Box sx={{ textAlign: 'center', mb: 3 }}>
-                        <Typography variant="h5" fontWeight="bold" gutterBottom>
+                    {/* Header mb: 3 }}>
+                        <Typography variant="h6" fontWeight="bold">
                             {campusName}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{ mb: 2 }}>
                             {campusLocation}
                         </Typography>
-                        <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+                        <Typography variant="subtitle2" fontWeight="bold">
                             OFFICIAL RECEIPT
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Divider sx={{ my: 1 }} />
+                        <Typography variant="body2">
                             eOR Number: {eorNumber || data?.eorNumber || "Preview"}
                         </Typography>
-                    </Box>
-
+                    </Box
                     <Divider sx={{ my: 2 }} />
 
                     {/* Receipt Content */}
                     {renderReceiptContent()}
 
                     <Divider sx={{ my: 3 }} />
-
                     {/* Amount in Words */}
-                    <Box sx={{ mb: 2 }}>
+                    <Box sx={{ mt: 3, mb: 2 }}>
                         <Typography variant="body2" fontWeight="bold">
                             Amount in Words:
                         </Typography>
-                        <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                        <Typography variant="body2">
                             {getAmountInWords()}
                         </Typography>
                     </Box>
 
                     {/* Footer */}
-                    <Box sx={{ mt: 4, textAlign: 'center' }}>
-                        <Typography variant="body2" fontWeight="bold" gutterBottom>
+                    <Box sx={{ mt: 3 }}>
+                        <Typography variant="body2">
                             Thank you for your payment.
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                            Note: This is a system-generated receipt and does not require a signature.
+                        <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
                         </Typography>
                     </Box>
                 </Paper>
@@ -463,7 +458,7 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
                     Print Preview
                 </Button>
             </DialogActions>
-        </Dialog>
+        </Dialog >
     );
 };
 

@@ -92,8 +92,8 @@ const DailyCollectionReport: React.FC<Props> = ({
         .info-table td { border:none; padding:1px 4px; vertical-align:top; }
         .report-page { margin:0; padding:12px; min-height:700px; max-height:700px; display:flex; flex-direction:column; }
         .page-header { flex-shrink:0; height:120px; overflow:hidden; }
-        .page-body { flex-shrink:0; clamp(450px, 100%, 450px); overflow:hidden; display:flex; flex-direction:column; }
-        .page-footer { flex-shrink:0; height:130px; margin-top:0; overflow:visible; }
+        .page-body { flex-shrink:0; min-height: 450px; max-height: 450px; overflow:hidden; display:flex; flex-direction:column; }
+        .page-footer { flex-shrink:0; height:100px; margin-top:0; overflow:visible; }
         .table-container { height:100%; overflow:visible; display:flex; flex-direction:column; }
         .table-container table { height:100%; display:flex; flex-direction:column; }
         .table-container thead { flex-shrink:0; display:table; width:100%; table-layout:fixed; }
@@ -128,9 +128,10 @@ const DailyCollectionReport: React.FC<Props> = ({
                         <div><strong>Fund Cluster:</strong> {fundClusters}</div>
                         <div><strong>Bank / Account number:</strong> 123-456-789</div>
                       </td>
-                      <td style={{width:'50%'}} className="entity-info text-right">
+                      <td style={{width:'10%'}} className="entity-info">
                         <div><strong>Report No.:</strong> {reportNo}</div>
-                        <div><strong>Sheet No.:</strong> {startSheetNo + pageIndex} of {startSheetNo + totalSheets - 1}</div>
+                        {/* <div><strong>Sheet No.:</strong> {startSheetNo + pageIndex} of {startSheetNo + totalSheets - 1}</div> */}
+                        <div><strong>Sheet No.:</strong> {startSheetNo + pageIndex}</div>
                         <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
                       </td>
                     </tr>

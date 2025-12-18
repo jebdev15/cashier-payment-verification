@@ -704,7 +704,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
 
     return (
         <>
-            <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+            <Dialog open={open} maxWidth="lg" fullWidth>
                 {/* Header */}
                 <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -721,7 +721,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                         )}
                     </Box>
                     <Box>
-                        {formData?.status === 'approved' && (
+                        {/* {formData?.status === 'approved' && (
                             <IconButton 
                                 onClick={() => setPreviewOpen(true)} 
                                 color="primary"
@@ -730,8 +730,8 @@ const TransactionDialogForStudent: React.FC<Props> = ({
                             >
                                 <VisibilityIcon />
                             </IconButton>
-                        )}
-                        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+                        )} */}
+                        <IconButton onClick={onClose} disabled={loading} ><CloseIcon /></IconButton>
                     </Box>
                 </DialogTitle>
 

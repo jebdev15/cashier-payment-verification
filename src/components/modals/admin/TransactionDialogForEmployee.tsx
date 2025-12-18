@@ -141,10 +141,6 @@ const TransactionModal: React.FC<Props> = ({
                     <Typography variant="body1">{formData?.payor || "N/A"}</Typography>
                 </Box>
                 <Box sx={{ mb: 2 }}>
-                    <Typography variant="caption" color="textSecondary">Reference ID</Typography>
-                    <Typography variant="body1" fontWeight="medium">{formData?.referenceId || "N/A"}</Typography>
-                </Box>
-                <Box sx={{ mb: 2 }}>
                     <Typography variant="caption" color="textSecondary">Reference Number</Typography>
                     <Typography variant="body1" fontWeight="medium">{formData?.referenceNumber || "N/A"}</Typography>
                 </Box>
@@ -154,7 +150,7 @@ const TransactionModal: React.FC<Props> = ({
                     <Typography variant="body1" fontWeight="medium" color="primary">{formData?.eOr || "N/A"}</Typography>
                 </Box>
                 <Box sx={{ mb: 2 }}>
-                    <Typography variant="caption" color="textSecondary">Created At</Typography>
+                    <Typography variant="caption" color="textSecondary">Submitted At</Typography>
                     <Typography variant="body2">{formData?.createdAt ? new Date(formData.createdAt).toLocaleString() : "N/A"}</Typography>
                 </Box>
 
@@ -302,7 +298,7 @@ const TransactionModal: React.FC<Props> = ({
 
     return (
         <>
-            <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+            <Dialog open={open} maxWidth="lg" fullWidth>
                 {/* Header */}
                 <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -329,7 +325,7 @@ const TransactionModal: React.FC<Props> = ({
                                 <VisibilityIcon />
                             </IconButton>
                         )}
-                        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+                        <IconButton onClick={onClose} disabled={loading}><CloseIcon /></IconButton>
                     </Box>
                 </DialogTitle>
 

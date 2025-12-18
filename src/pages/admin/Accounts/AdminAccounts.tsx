@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Button } from "@mui/material";
+import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Button, Chip } from "@mui/material";
 import { Edit as EditIcon, Add as AddIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { AccountDataType, AdminAccountDataType } from "./type";
@@ -145,9 +145,12 @@ const AdminAccounts = () => {
             renderCell: ({ row }: { row: AccountDataType }) => {
                 const status = Number(row.status) ? "Active" : "Inactive";
                 return (
-                    <Typography variant="caption" sx={{ color: status === "Active" ? "green" : "red" }}>
-                        {status.toUpperCase()}
-                    </Typography>
+                    <Chip
+                        label={status.toUpperCase()}
+                        size="small"
+                        color={status === "Active" ? "success" : "error"}
+                        sx={{ fontWeight: 500, minWidth: 90 }}
+                    />
                 );
             },
         },

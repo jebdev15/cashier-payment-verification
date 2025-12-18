@@ -154,34 +154,14 @@ const ShowTransactions = () => {
   }, [refresh, fetchTransactions]);
 
   const columns = [
-    { field: "_id", headerName: "No.", width: 100 },
+    { field: "_id", headerName: "No.", width: 75 },
     { field: "userType", headerName: "User Type", minWidth: 50 },
     { field: "payor", headerName: "Payor", minWidth: 250, flex: 1 },
     // { field: "referenceId", headerName: "Reference ID", minWidth: 175, flex: 1 },
     { field: "eOr", headerName: "eOR / transaction confirmation number", minWidth: 100, flex: 1 },
     {
-      field: "status",
-      headerName: "Status",
-      width: 125,
-      renderCell: ({ row }: { row: TransactionDataType }) => (
-        <Typography
-          variant="caption"
-          sx={{
-            color:
-              row.status === "approved"
-                ? "green"
-                : row.status === "rejected"
-                  ? "red"
-                  : "orange",
-          }}
-        >
-          {row.status?.toUpperCase()}
-        </Typography>
-      ),
-    },
-    {
       field: "createdAt",
-      headerName: "Created At",
+      headerName: "Submitted At",
       width: 200,
       valueGetter: (value: string) => new Date(value).toLocaleString(),
     },
@@ -373,7 +353,7 @@ const ShowTransactions = () => {
             textColor="primary"
             centered
           >
-            <Tab label="All" value="all" />
+            {/* <Tab label="All" value="all" /> */}
             <Tab label="Pending" value="pending" />
             <Tab label="Approved" value="approved" />
             <Tab label="Rejected" value="rejected" />

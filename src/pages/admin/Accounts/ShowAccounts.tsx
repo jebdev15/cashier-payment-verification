@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Tabs, Tab, Button } from "@mui/material";
+import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Tabs, Tab, Button, Chip } from "@mui/material";
 import { Edit as EditIcon, Subject as SubjectIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { AccountDataType } from "./type";
@@ -9,6 +9,7 @@ import CustomCircularProgress from "@/components/CustomCircularProgress";
 import StudentAccountDialog from "@/components/modals/admin/StudentAccountDialog";
 import EmployeeAccountDialog from "@/components/modals/admin/EmployeeAccountDialog";
 import ExternalAccountDialog from "@/components/modals/admin/ExternalAccountDialog";
+import { CustomChip } from "@/components/CustomChip";
 
 // Simple module-level cache keyed by "status:offset:limit"
 const acctPageCache: Record<string, { items: AccountDataType[]; total: number }> = {};
@@ -105,19 +106,6 @@ const ShowAccounts = () => {
     { field: "id", headerName: "No.", width: 100 },
     { field: "userType", headerName: "User Type", minWidth: 50 },
     { field: "payor", headerName: "Name", minWidth: 150, flex: 1 },
-    { field: "email", headerName: "Email Address", minWidth: 100, flex: 1 },
-    {
-      field: "status",
-      headerName: "Status",
-      width: 125,
-      renderCell: ({ row }: { row: AccountDataType }) => {
-        return (
-          <Typography variant="caption" sx={{ color: row.status === "approved" ? "green" : row.status === "rejected" ? "red" : "orange" }}>
-            {row.status.toUpperCase()}
-          </Typography>
-        );
-      },
-    },
     {
       field: "hasMatchingRecord",
       headerName: "Match Found",
@@ -127,15 +115,12 @@ const ShowAccounts = () => {
         const hasMatch = row.hasMatchingRecord === 1;
         return (
           <Tooltip title={hasMatch ? "Matching record found in database" : "No matching record found"}>
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: hasMatch ? "green" : "gray",
-                fontWeight: hasMatch ? "bold" : "normal"
-              }}
-            >
-              {hasMatch ? "✓ MATCH" : "NO MATCH"}
-            </Typography>
+            <CustomChip
+              label={hasMatch ? "✓ MATCH" : "NO MATCH"}
+              size="small"
+              color={hasMatch ? "success" : "default"}
+              sx={{ fontWeight: 500, minWidth: 90 }}
+            />
           </Tooltip>
         );
       },
@@ -250,7 +235,7 @@ const ShowAccounts = () => {
         {/* Tabs */}
         <Box sx={{ bgcolor: "background.paper", borderRadius: 4, boxShadow: 2, p: 2, overflow: "auto" }}>
           <Tabs value={tabValue} onChange={handleTabChange} indicatorColor="primary" textColor="primary" centered>
-            <Tab label="All" value="all" />
+            {/* <Tab label="All" value="all" /> */}
             <Tab label="Pending" value="pending" />
             <Tab label="Approved" value="approved" />
             {/* <Tab label="Rejected" value="rejected" /> */}

@@ -311,7 +311,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
 
     return (
         <>
-            <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+            <Dialog open={open} maxWidth="lg" fullWidth>
                 {/* Header */}
                 <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -338,7 +338,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                                 <VisibilityIcon />
                             </IconButton>
                         )}
-                        <IconButton onClick={onClose}><CloseIcon /></IconButton>
+                        <IconButton onClick={onClose} disabled={loading}><CloseIcon /></IconButton>
                     </Box>
                 </DialogTitle>
 
