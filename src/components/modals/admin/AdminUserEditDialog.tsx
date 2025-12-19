@@ -52,7 +52,6 @@ const accessLevels = [
 const AdminUserEditDialog: React.FC<Props> = ({ open, onClose, data, onSuccess, sysUsers }) => {
   const [{ accessToken }] = useCookies(["accessToken"]);
 
-  const [fullname, setFullname] = React.useState(data?.fullname || "");
   const [email, setEmail] = React.useState(data?.email || "");
   const [accessLevel, setAccessLevel] = React.useState(data?.accessLevel || "");
   const [active, setActive] = React.useState((data?.status ?? 1) === 1);
@@ -60,7 +59,6 @@ const AdminUserEditDialog: React.FC<Props> = ({ open, onClose, data, onSuccess, 
 
   React.useEffect(() => {
     if (data) {
-      setFullname(data.fullname);
       setEmail(data.email);
       setAccessLevel(data.accessLevel);
       setActive((data.status ?? 1) === 1);
@@ -73,7 +71,6 @@ const AdminUserEditDialog: React.FC<Props> = ({ open, onClose, data, onSuccess, 
     setSaving(true);
     try {
       await axiosInstanceWithAuthorization(accessToken).put(`/api/admin-sys-users/${data.userId}`, {
-        fullname,
         email,
         accessLevel,
         status: active ? 1 : 0
@@ -99,13 +96,13 @@ const AdminUserEditDialog: React.FC<Props> = ({ open, onClose, data, onSuccess, 
             fullWidth
             InputProps={{ readOnly: true }}
           />
-          <TextField
+          {/* <TextField
             label="Full Name"
             value={fullname}
             onChange={(e) => setFullname(e.target.value)}
             fullWidth
             required
-          />
+          /> */}
           <TextField
             label="Email"
             type="email"

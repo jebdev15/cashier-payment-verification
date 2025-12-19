@@ -34,7 +34,7 @@ const ShowTransactions = () => {
 
   // ✅ Pagination states (offset–limit model)
   const [page, setPage] = React.useState(1);
-  const [limit, setLimit] = React.useState(10);
+  const [limit, ] = React.useState(10);
   const [totalCount, setTotalCount] = React.useState(0);
   const offset = (page - 1) * limit;
 
@@ -44,7 +44,7 @@ const ShowTransactions = () => {
 
   // ✅ Tabs: default to "pending"
   const [tabValue, setTabValue] = React.useState<string>("pending");
-  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setTabValue(newValue);
     setPage(1); // reset pagination on tab switch
   };
@@ -377,7 +377,7 @@ const ShowTransactions = () => {
             <Pagination
               count={totalPages}
               page={page}
-              onChange={(e, value) => setPage(value)}
+              onChange={(_, value) => setPage(value)}
               color="primary"
               shape="rounded"
             />

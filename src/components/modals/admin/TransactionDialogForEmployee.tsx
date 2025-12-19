@@ -36,23 +36,15 @@ const TransactionModal: React.FC<Props> = ({
     const [image, setImage] = React.useState<string | null>(null);
 
     // 🔹 FORM STATES
-    const [amountToPay, setAmountToPay] = React.useState<number>(0);
+    const [amountToPay, ] = React.useState<number>(0);
     const [amountTendered, setAmountTendered] = React.useState<number>(0);
     const [remarks, setRemarks] = React.useState<string>("");
     const [details, setDetails] = React.useState<string>("");
     const [selectedAccount, setSelectedAccount] = React.useState("");
-    const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
     const [adminParticulars, setAdminParticulars] = React.useState<number[]>([]);
     const [payorParticulars, setPayorParticulars] = React.useState<any[]>([]);
     const [previewOpen, setPreviewOpen] = React.useState(false);
     const [submittedReceiptPreviewOpen, setSubmittedReceiptPreviewOpen] = React.useState(false);
-
-    // 🔹 Handle text inputs
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        if (!formData) return;
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev!, [name]: value }));
-    };
 
     // 🔹 Handle submit
     const handleSubmit = () => {
@@ -97,31 +89,14 @@ const TransactionModal: React.FC<Props> = ({
         }
     }, [data]);
 
-    // 🔹 Update particulars when account changes
-    React.useEffect(() => {
-        if (selectedAccount) {
-            const filtered = allParticulars.filter((item) => item.fund_cluster === selectedAccount);
-            console.log('🔍 Employee Dialog - Admin Particulars Filtering:', { 
-                selectedAccount, 
-                totalParticulars: allParticulars.length,
-                allParticulars: allParticulars, 
-                filtered: filtered,
-                filteredCount: filtered.length 
-            });
-            setFilteredParticulars(filtered.map(i => i.fee));
-        } else {
-            setFilteredParticulars([]);
-        }
-    }, [selectedAccount, allParticulars]);
-
     // Update form data on load
     React.useEffect(() => {
         const fd = formData ?? data;
         if (!editable && (fd?.status ?? data?.status) === 'approved') {
-            setSelectedAccount(fd.fundCluster ?? "");
-            setDetails(fd.details ?? "");
-            setRemarks(fd.remarks ?? "");
-            setAmountTendered(parseFloat((fd.amountTendered ?? "0").toString()));
+            setSelectedAccount(fd?.fundCluster ?? "");
+            setDetails(fd?.details ?? "");
+            setRemarks(fd?.remarks ?? "");
+            setAmountTendered(parseFloat((fd?.amountTendered ?? "0").toString()));
         }
     }, []);
     /**
@@ -277,7 +252,7 @@ const TransactionModal: React.FC<Props> = ({
                         label="Amount Received"
                         name="amountTendered"
                         type="number"
-                        value={amountTendered ?? (parseFloat(formData?.amountTendered ?? "0"))}
+                        value={amountTendered ?? (formData?.amountTendered ?? "0")}
                         onChange={(e) => setAmountTendered(parseFloat(Number(e.target.value).toFixed(2)))}
                         fullWidth
                         disabled={!editable || formData?.status !== 'approved'}

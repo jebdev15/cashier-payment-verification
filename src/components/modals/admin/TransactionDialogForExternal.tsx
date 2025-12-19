@@ -40,18 +40,11 @@ const TransactionDialogForExternal: React.FC<Props> = ({
     const [remarks, setRemarks] = React.useState<string>("");
     const [details, setDetails] = React.useState<string>("");
     const [selectedAccount, setSelectedAccount] = React.useState("");
-    const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
     const [adminParticulars, setAdminParticulars] = React.useState<number[]>([]);
     const [payorParticulars, setPayorParticulars] = React.useState<any[]>([]);
     const [previewOpen, setPreviewOpen] = React.useState(false);
     const [submittedReceiptPreviewOpen, setSubmittedReceiptPreviewOpen] = React.useState(false);
 
-    // 🔹 Handle text inputs
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        if (!formData) return;
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev!, [name]: value }));
-    };
 
     // 🔹 Handle submit
     const handleSubmit = () => {
@@ -95,30 +88,14 @@ const TransactionDialogForExternal: React.FC<Props> = ({
         }
     }, [data]);
 
-    // 🔹 Update particulars when account changes
-    React.useEffect(() => {
-        if (selectedAccount) {
-            const filtered = allParticulars.filter((item) => item.fund_cluster === selectedAccount);
-            console.log('🔍 External Dialog - Admin Particulars Filtering:', { 
-                selectedAccount, 
-                totalParticulars: allParticulars.length,
-                filteredFromDB: filtered,
-                filteredCount: filtered.length 
-            });
-            setFilteredParticulars(filtered.map(i => i.fee));
-        } else {
-            setFilteredParticulars([]);
-        }
-    }, [selectedAccount, allParticulars]);
-
     React.useEffect(() => {
         const updateAllTheDetailsIfApproved = () => {
             const fd = formData ?? data;
             if (!editable && (fd?.status ?? data?.status) === 'approved') {
-                setSelectedAccount(fd.fundCluster ?? "");
-                setRemarks(fd.remarks ?? "");
-                setDetails(fd.details ?? "");
-                setAmountTendered(parseFloat((fd.amountTendered ?? "0").toString()));
+                setSelectedAccount(fd?.fundCluster ?? "");
+                setRemarks(fd?.remarks ?? "");
+                setDetails(fd?.details ?? "");
+                setAmountTendered(parseFloat((fd?.amountTendered ?? "0").toString()));
             }
         };
         updateAllTheDetailsIfApproved();

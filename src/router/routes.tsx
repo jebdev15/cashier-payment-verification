@@ -17,7 +17,6 @@ const AdminLayoutContextProvider = React.lazy(() => import("../context/AdminLayo
 const AdminLayout = React.lazy(() => import("../pages/admin/Layout"));
 const Dashboard = React.lazy(() => import("../pages/admin/Dashboard"));
 const ShowAccounts = React.lazy(() => import("../pages/admin/Accounts/ShowAccounts"));
-const EditAccount = React.lazy(() => import("../pages/admin/Accounts/EditAccount"));
 const ShowAdminAccounts = React.lazy(() => import("../pages/admin/Accounts/AdminAccounts"));
 const ShowTransactions = React.lazy(() => import("../pages/admin/Transactions/ShowTransactions"));
 const AdminReportsPage = React.lazy(() => import("../pages/admin/Reports"));

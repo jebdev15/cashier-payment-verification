@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Tabs, Tab, Button, Chip } from "@mui/material";
+import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Tabs, Tab, Button } from "@mui/material";
 import { Edit as EditIcon, Subject as SubjectIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { AccountDataType } from "./type";
@@ -25,7 +25,7 @@ const ShowAccounts = () => {
 
   // Pagination (offset-limit)
   const [page, setPage] = React.useState(1);
-  const [limit, setLimit] = React.useState(10);
+  const [limit,] = React.useState(10);
   const [totalCount, setTotalCount] = React.useState(0);
   const offset = (page - 1) * limit;
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -33,7 +33,7 @@ const ShowAccounts = () => {
   const [editable, setEditable] = React.useState(false);
   // Tabs default to "pending"
   const [tabValue, setTabValue] = React.useState<string>("pending");
-  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setTabValue(newValue);
     setPage(1); // reset when tab changes
   };
@@ -258,7 +258,7 @@ const ShowAccounts = () => {
             <Pagination
               count={totalPages}
               page={page}
-              onChange={(e, value) => setPage(value)}
+              onChange={(_, value) => setPage(value)}
               color="primary"
               shape="rounded"
             />

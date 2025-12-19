@@ -35,7 +35,6 @@ const Reports = () => {
   const [{ accessToken }] = useCookies(["accessToken"]);
   const [reportType, setReportType] = React.useState("");
   const [fromDate, setFromDate] = React.useState("");
-  const [toDate, setToDate] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -88,29 +87,29 @@ const Reports = () => {
     window.print();
   };
 
-  const handleDownloadExcel = async () => {
-    if (!reportType || !fromDate) return;
-    try {
-      const res = await axiosInstanceWithAuthorization(accessToken).get(
-        `/api/reports/daily-collection/export?from=${fromDate}&to=${fromDate}&format=xlsx`,
-        { responseType: "blob" }
-      );
-      const blob = new Blob([res.data], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      const fileName = `daily-collection-${fromDate}-${fromDate}.xlsx`;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e: any) {
-      alert(e?.response?.data?.message || "Failed to download Excel");
-    }
-  };
+  // const handleDownloadExcel = async () => {
+  //   if (!reportType || !fromDate) return;
+  //   try {
+  //     const res = await axiosInstanceWithAuthorization(accessToken).get(
+  //       `/api/reports/daily-collection/export?from=${fromDate}&to=${fromDate}&format=xlsx`,
+  //       { responseType: "blob" }
+  //     );
+  //     const blob = new Blob([res.data], {
+  //       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //     });
+  //     const url = URL.createObjectURL(blob);
+  //     const a = document.createElement("a");
+  //     a.href = url;
+  //     const fileName = `daily-collection-${fromDate}-${fromDate}.xlsx`;
+  //     a.download = fileName;
+  //     document.body.appendChild(a);
+  //     a.click();
+  //     a.remove();
+  //     URL.revokeObjectURL(url);
+  //   } catch (e: any) {
+  //     alert(e?.response?.data?.message || "Failed to download Excel");
+  //   }
+  // };
 
   return (
     <Box id="print-root">

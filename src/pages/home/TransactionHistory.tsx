@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Box, IconButton, Tooltip, Typography, Pagination, Tabs, Tab, Button, Chip } from "@mui/material";
+import { Alert, Box, IconButton, Tooltip, Typography, Pagination, Tabs, Tab, Button } from "@mui/material";
 import { Subject as SubjectIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import { axiosInstanceWithAuthorization } from "@/api/app";
@@ -22,7 +22,7 @@ const TransactionHistory = () => {
 
   // ✅ Pagination states (offset–limit model)
   const [page, setPage] = React.useState(1);
-  const [limit, setLimit] = React.useState(10);
+  const [limit,] = React.useState(10);
   const [totalCount, setTotalCount] = React.useState(0);
   const offset = (page - 1) * limit;
 
@@ -36,7 +36,7 @@ const TransactionHistory = () => {
   //   setPage(1); // reset pagination on tab switch
   // };
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setTabValue(newValue);
     setPage(1); // reset pagination on tab switch
   };
@@ -217,7 +217,7 @@ const TransactionHistory = () => {
           <Pagination
             count={totalPages}
             page={page}
-            onChange={(e, value) => setPage(value)}
+            onChange={(_, value) => setPage(value)}
             color="primary"
             shape="rounded"
           />

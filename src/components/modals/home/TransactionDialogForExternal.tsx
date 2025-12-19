@@ -64,7 +64,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                     } else {
                         setParticularsText(data.particulars);
                     }
-                } catch (e) {
+                } catch {
                     setParticularsText(data.particulars);
                 }
             }
@@ -137,7 +137,7 @@ const TransactionDialogForExternal: React.FC<Props> = ({
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 
-                <DataRow label="Fund Cluster" value={data?.accountType || data?.selectedAccount} />
+                <DataRow label="Fund Cluster" value={data?.fundCluster || data?.selectedAccount} />
                 <DataRow label="Particulars" value={particularsText || "N/A"} />
                 <DataRow label="Details" value={data?.details} />
                 <DataRow 

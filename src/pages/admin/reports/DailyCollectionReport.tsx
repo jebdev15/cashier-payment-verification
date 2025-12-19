@@ -1,4 +1,3 @@
-import { formatDate } from "@/utils/dateFormatter";
 import React from "react";
 
 type TransactionRow = {
@@ -54,8 +53,8 @@ const DailyCollectionReport: React.FC<Props> = ({
   // Use provided report metadata or generate fallback
   const reportNo = propReportNo || `${new Date(from).getFullYear()}-${String(new Date(from).getMonth() + 1).padStart(2, '0')}-001`;
   const fundClusters = propFundClusters || '';
-  const totalSheets = propTotalSheets || pages.length;
-
+  // const totalSheets = propTotalSheets || pages.length;
+  console.log({ to, propTotalSheets})
   return (
     <>
       <style>{`

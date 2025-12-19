@@ -45,7 +45,6 @@ const TransactionDialogForStudent: React.FC<Props> = ({
     const [remarks, setRemarks] = React.useState<string>("");
     const [details, setDetails] = React.useState<string>("");
     const [selectedAccount, setSelectedAccount] = React.useState("");
-    const [filteredParticulars, setFilteredParticulars] = React.useState<string[]>([]);
     const [checkedItems, setCheckedItems] = React.useState<string[]>([]);
     const [miscellaneousFees, setMiscellaneousFees] = React.useState<any[]>([]);
     const [tuitionFee, setTuitionFee] = React.useState<string>("0.00");
@@ -166,10 +165,10 @@ const TransactionDialogForStudent: React.FC<Props> = ({
         };
         const updateFormDataIfApproved = () => {
             if (!editable && formData?.status === 'approved') {
-                setSelectedAccount(formData.accountType || "");
+                setSelectedAccount(formData.fundCluster || "");
                 setDetails(formData.details || "");
                 setRemarks(formData.remarks || "");
-                setAmountTendered(parseFloat(formData.amountTendered || "0"));
+                setAmountTendered(parseFloat((formData.amountTendered ?? "0").toString()));
             }
         }
         if (cookie?.accessToken) {
@@ -184,21 +183,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
 
         updateFormDataIfApproved();
     }, [])
-    React.useEffect(() => {
-        if (selectedAccount) {
-            const filtered = allParticulars.filter((item) => item.fund_cluster === selectedAccount);
-            console.log('🔍 Student Dialog - Admin Particulars Filtering:', { 
-                selectedAccount, 
-                totalParticulars: allParticulars.length,
-                filtered: filtered,
-                filteredCount: filtered.length 
-            });
-            
-            setFilteredParticulars(filtered.map(i => i.fee));
-        } else {
-            setFilteredParticulars([]);
-        }
-    }, [selectedAccount, allParticulars]);
+
     // React.useEffect(() => {
     //     if (!amountTendered) {
     //         setDistribution({ miscellaneous: 0, tuition: 0, totalPayable: 0, accountsPayable: 0 });
@@ -313,7 +298,7 @@ const TransactionDialogForStudent: React.FC<Props> = ({
         }
         if (!editable && (formData?.status ?? data?.status) === 'approved') {
             const fd = formData ?? data;
-            setSelectedAccount(fd?.accountType ?? "");
+            setSelectedAccount(fd?.fundCluster ?? "");
             setDetails(fd?.details ?? "");
             setAmountToPay(parseFloat((fd?.amountToPay ?? "0").toString()));
             setAmountTendered(parseFloat((fd?.amountTendered ?? "0").toString()));

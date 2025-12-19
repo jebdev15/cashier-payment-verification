@@ -8,27 +8,6 @@ import { HomeLayoutContext } from "../../context/HomeLayoutContext";
 import { jwtDecode } from "jwt-decode";
 import { theme } from "@/theme/theme";
 
-const SidebarListItems = ({ userType, item: { abbreviation, path, label, icon }, handleChange }: any) => {
-  const isDisabled = (userType: string) => {
-    if (userType === "student" && abbreviation === "ur-emp") return true;
-    if (userType === "external" && abbreviation === "ur-emp") return true;
-    if (userType === "employee" && abbreviation === "ur-ex") return true;
-    return false;
-  };
-
-  return (
-    <ListItem disablePadding>
-      <ListItemButton
-        onClick={() => handleChange(path, abbreviation)}
-        disabled={isDisabled(userType)}
-      >
-        <ListItemIcon>{icon}</ListItemIcon>
-        <ListItemText primary={label} />
-      </ListItemButton>
-    </ListItem>
-  );
-};
-
 const Sidebar = () => {
   const { sidebarOpen } = React.useContext(HomeLayoutContext);
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, Box, IconButton, Typography, Tooltip, Pagination, Button, Chip } from "@mui/material";
 import { Edit as EditIcon, Add as AddIcon, Refresh as RefreshIcon } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { AccountDataType, AdminAccountDataType } from "./type";
 import { axiosInstanceWithAuthorization } from "@/api/app";
 import { useCookies } from "react-cookie";
@@ -26,8 +26,8 @@ const AdminAccounts = () => {
 
     // Pagination (offset-limit)
     const [page, setPage] = React.useState(1);
-    const [limit, setLimit] = React.useState(10);
     const [totalCount, setTotalCount] = React.useState(0);
+    const limit = 10;
     const offset = (page - 1) * limit;
 
     // Add/Edit dialog states
@@ -116,7 +116,7 @@ const AdminAccounts = () => {
         refreshSysUsers();
     }, [fetchAccounts, refreshSysUsers]);
 
-    const columns = [
+    const columns: GridColDef[] = [
         { field: "id", headerName: "No.", width: 100 },
         { field: "fullname", headerName: "Full Name", minWidth: 150, flex: 1 },
         {
@@ -127,7 +127,7 @@ const AdminAccounts = () => {
             renderCell: ({ row }: { row: AdminAccountDataType }) => {
                 return formatAccessLevel(row.accessLevel);
             }
-        },
+        } as GridColDef,
         {
             field: "department",
             headerName: "Department",
@@ -136,7 +136,7 @@ const AdminAccounts = () => {
             renderCell: ({ row }: { row: AdminAccountDataType }) => {
                 return formatAdminDepartment(row.department ?? 0);
             }
-        },
+        } as GridColDef,
         { field: "email", headerName: "Email Address", minWidth: 100, flex: 1 },
         {
             field: "status",
@@ -153,7 +153,7 @@ const AdminAccounts = () => {
                     />
                 );
             },
-        },
+        } as GridColDef,
         {
             field: "action",
             headerName: "Action",
@@ -167,7 +167,7 @@ const AdminAccounts = () => {
                     </Tooltip>
                 );
             },
-        },
+        } as GridColDef,
     ];
 
     if (error) return <Alert severity="error">{error}</Alert>;
@@ -225,7 +225,7 @@ const AdminAccounts = () => {
                         <Pagination
                             count={totalPages}
                             page={page}
-                            onChange={(e, value) => setPage(value)}
+                            onChange={(_, value) => setPage(value)}
                             color="primary"
                             shape="rounded"
                         />

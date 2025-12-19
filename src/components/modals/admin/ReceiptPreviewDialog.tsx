@@ -35,8 +35,6 @@ const ReceiptPreviewDialog: React.FC<Props> = ({
     data,
     eorNumber,
     adminParticulars = [],
-    campusName = "University of Eastern Philippines",
-    campusLocation = "University Town, Catarman, Northern Samar",
 }) => {
     const printRef = React.useRef<HTMLDivElement>(null);
 
